@@ -1,86 +1,38 @@
-Ôªø<%@ Page Language="C#" AutoEventWireup="true" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
-<%@ Import Namespace="StudentInformationSystem.Models" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
+<!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
-    protected string SourceView = "Views/Admin/ResetPassword.cshtml";
-    protected void EnsureRole()
-    {
-        var currentUser = Session["User"] as Users;
-        if (currentUser == null || currentUser.Role != 0)
-        {
-            Response.Redirect("~/WebForms/Login.aspx", true);
-            return;
-        }
-    }
     protected void Page_Load(object sender, EventArgs e)
     {
-        EnsureRole();
-        if (TryRedirectToMvc())
+        PageTitle = "÷ÿ÷√√‹¬Î";
+        if (!EnsureAdminRole())
         {
             return;
         }
-    }
 
-    protected bool TryRedirectToMvc()
-    {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
+        int userId;
+        if (!int.TryParse(Request.Form["userId"] ?? Request.QueryString["userId"], out userId) || userId <= 0)
         {
-            return false;
+            Response.Redirect("StudentList.aspx", true);
+            return;
         }
 
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
+        using (var db = new StudentManagementDBEntities())
         {
-            return false;
+            var userToReset = db.Users.Find(userId);
+            if (userToReset != null)
+            {
+                userToReset.Password = "Hzd@123456";
+                db.Entry(userToReset).State = EntityState.Modified;
+                db.SaveChanges();
+                Session["AdminFlashMessage"] = "”√ªß " + (userToReset.Username ?? "") + " µƒ√‹¬Î“—≥…π¶÷ÿ÷√Œ™ \"Hzd@123456\"°£";
+
+                var target = userToReset.Role == 2 ? "StudentList.aspx" : "TeacherList.aspx";
+                Response.Redirect(target, true);
+                return;
+            }
         }
 
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
-
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
-        }
-
-        Response.Redirect(target, true);
-        return true;
+        Response.Redirect("StudentList.aspx", true);
     }
 </script>
-
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head runat="server">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin/ResetPassword</title>
-    <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
-</head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            Ê≠£Âú®Ë∑≥ËΩ¨Âà∞ÂéüÈ°µÈù¢Ôºö<code><%= SourceView %></code>
-        </div>
-    </div>
-</body>
-</html>
-

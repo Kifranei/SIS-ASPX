@@ -1,4 +1,4 @@
-ï»¿@{
+@{
     var currentUser = Session["User"] as StudentInformationSystem.Models.Users;
 }
 <!DOCTYPE html>
@@ -7,22 +7,22 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - æ•™åŠ¡ç®¡ç†ç³»ç»Ÿ</title>
+    <title>@ViewBag.Title - ½ÌÎñ¹ÜÀíÏµÍ³</title>
     
-    <!-- é˜²æ­¢æš—è‰²æ¨¡å¼å’Œä¸»é¢˜è‰²é—ªç™½çš„é¢„è®¾è„šæœ¬ - å¿…é¡»åœ¨CSSä¹‹å‰ -->
+    <!-- ·ÀÖ¹°µÉ«Ä£Ê½ºÍÖ÷ÌâÉ«ÉÁ°×µÄÔ¤Éè½Å±¾ - ±ØĞëÔÚCSSÖ®Ç° -->
     <script>
         (function() {
-            // ç«‹å³æ£€æŸ¥å¹¶åº”ç”¨æš—è‰²æ¨¡å¼ï¼Œé˜²æ­¢é—ªç™½
+            // Á¢¼´¼ì²é²¢Ó¦ÓÃ°µÉ«Ä£Ê½£¬·ÀÖ¹ÉÁ°×
             var theme = localStorage.getItem('theme');
             var selectedTheme = localStorage.getItem('selected-theme') || 'deep-blue';
             
-            // åº”ç”¨æš—è‰²æ¨¡å¼
+            // Ó¦ÓÃ°µÉ«Ä£Ê½
             if (theme === 'dark') {
                 document.documentElement.classList.add('dark-mode');
                 document.body && document.body.classList.add('dark-mode');
             }
             
-            // åº”ç”¨ä¸»é¢˜è‰²ï¼Œé˜²æ­¢é¢œè‰²åˆ‡æ¢é—ªçƒ
+            // Ó¦ÓÃÖ÷ÌâÉ«£¬·ÀÖ¹ÑÕÉ«ÇĞ»»ÉÁË¸
             var themeClasses = {
                 'default': 'theme-deep-red',
                 'deep-blue': 'theme-deep-blue', 
@@ -44,19 +44,19 @@
     <link href="@Url.Content("~/Content/theme-system.css")" rel="stylesheet" type="text/css" />
 
     <style>
-        /* --- åŸºç¡€å’Œæ¡Œé¢ç«¯å¸ƒå±€ (ç¨³å®šç‰ˆ) --- */
+        /* --- »ù´¡ºÍ×ÀÃæ¶Ë²¼¾Ö (ÎÈ¶¨°æ) --- */
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
-            font-family: "Microsoft YaHei", "å¾®è½¯é›…é»‘", sans-serif;
+            font-family: "Microsoft YaHei", "Î¢ÈíÑÅºÚ", sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color-primary);
-            /* ç§»é™¤è¿‡æ¸¡åŠ¨ç”»ä»¥å‡å°‘é—ªçƒ - åªåœ¨é¡µé¢åŠ è½½åå¯ç”¨ */
+            /* ÒÆ³ı¹ı¶É¶¯»­ÒÔ¼õÉÙÉÁË¸ - Ö»ÔÚÒ³Ãæ¼ÓÔØºóÆôÓÃ */
             overflow-x: hidden;
         }
 
-        /* é¡µé¢åŠ è½½å®Œæˆåå¯ç”¨è¿‡æ¸¡åŠ¨ç”» */
+        /* Ò³Ãæ¼ÓÔØÍê³ÉºóÆôÓÃ¹ı¶É¶¯»­ */
         body.transitions-enabled, 
         body.transitions-enabled .sidebar,
         body.transitions-enabled .main-content,
@@ -114,7 +114,7 @@
             display: none;
         }
 
-        /* --- ç§»åŠ¨ç«¯å“åº”å¼å¸ƒå±€ (ç¨³å®šç‰ˆ) --- */
+        /* --- ÒÆ¶¯¶ËÏìÓ¦Ê½²¼¾Ö (ÎÈ¶¨°æ) --- */
         @@media screen and (max-width: 768px) {
             .sidebar {
                 left: -240px;
@@ -147,7 +147,7 @@
             }
         }
 
-        /* --- ç»„ä»¶æ ·å¼ --- */
+        /* --- ×é¼şÑùÊ½ --- */
         .sidebar-header {
             display: flex;
             align-items: center;
@@ -180,7 +180,7 @@
                 font-size: 15px;
                 border-radius: 5px;
                 margin: 5px 10px;
-                text-align: center; /* æ¢å¤å±…ä¸­å¯¹é½ */
+                text-align: center; /* »Ö¸´¾ÓÖĞ¶ÔÆë */
                 position: relative;
             }
 
@@ -222,27 +222,31 @@
             white-space: nowrap;
         }
 
-        /* --- ä¸»é¢˜åˆ‡æ¢å™¨æ ·å¼ --- */
+        /* --- Ö÷ÌâÇĞ»»Æ÷ÑùÊ½ --- */
         .sidebar-footer {
             padding: 20px;
             border-top: 1px solid var(--border-color);
             text-align: center;
         }
 
-        /* ç§»é™¤äº†æš—è‰²æ¨¡å¼åˆ‡æ¢å¼€å…³æ ·å¼ï¼Œç°åœ¨ä½¿ç”¨é½¿è½®å›¾æ ‡èœå• */
+        /* ÒÆ³ıÁË°µÉ«Ä£Ê½ÇĞ»»¿ª¹ØÑùÊ½£¬ÏÖÔÚÊ¹ÓÃ³İÂÖÍ¼±ê²Ëµ¥ */
         
-        /* --- Logo é¢œè‰²åè½¬æ ·å¼ --- */
-        body:not(.dark-mode) .sidebar-logo-img {
+        /* --- Logo ÑÕÉ«·´×ªÑùÊ½ --- */
+        html:not(.dark-mode) .sidebar-logo-img {
             filter: invert(1);
         }
+
+        html.dark-mode .sidebar-logo-img {
+            filter: none;
+        }
         
-        /* --- ä¿®å¤æˆç»©å¾½ç« (Badge)çš„æ˜¾ç¤ºæ ·å¼ --- */
+        /* --- ĞŞ¸´³É¼¨»ÕÕÂ(Badge)µÄÏÔÊ¾ÑùÊ½ --- */
         .list-group-item .badge {
             background-color: var(--theme-primary);
             color: var(--menu-active-text);
         }
         
-        /* --- æš—è‰²æ¨¡å¼ä¸‹ï¼Œä¿®æ­£é»˜è®¤æŒ‰é’®(btn-default)çš„æ ·å¼ --- */
+        /* --- °µÉ«Ä£Ê½ÏÂ£¬ĞŞÕıÄ¬ÈÏ°´Å¥(btn-default)µÄÑùÊ½ --- */
         body.dark-mode .btn-default {
             color: #ccc;
             background-color: #333;
@@ -261,7 +265,7 @@
             color: var(--text-color-secondary);
         }
         
-        /* --- å¤´éƒ¨ä¸»é¢˜è®¾ç½®æŒ‰é’®æ ·å¼ --- */
+        /* --- Í·²¿Ö÷ÌâÉèÖÃ°´Å¥ÑùÊ½ --- */
         .theme-settings-header-btn {
             background: var(--theme-primary);
             color: white;
@@ -292,6 +296,30 @@
         .theme-settings-header-btn i {
             font-size: 14px;
         }
+        /* --- °µÉ«Ä£Ê½ÏÂÌáÉı»ÒÉ«ÎÄ×Ö¿É¶ÁĞÔ --- */
+        html.dark-mode .text-muted,
+        html.dark-mode small,
+        body.dark-mode .text-muted,
+        body.dark-mode small {
+            color: #c9d1d9 !important;
+        }
+    
+        /* --- °µÉ«Ä£Ê½ÏÂÔöÇ¿Ä¬ÈÏ°´Å¥¿É¶ÁĞÔ --- */
+        html.dark-mode .btn-default,
+        body.dark-mode .btn-default {
+            color: #f3f4f6 !important;
+            background-color: #2f3745 !important;
+            border-color: #5a6578 !important;
+        }
+
+        html.dark-mode .btn-default:hover,
+        html.dark-mode .btn-default:focus,
+        body.dark-mode .btn-default:hover,
+        body.dark-mode .btn-default:focus {
+            color: #ffffff !important;
+            background-color: #3c475a !important;
+            border-color: #7a879d !important;
+        }
     </style>
 </head>
 <body class="@(Request.Cookies["theme"] != null && Request.Cookies["theme"].Value == "dark" ? "dark-mode" : "")">
@@ -299,38 +327,38 @@
         <div class="sidebar-overlay" style="display:none;"></div>
         <aside class="sidebar">
             <div class="sidebar-header">
-                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="æ ¡å¾½" class="sidebar-logo-img" />
+                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="Ğ£»Õ" class="sidebar-logo-img" />
             </div>
 
             <ul class="sidebar-menu">
                 @if (currentUser != null)
                 {
-                    if (currentUser.Role == 0) // ç®¡ç†å‘˜èœå•
+                    if (currentUser.Role == 0) // ¹ÜÀíÔ±²Ëµ¥
                     {
-                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "Index" ? "active" : "")"><a href="@Url.Action("Index", "Admin")"><span class="glyphicon glyphicon-dashboard"></span> æ§åˆ¶å°</a></li>
-                        <li class="@(ViewContext.RouteData.GetRequiredString("action").StartsWith("Student") ? "active" : "")"><a href="@Url.Action("StudentList", "Admin")"><span class="glyphicon glyphicon-user"></span> å­¦ç”Ÿç®¡ç†</a></li>
-                        <li class="@(ViewContext.RouteData.GetRequiredString("action").StartsWith("Teacher") ? "active" : "")"><a href="@Url.Action("TeacherList", "Admin")"><span class="glyphicon glyphicon-education"></span> æ•™å¸ˆç®¡ç†</a></li>
-                        <li class="@(ViewContext.RouteData.GetRequiredString("action").StartsWith("Class") ? "active" : "")"><a href="@Url.Action("ClassList", "Admin")"><span class="glyphicon glyphicon-th-large"></span> ç­çº§ç®¡ç†</a></li>
-                        <li class="@(ViewContext.RouteData.GetRequiredString("action").StartsWith("Course") ? "active" : "")"><a href="@Url.Action("CourseList", "Admin")"><span class="glyphicon glyphicon-list-alt"></span> è¯¾ç¨‹ç®¡ç†</a></li>
-                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "EnrollmentList" ? "active" : "")"><a href="@Url.Action("EnrollmentList", "Admin")"><span class="glyphicon glyphicon-check"></span> é€‰è¯¾è®°å½•</a></li>
-                        <li class="@(ViewContext.RouteData.GetRequiredString("action").StartsWith("Exam") ? "active" : "")"><a href="@Url.Action("ExamList", "Admin")"><span class="glyphicon glyphicon-pencil"></span> è€ƒè¯•ç®¡ç†</a></li>
-                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "ChangePassword" ? "active" : "")"><a href="@Url.Action("ChangePassword", "Admin")"><span class="glyphicon glyphicon-lock"></span> ä¿®æ”¹å¯†ç </a></li>
+                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "Index" ? "active" : "")"><a href="@Url.Action("Index", "Admin")"><span class="glyphicon glyphicon-dashboard"></span> ¿ØÖÆÌ¨</a></li>
+                        <li class="@(ViewContext.RouteData.GetRequiredString("action").StartsWith("Student") ? "active" : "")"><a href="@Url.Action("StudentList", "Admin")"><span class="glyphicon glyphicon-user"></span> Ñ§Éú¹ÜÀí</a></li>
+                        <li class="@(ViewContext.RouteData.GetRequiredString("action").StartsWith("Teacher") ? "active" : "")"><a href="@Url.Action("TeacherList", "Admin")"><span class="glyphicon glyphicon-education"></span> ½ÌÊ¦¹ÜÀí</a></li>
+                        <li class="@(ViewContext.RouteData.GetRequiredString("action").StartsWith("Class") ? "active" : "")"><a href="@Url.Action("ClassList", "Admin")"><span class="glyphicon glyphicon-th-large"></span> °à¼¶¹ÜÀí</a></li>
+                        <li class="@(ViewContext.RouteData.GetRequiredString("action").StartsWith("Course") ? "active" : "")"><a href="@Url.Action("CourseList", "Admin")"><span class="glyphicon glyphicon-list-alt"></span> ¿Î³Ì¹ÜÀí</a></li>
+                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "EnrollmentList" ? "active" : "")"><a href="@Url.Action("EnrollmentList", "Admin")"><span class="glyphicon glyphicon-check"></span> Ñ¡¿Î¼ÇÂ¼</a></li>
+                        <li class="@(ViewContext.RouteData.GetRequiredString("action").StartsWith("Exam") ? "active" : "")"><a href="@Url.Action("ExamList", "Admin")"><span class="glyphicon glyphicon-pencil"></span> ¿¼ÊÔ¹ÜÀí</a></li>
+                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "ChangePassword" ? "active" : "")"><a href="@Url.Action("ChangePassword", "Admin")"><span class="glyphicon glyphicon-lock"></span> ĞŞ¸ÄÃÜÂë</a></li>
                     }
-                    else if (currentUser.Role == 1) // æ•™å¸ˆèœå•
+                    else if (currentUser.Role == 1) // ½ÌÊ¦²Ëµ¥
                     {
-                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "Index" ? "active" : "")"><a href="@Url.Action("Index", "Teacher")"><span class="glyphicon glyphicon-dashboard"></span> é¦–é¡µ</a></li>
-                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "Timetable" ? "active" : "")"><a href="@Url.Action("Timetable", "Teacher")"><span class="glyphicon glyphicon-calendar"></span> æˆ‘çš„è¯¾è¡¨</a></li>
-                        <li class="@(new[] {"CourseList", "GradeEntry"}.Contains(ViewContext.RouteData.GetRequiredString("action")) ? "active" : "")"><a href="@Url.Action("CourseList", "Teacher")"><span class="glyphicon glyphicon-edit"></span> æˆç»©å½•å…¥</a></li>
-                        <li class="@(ViewContext.RouteData.GetRequiredString("action").StartsWith("Exam") ? "active" : "")"><a href="@Url.Action("ExamList", "Teacher")"><span class="glyphicon glyphicon-pencil"></span> è€ƒè¯•ç®¡ç†</a></li>
-                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "ChangePassword" ? "active" : "")"><a href="@Url.Action("ChangePassword", "Teacher")"><span class="glyphicon glyphicon-lock"></span> ä¿®æ”¹å¯†ç </a></li>
+                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "Index" ? "active" : "")"><a href="@Url.Action("Index", "Teacher")"><span class="glyphicon glyphicon-dashboard"></span> Ê×Ò³</a></li>
+                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "Timetable" ? "active" : "")"><a href="@Url.Action("Timetable", "Teacher")"><span class="glyphicon glyphicon-calendar"></span> ÎÒµÄ¿Î±í</a></li>
+                        <li class="@(new[] {"CourseList", "GradeEntry"}.Contains(ViewContext.RouteData.GetRequiredString("action")) ? "active" : "")"><a href="@Url.Action("CourseList", "Teacher")"><span class="glyphicon glyphicon-edit"></span> ³É¼¨Â¼Èë</a></li>
+                        <li class="@(ViewContext.RouteData.GetRequiredString("action").StartsWith("Exam") ? "active" : "")"><a href="@Url.Action("ExamList", "Teacher")"><span class="glyphicon glyphicon-pencil"></span> ¿¼ÊÔ¹ÜÀí</a></li>
+                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "ChangePassword" ? "active" : "")"><a href="@Url.Action("ChangePassword", "Teacher")"><span class="glyphicon glyphicon-lock"></span> ĞŞ¸ÄÃÜÂë</a></li>
                     }
-                    else if (currentUser.Role == 2) // å­¦ç”Ÿèœå•
+                    else if (currentUser.Role == 2) // Ñ§Éú²Ëµ¥
                     {
-                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "Index" ? "active" : "")"><a href="@Url.Action("Index", "Student")"><span class="glyphicon glyphicon-home"></span> ä¸ªäººä¸­å¿ƒ</a></li>
-                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "Timetable" ? "active" : "")"><a href="@Url.Action("Timetable", "Student")"><span class="glyphicon glyphicon-calendar"></span> æˆ‘çš„è¯¾è¡¨</a></li>
-                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "CourseSelection" ? "active" : "")"><a href="@Url.Action("CourseSelection", "Student")"><span class="glyphicon glyphicon-check"></span> åœ¨çº¿é€‰è¯¾</a></li>
-                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "MyExams" ? "active" : "")"><a href="@Url.Action("MyExams", "Student")"><span class="glyphicon glyphicon-pencil"></span> æˆ‘çš„è€ƒè¯•</a></li>
-                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "ChangePassword" ? "active" : "")"><a href="@Url.Action("ChangePassword", "Student")"><span class="glyphicon glyphicon-lock"></span> ä¿®æ”¹å¯†ç </a></li>
+                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "Index" ? "active" : "")"><a href="@Url.Action("Index", "Student")"><span class="glyphicon glyphicon-home"></span> ¸öÈËÖĞĞÄ</a></li>
+                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "Timetable" ? "active" : "")"><a href="@Url.Action("Timetable", "Student")"><span class="glyphicon glyphicon-calendar"></span> ÎÒµÄ¿Î±í</a></li>
+                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "CourseSelection" ? "active" : "")"><a href="@Url.Action("CourseSelection", "Student")"><span class="glyphicon glyphicon-check"></span> ÔÚÏßÑ¡¿Î</a></li>
+                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "MyExams" ? "active" : "")"><a href="@Url.Action("MyExams", "Student")"><span class="glyphicon glyphicon-pencil"></span> ÎÒµÄ¿¼ÊÔ</a></li>
+                        <li class="@(ViewContext.RouteData.GetRequiredString("action") == "ChangePassword" ? "active" : "")"><a href="@Url.Action("ChangePassword", "Student")"><span class="glyphicon glyphicon-lock"></span> ĞŞ¸ÄÃÜÂë</a></li>
                     }
                 }
             </ul>
@@ -347,17 +375,17 @@
                     </div>
                 </div>
                 <div class="header-right">
-                    <!-- åœ¨ç”¨æˆ·ä¿¡æ¯å·¦è¾¹æ·»åŠ ä¸»é¢˜è®¾ç½®æŒ‰é’® -->
-                    <button class="theme-settings-header-btn" id="main-theme-btn" title="ä¸»é¢˜è®¾ç½®">
-                        <i class="glyphicon glyphicon-cog"></i> ä¸»é¢˜è®¾ç½®
+                    <!-- ÔÚÓÃ»§ĞÅÏ¢×ó±ßÌí¼ÓÖ÷ÌâÉèÖÃ°´Å¥ -->
+                    <button class="theme-settings-header-btn" id="main-theme-btn" title="Ö÷ÌâÉèÖÃ">
+                        <i class="glyphicon glyphicon-cog"></i> Ö÷ÌâÉèÖÃ
                     </button>
                     
                     <div class="user-info">
                         @if (currentUser != null)
                         {
-                            <a href="#"><span class="glyphicon glyphicon-user"></span> æ¬¢è¿æ‚¨, @currentUser.Username</a>
+                            <a href="#"><span class="glyphicon glyphicon-user"></span> »¶Ó­Äú, @currentUser.Username</a>
                             <span style="margin: 0 10px;">|</span>
-                            <a href="@Url.Content("~/WebForms/Logout.aspx")"><span class="glyphicon glyphicon-log-out"></span> å®‰å…¨é€€å‡º</a>
+                            <a href="@Url.Content("~/Logout.aspx")"><span class="glyphicon glyphicon-log-out"></span> °²È«ÍË³ö</a>
                         }
                     </div>
                 </div>
@@ -376,7 +404,7 @@
     @RenderSection("scripts", required: false)
     <script>
         $(document).ready(function () {
-            // --- æ”¹è¿›çš„ä¸»é¢˜é€»è¾‘ - é˜²æ­¢é—ªç™½é—®é¢˜ ---
+            // --- ¸Ä½øµÄÖ÷ÌâÂß¼­ - ·ÀÖ¹ÉÁ°×ÎÊÌâ ---
             const body = $('body');
 
             function applyTheme(theme) {
@@ -389,17 +417,17 @@
                 }
             }
 
-            // é¡µé¢åŠ è½½æ—¶ï¼Œåº”ç”¨ä¿å­˜çš„ä¸»é¢˜
+            // Ò³Ãæ¼ÓÔØÊ±£¬Ó¦ÓÃ±£´æµÄÖ÷Ìâ
             let currentTheme = localStorage.getItem('theme') || 'light';
             applyTheme(currentTheme);
 
-            // å»¶è¿Ÿå¯ç”¨è¿‡æ¸¡åŠ¨ç”»ï¼Œé¿å…åˆå§‹åŠ è½½æ—¶çš„é—ªçƒ
+            // ÑÓ³ÙÆôÓÃ¹ı¶É¶¯»­£¬±ÜÃâ³õÊ¼¼ÓÔØÊ±µÄÉÁË¸
             setTimeout(function() {
                 body.addClass('transitions-enabled');
                 console.log('Transitions enabled');
-            }, 150); // ç¨å¾®å»¶é•¿æ—¶é—´ç¡®ä¿æ‰€æœ‰å…ƒç´ éƒ½åŠ è½½å®Œæˆ
+            }, 150); // ÉÔÎ¢ÑÓ³¤Ê±¼äÈ·±£ËùÓĞÔªËØ¶¼¼ÓÔØÍê³É
 
-            // --- å“åº”å¼èœå•çš„æ§åˆ¶é€»è¾‘ (ä¿æŒä¸å˜) ---
+            // --- ÏìÓ¦Ê½²Ëµ¥µÄ¿ØÖÆÂß¼­ (±£³Ö²»±ä) ---
             const hamburger = $('.hamburger-menu');
             const sidebar = $('.sidebar');
             const overlay = $('.sidebar-overlay');
@@ -412,23 +440,23 @@
                 overlay.hide();
             });
 
-            // === ä¸»é¢˜ç³»ç»Ÿè°ƒè¯•å’Œç¡®ä¿æ­£å¸¸å·¥ä½œ ===
+            // === Ö÷ÌâÏµÍ³µ÷ÊÔºÍÈ·±£Õı³£¹¤×÷ ===
             console.log('Main layout loaded');
             console.log('Current theme:', currentTheme);
             
-            // ç¡®ä¿ä¸»é¢˜ç³»ç»Ÿåœ¨ä¸»é¡µé¢ä¹Ÿèƒ½æ­£å¸¸å·¥ä½œ - ç°åœ¨ä½¿ç”¨å¤´éƒ¨æŒ‰é’®
+            // È·±£Ö÷ÌâÏµÍ³ÔÚÖ÷Ò³ÃæÒ²ÄÜÕı³£¹¤×÷ - ÏÖÔÚÊ¹ÓÃÍ·²¿°´Å¥
             setTimeout(function() {
                 if (window.ThemeSystem) {
                     console.log('ThemeSystem available in main layout');
-                    // ç¡®ä¿é»˜è®¤ä¸»é¢˜è¢«æ­£ç¡®è®¾ç½®
+                    // È·±£Ä¬ÈÏÖ÷Ìâ±»ÕıÈ·ÉèÖÃ
                     window.ThemeSystem.ensureDefaultTheme();
-                    // åˆå§‹åŒ–ä¸»é¢˜ç³»ç»Ÿ
+                    // ³õÊ¼»¯Ö÷ÌâÏµÍ³
                     window.ThemeSystem.init();
                 } else {
                     console.error('ThemeSystem not available in main layout');
                 }
 
-                // æ£€æŸ¥å¤´éƒ¨æŒ‰é’®æ˜¯å¦å­˜åœ¨
+                // ¼ì²éÍ·²¿°´Å¥ÊÇ·ñ´æÔÚ
                 const headerBtn = document.querySelector('#main-theme-btn');
                 if (headerBtn) {
                     console.log('Header theme button found in main layout');
@@ -439,7 +467,7 @@
         });
     </script>
     <script>
-        // ç¡®ä¿JavaScriptå’ŒæœåŠ¡ç«¯çŠ¶æ€åŒæ­¥
+        // È·±£JavaScriptºÍ·şÎñ¶Ë×´Ì¬Í¬²½
         (function() {
             var theme = localStorage.getItem('theme');
             if (theme === 'dark' && !document.body.classList.contains('dark-mode')) {
@@ -453,3 +481,5 @@
     </script>
 </body>
 </html>
+
+

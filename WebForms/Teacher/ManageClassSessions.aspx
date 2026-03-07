@@ -1,69 +1,69 @@
-Ôªø<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
 <%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
+<%@ Import Namespace="System.Collections.Generic" %>
+<%@ Import Namespace="System.Linq" %>
+<%@ Import Namespace="System.Data.Entity" %>
+<%@ Import Namespace="StudentInformationSystem.Helpers" %>
 <%@ Import Namespace="StudentInformationSystem.Models" %>
 
 <script runat="server">
-    protected string SourceView = "Views/Teacher/ManageClassSessions.cshtml";
-    protected void EnsureRole()
+    protected List<ClassSessions> Sessions = new List<ClassSessions>();
+    protected Dictionary<int, string> HolidayDescriptions = new Dictionary<int, string>();
+    protected List<int> HolidayWeeks = new List<int>();
+    protected string FlashMessage = string.Empty;
+    protected string[] DayNames = { "", "–«∆⁄“ª", "–«∆⁄∂˛", "–«∆⁄»˝", "–«∆⁄Àƒ", "–«∆⁄ŒÂ", "–«∆⁄¡˘", "–«∆⁄»’" };
+    protected string[] PeriodTimes = { "08:40-09:25", "09:30-10:15", "10:35-11:20", "11:25-12:10", "13:20-14:05", "14:10-14:55", "15:15-16:00", "16:05-16:50", "17:30-18:15", "18:20-19:05", "19:10-19:55", "20:00-20:45" };
+
+    protected void Page_Load(object sender, EventArgs e)
     {
         var currentUser = Session["User"] as Users;
         if (currentUser == null || currentUser.Role != 1)
         {
-            Response.Redirect("~/WebForms/Login.aspx", true);
+            Response.Redirect("~/Login.aspx", true);
             return;
         }
-    }
-    protected void Page_Load(object sender, EventArgs e)
-    {
-        EnsureRole();
-        if (TryRedirectToMvc())
+
+        FlashMessage = (Request.QueryString["msg"] ?? string.Empty).Trim();
+        HolidayDescriptions = HolidayHelper.GetHolidayWeekDescriptions();
+        HolidayWeeks = HolidayHelper.GetCurrentSemesterHolidayWeeks();
+
+        using (var db = new StudentManagementDBEntities())
         {
-            return;
+            var teacher = db.Teachers.FirstOrDefault(t => t.UserID == currentUser.UserID);
+            if (teacher == null)
+            {
+                Response.Redirect("~/Login.aspx", true);
+                return;
+            }
+
+            var taughtCourseIds = db.Courses.Where(c => c.TeacherID == teacher.TeacherID).Select(c => c.CourseID).ToList();
+            Sessions = db.ClassSessions
+                .Include("Courses")
+                .Where(cs => taughtCourseIds.Contains(cs.CourseID))
+                .OrderBy(cs => cs.Courses.CourseName)
+                .ThenBy(cs => cs.StartWeek)
+                .ThenBy(cs => cs.DayOfWeek)
+                .ThenBy(cs => cs.StartPeriod)
+                .ToList();
         }
     }
 
-    protected bool TryRedirectToMvc()
+    protected string DayText(int day)
     {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
-        {
-            return false;
-        }
+        return day >= 1 && day <= 7 ? DayNames[day] : "Œ¥÷™";
+    }
 
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
+    protected string TimeRange(ClassSessions s)
+    {
+        var start = s.StartPeriod >= 1 && s.StartPeriod <= 12 ? PeriodTimes[s.StartPeriod - 1].Split('-')[0] : "";
+        var end = s.EndPeriod >= 1 && s.EndPeriod <= 12 ? PeriodTimes[s.EndPeriod - 1].Split('-')[1] : "";
+        return start + " - " + end;
+    }
 
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
-        {
-            return false;
-        }
-
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
-
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
-        }
-
-        Response.Redirect(target, true);
-        return true;
+    protected string Active(string page)
+    {
+        var current = VirtualPathUtility.GetFileName(Request.AppRelativeCurrentExecutionFilePath) ?? string.Empty;
+        return current.Equals(page, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty;
     }
 </script>
 
@@ -72,15 +72,138 @@
 <head runat="server">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Teacher/ManageClassSessions</title>
+    <script>
+        (function () {
+            var theme = localStorage.getItem('theme');
+            var isDark = theme === 'dark';
+            if (isDark) {
+                document.documentElement.classList.add('dark-mode');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+            }
+        })();
+    </script>
+    <title>øŒ≥Ã∞≤≈≈π‹¿Ì</title>
     <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
+    <link href="<%= ResolveUrl("~/Content/theme-system.css") %>" rel="stylesheet" />
+    <link href="<%= ResolveUrl("~/Content/webforms-student-layout.css") %>" rel="stylesheet" />
 </head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            Ê≠£Âú®Ë∑≥ËΩ¨Âà∞ÂéüÈ°µÈù¢Ôºö<code><%= SourceView %></code>
+<body class="webforms-student">
+    <div class="page-wrapper">
+        <div class="sidebar-overlay"></div>
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="–£ª’" class="sidebar-logo-img" />
+            </div>
+            <ul class="sidebar-menu">
+                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx"> ◊“≥</a></li>
+                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">Œ“µƒøŒ±Ì</a></li>
+                <li><a class="<%= Active("CourseList.aspx") %>" href="CourseList.aspx">≥…º®¬º»Î</a></li>
+                <li><a class="<%= Active("ExamList.aspx") %>" href="ExamList.aspx">øº ‘π‹¿Ì</a></li>
+                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">–ﬁ∏ƒ√‹¬Î</a></li>
+            </ul>
+        </aside>
+
+        <div class="main-content">
+            <header class="header-bar">
+                <div class="header-left">
+                    <button class="hamburger-menu" type="button" aria-label="≤Àµ•">&#9776;</button>
+                </div>
+                <div class="header-right">
+                    <button class='dark-toggle-btn' type='button'>∞µ…´ƒ£ Ω</button>
+                    <div class="user-info">
+                        <span class="username">ª∂”≠ƒ˙, <%= ((Session["User"] as Users)?.Username ?? "ΩÃ ¶") %></span>
+                        <span class="sep">|</span>
+                        <a class="logout-link" href="../Logout.aspx">∞≤»´ÕÀ≥ˆ</a>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content-body">
+                <div class="container-fluid">
+                    <% if (!string.IsNullOrEmpty(FlashMessage)) { %>
+                        <div class="alert alert-success"><%= Server.HtmlEncode(FlashMessage) %></div>
+                    <% } %>
+
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <h2>øŒ≥Ã∞≤≈≈π‹¿Ì</h2>
+                        <div>
+                            <a class="btn btn-primary" href="AddClassSession.aspx">ÃÌº”–¬∞≤≈≈</a>
+                            <a class="btn btn-default" href="Timetable.aspx">∑µªÿøŒ±Ì</a>
+                        </div>
+                    </div>
+                    <hr />
+
+                    <% if (HolidayDescriptions.Any()) { %>
+                        <div class="alert alert-info">
+                            <h5>±æ—ß∆⁄∑®∂®ºŸ»’Ã·–—</h5>
+                            <p>
+                                <% foreach (var holiday in HolidayDescriptions) { %>
+                                    <span class="label label-warning" style="margin-right:8px;">µ⁄<%= holiday.Key %>÷‹£∫<%= holiday.Value %></span>
+                                <% } %>
+                            </p>
+                        </div>
+                    <% } %>
+
+                    <% if (Sessions.Any()) { %>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>øŒ≥Ã√˚≥∆</th>
+                                        <th>÷‹¥Œ∑∂Œß</th>
+                                        <th>…œøŒ ±º‰</th>
+                                        <th>ΩÃ “</th>
+                                        <th>ºŸ»’◊¥Ã¨</th>
+                                        <th>≤Ÿ◊˜</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% foreach (var s in Sessions) {
+                                           var conflicts = new List<int>();
+                                           for (int w = s.StartWeek; w <= s.EndWeek; w++) {
+                                               if (HolidayWeeks.Contains(w)) { conflicts.Add(w); }
+                                           }
+                                    %>
+                                        <tr>
+                                            <td><strong><%= s.Courses == null ? "-" : s.Courses.CourseName %></strong></td>
+                                            <td><span class="label label-info">µ⁄ <%= s.StartWeek %> - <%= s.EndWeek %> ÷‹</span></td>
+                                            <td>
+                                                <%= DayText(s.DayOfWeek) %> µ⁄ <%= s.StartPeriod %> - <%= s.EndPeriod %> Ω⁄<br />
+                                                <small class="text-muted"><%= TimeRange(s) %></small>
+                                            </td>
+                                            <td><span class="label label-default"><%= s.Classroom %></span></td>
+                                            <td>
+                                                <% if (conflicts.Any()) { %>
+                                                    <span class="label label-warning">∫¨ºŸ»’</span><br />
+                                                    <small class="text-muted">µ⁄<%= string.Join("°¢", conflicts) %>÷‹</small>
+                                                <% } else { %>
+                                                    <span class="label label-success">’˝≥£</span>
+                                                <% } %>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a class="btn btn-warning" href="AdjustClass.aspx?sessionId=<%= s.SessionID %>">µ˜’˚</a>
+                                                    <a class="btn btn-danger" href="DeleteClassSession.aspx?id=<%= s.SessionID %>">…æ≥˝</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <div class="well text-center">
+                            <h4>‘›ŒﬁøŒ≥Ã∞≤≈≈</h4>
+                            <p class="text-muted">ƒ˙ªπ√ª”–ÃÌº”»Œ∫ŒøŒ≥Ã∞≤≈≈°£</p>
+                            <a class="btn btn-primary" href="AddClassSession.aspx">¡¢º¥ÃÌº”</a>
+                        </div>
+                    <% } %>
+                </div>
+            </main>
         </div>
     </div>
+    <script src="<%= ResolveUrl("~/Scripts/webforms-student-layout.js") %>"></script>
 </body>
 </html>
 

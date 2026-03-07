@@ -1,86 +1,82 @@
-ï»¿<%@ Page Language="C#" AutoEventWireup="true" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
-<%@ Import Namespace="StudentInformationSystem.Models" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
+<!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
-    protected string SourceView = "Views/Admin/EnrollmentList.cshtml";
-    protected void EnsureRole()
-    {
-        var currentUser = Session["User"] as Users;
-        if (currentUser == null || currentUser.Role != 0)
-        {
-            Response.Redirect("~/WebForms/Login.aspx", true);
-            return;
-        }
-    }
+    protected string SearchString = string.Empty;
+    protected List<StudentCourses> EnrollmentListData = new List<StudentCourses>();
+
     protected void Page_Load(object sender, EventArgs e)
     {
-        EnsureRole();
-        if (TryRedirectToMvc())
+        PageTitle = "È«²¿Ñ¡¿Î¼ÇÂ¼";
+        if (!EnsureAdminRole())
         {
             return;
         }
-    }
 
-    protected bool TryRedirectToMvc()
-    {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
+        SearchString = (Request.QueryString["searchString"] ?? string.Empty).Trim();
+
+        using (var db = new StudentManagementDBEntities())
         {
-            return false;
-        }
+            var query = db.StudentCourses.Include("Students").Include("Courses").AsQueryable();
+            if (!string.IsNullOrWhiteSpace(SearchString))
+            {
+                query = query.Where(e => e.Students.StudentName.Contains(SearchString)
+                                      || e.Students.StudentID.Contains(SearchString)
+                                      || e.Courses.CourseName.Contains(SearchString));
+            }
 
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
-        {
-            return false;
+            EnrollmentListData = query.OrderByDescending(e => e.SC_ID).ToList();
         }
-
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
-
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
-        }
-
-        Response.Redirect(target, true);
-        return true;
     }
 </script>
 
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head runat="server">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin/EnrollmentList</title>
-    <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
-</head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            æ­£åœ¨è·³è½¬åˆ°åŸé¡µé¢ï¼š<code><%= SourceView %></code>
-        </div>
-    </div>
-</body>
-</html>
+<!--#include file="_AdminLayoutTop.inc" -->
 
+<h2>È«²¿Ñ¡¿Î¼ÇÂ¼</h2>
+
+<form method="get" class="form-inline">
+    <div class="form-group">
+        <label>²éÕÒ¼ÇÂ¼:</label>
+        <input type="text" name="searchString" value="<%= H(SearchString) %>" class="form-control" placeholder="ÊäÈëÑ§ÉúĞÕÃû/Ñ§ºÅ/¿Î³ÌÃû" />
+    </div>
+    <button type="submit" class="btn btn-default">ËÑ Ë÷</button>
+</form>
+<hr />
+
+<p>ÕâÀïÕ¹Ê¾ÁËÏµÍ³ÖĞËùÓĞµÄÑ§ÉúÑ¡¿ÎÀúÊ·¼ÇÂ¼¡£</p>
+<div class="table-responsive">
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>¿Î³ÌÃû³Æ</th>
+                <th>Ñ§ÉúĞÕÃû</th>
+                <th>Ñ§ºÅ</th>
+                <th>³É¼¨</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (EnrollmentListData.Any()) { %>
+                <% foreach (var item in EnrollmentListData) { %>
+                    <tr>
+                        <td><%= item.Courses == null ? "-" : H(item.Courses.CourseName) %></td>
+                        <td><%= item.Students == null ? "-" : H(item.Students.StudentName) %></td>
+                        <td><%= H(item.StudentID) %></td>
+                        <td>
+                            <% if (item.Grade.HasValue) { %>
+                                <strong><%= item.Grade.Value.ToString("0.##") %></strong>
+                            <% } else { %>
+                                <span class="text-muted">Î´Â¼Èë</span>
+                            <% } %>
+                        </td>
+                    </tr>
+                <% } %>
+            <% } else { %>
+                <tr><td colspan="4" class="text-center text-muted">ÔİÎŞÑ¡¿Î¼ÇÂ¼¡£</td></tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>
+
+<p><a class="btn btn-default" href="Index.aspx">·µ»Ø¿ØÖÆÌ¨</a></p>
+
+<!--#include file="_AdminLayoutBottom.inc" -->

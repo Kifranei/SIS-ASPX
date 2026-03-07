@@ -1,86 +1,115 @@
-Ôªø<%@ Page Language="C#" AutoEventWireup="true" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
-<%@ Import Namespace="StudentInformationSystem.Models" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
+<!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
-    protected string SourceView = "Views/Admin/AddExam.cshtml";
-    protected void EnsureRole()
-    {
-        var currentUser = Session["User"] as Users;
-        if (currentUser == null || currentUser.Role != 0)
-        {
-            Response.Redirect("~/WebForms/Login.aspx", true);
-            return;
-        }
-    }
+    protected string MessageText = string.Empty;
+    protected List<Courses> CourseOptions = new List<Courses>();
+
+    protected string FormCourseID = string.Empty;
+    protected string FormExamTime = string.Empty;
+    protected string FormLocation = string.Empty;
+    protected string FormDetails = string.Empty;
+
     protected void Page_Load(object sender, EventArgs e)
     {
-        EnsureRole();
-        if (TryRedirectToMvc())
+        PageTitle = "ÃÌº”–¬øº ‘";
+        if (!EnsureAdminRole())
         {
             return;
         }
+
+        if (Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase))
+        {
+            FormCourseID = (Request.Form["CourseID"] ?? string.Empty).Trim();
+            FormExamTime = (Request.Form["ExamTime"] ?? string.Empty).Trim();
+            FormLocation = (Request.Form["Location"] ?? string.Empty).Trim();
+            FormDetails = (Request.Form["Details"] ?? string.Empty).Trim();
+            SaveExam();
+        }
+
+        using (var db = new StudentManagementDBEntities())
+        {
+            CourseOptions = db.Courses.OrderBy(c => c.CourseName).ToList();
+        }
     }
 
-    protected bool TryRedirectToMvc()
+    private void SaveExam()
     {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
+        int courseId;
+        DateTime examTime;
+        if (!int.TryParse(FormCourseID, out courseId) || !DateTime.TryParse(FormExamTime, out examTime) || string.IsNullOrWhiteSpace(FormLocation))
         {
-            return false;
+            MessageText = "«Î’˝»∑ÃÓ–¥øŒ≥Ã°¢øº ‘ ±º‰∫Õøº ‘µÿµ„°£";
+            return;
         }
 
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
+        using (var db = new StudentManagementDBEntities())
         {
-            return false;
+            var exam = new Exams
+            {
+                CourseID = courseId,
+                ExamTime = examTime,
+                Location = FormLocation,
+                Details = FormDetails
+            };
+            db.Exams.Add(exam);
+            db.SaveChanges();
+            Response.Redirect("ExamList.aspx", true);
         }
-
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
-
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
-        }
-
-        Response.Redirect(target, true);
-        return true;
     }
 </script>
 
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head runat="server">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin/AddExam</title>
-    <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
-</head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            Ê≠£Âú®Ë∑≥ËΩ¨Âà∞ÂéüÈ°µÈù¢Ôºö<code><%= SourceView %></code>
+<!--#include file="_AdminLayoutTop.inc" -->
+
+<h2>ÃÌº”–¬øº ‘</h2>
+
+<% if (!string.IsNullOrEmpty(MessageText)) { %>
+    <div class="alert alert-danger"><%= H(MessageText) %></div>
+<% } %>
+
+<form method="post" class="form-horizontal" style="max-width:900px;">
+    <h4>øº ‘–≈œ¢</h4>
+    <hr />
+
+    <div class="form-group">
+        <label class="control-label col-md-2">øŒ≥Ã√˚≥∆</label>
+        <div class="col-md-10">
+            <select class="form-control" name="CourseID" required>
+                <option value="">--«Î—°‘ÒøŒ≥Ã--</option>
+                <% foreach (var c in CourseOptions) { %>
+                    <option value="<%= c.CourseID %>" <%= FormCourseID == c.CourseID.ToString() ? "selected" : "" %>><%= H(c.CourseName) %></option>
+                <% } %>
+            </select>
         </div>
     </div>
-</body>
-</html>
 
+    <div class="form-group">
+        <label class="control-label col-md-2">øº ‘ ±º‰</label>
+        <div class="col-md-10">
+            <input class="form-control" type="datetime-local" name="ExamTime" value="<%= H(FormExamTime) %>" required />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">øº ‘µÿµ„</label>
+        <div class="col-md-10">
+            <input class="form-control" name="Location" value="<%= H(FormLocation) %>" required />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">±∏◊¢</label>
+        <div class="col-md-10">
+            <input class="form-control" name="Details" value="<%= H(FormDetails) %>" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <button type="submit" class="btn btn-success">¥¥Ω®</button>
+            <a class="btn btn-default" href="ExamList.aspx">∑µªÿ¡–±Ì</a>
+        </div>
+    </div>
+</form>
+
+<!--#include file="_AdminLayoutBottom.inc" -->

@@ -1,86 +1,129 @@
-ï»¿<%@ Page Language="C#" AutoEventWireup="true" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
-<%@ Import Namespace="StudentInformationSystem.Models" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
+<!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
-    protected string SourceView = "Views/Admin/DeleteCourseSchedule.cshtml";
-    protected void EnsureRole()
-    {
-        var currentUser = Session["User"] as Users;
-        if (currentUser == null || currentUser.Role != 0)
-        {
-            Response.Redirect("~/WebForms/Login.aspx", true);
-            return;
-        }
-    }
+    protected ClassSessions CurrentSession;
+    protected string MessageText = string.Empty;
+    protected List<int> HolidayWeeks = new List<int>();
+
     protected void Page_Load(object sender, EventArgs e)
     {
-        EnsureRole();
-        if (TryRedirectToMvc())
+        PageTitle = "É¾³ı¿Î³Ì°²ÅÅ";
+        if (!EnsureAdminRole())
         {
             return;
         }
+
+        int sessionId;
+        if (!int.TryParse(Request.QueryString["sessionId"] ?? Request.Form["SessionID"], out sessionId) || sessionId <= 0)
+        {
+            MessageText = "¿Î³Ì°²ÅÅ²ÎÊıÎŞĞ§¡£";
+            return;
+        }
+
+        using (var db = new StudentManagementDBEntities())
+        {
+            CurrentSession = db.ClassSessions.Include("Courses.Teachers").FirstOrDefault(cs => cs.SessionID == sessionId);
+            if (CurrentSession == null)
+            {
+                MessageText = "¿Î³Ì°²ÅÅ²»´æÔÚ¡£";
+                return;
+            }
+
+            if (Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase))
+            {
+                var courseId = CurrentSession.CourseID;
+                var courseName = CurrentSession.Courses == null ? "¿Î³Ì" : CurrentSession.Courses.CourseName;
+                var info = "µÚ" + CurrentSession.StartWeek + "-" + CurrentSession.EndWeek + "ÖÜ£¬" + DayName(CurrentSession.DayOfWeek) + "µÚ" + CurrentSession.StartPeriod + "-" + CurrentSession.EndPeriod + "½Ú£¬" + CurrentSession.Classroom + "½ÌÊÒ";
+
+                db.ClassSessions.Remove(CurrentSession);
+                db.SaveChanges();
+
+                Session["AdminFlashMessage"] = "¿Î³Ì°²ÅÅÉ¾³ı³É¹¦£¡ÒÑÉ¾³ı " + courseName + " µÄ°²ÅÅ£º" + info;
+                Response.Redirect("CourseSchedule.aspx?courseId=" + courseId, true);
+            }
+        }
+
+        HolidayWeeks = HolidayHelper.GetCurrentSemesterHolidayWeeks();
     }
 
-    protected bool TryRedirectToMvc()
+    protected bool HasHolidayConflict()
     {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
+        if (CurrentSession == null)
         {
             return false;
         }
 
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
+        for (int week = CurrentSession.StartWeek; week <= CurrentSession.EndWeek; week++)
         {
-            return false;
+            if (HolidayWeeks.Contains(week))
+            {
+                return true;
+            }
         }
 
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
-
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
-        }
-
-        Response.Redirect(target, true);
-        return true;
+        return false;
     }
 </script>
 
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head runat="server">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin/DeleteCourseSchedule</title>
-    <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
-</head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            æ­£åœ¨è·³è½¬åˆ°åŸé¡µé¢ï¼š<code><%= SourceView %></code>
+<!--#include file="_AdminLayoutTop.inc" -->
+
+<h2>É¾³ı¿Î³Ì°²ÅÅ</h2>
+<hr />
+
+<% if (!string.IsNullOrEmpty(MessageText)) { %>
+    <div class="alert alert-danger"><%= H(MessageText) %></div>
+<% } else { %>
+    <div class="alert alert-danger">
+        <h4><span class="glyphicon glyphicon-warning-sign"></span> È·ÈÏÉ¾³ı</h4>
+        <p>ÄúÈ·¶¨ÒªÉ¾³ıÒÔÏÂ¿Î³Ì°²ÅÅÂğ£¿´Ë²Ù×÷ÎŞ·¨³·Ïú£¬ÇÒ»áÓ°ÏìÏà¹Ø½ÌÊ¦ºÍÑ§ÉúµÄ¿Î±í¡£</p>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading"><h3 class="panel-title">¿Î³Ì°²ÅÅÏêÇé</h3></div>
+        <div class="panel-body">
+            <dl class="dl-horizontal">
+                <dt>¿Î³ÌÃû³Æ£º</dt>
+                <dd><strong><%= CurrentSession.Courses == null ? "-" : H(CurrentSession.Courses.CourseName) %></strong></dd>
+
+                <dt>ÈÎ¿Î½ÌÊ¦£º</dt>
+                <dd><%= (CurrentSession.Courses != null && CurrentSession.Courses.Teachers != null) ? H(CurrentSession.Courses.Teachers.TeacherName) : "Î´·ÖÅä½ÌÊ¦" %></dd>
+
+                <dt>¿Î³ÌÀàĞÍ£º</dt>
+                <dd><span class="label label-info"><%= CurrentSession.Courses == null ? "-" : H(CourseTypeText(CurrentSession.Courses.CourseType)) %></span></dd>
+
+                <dt>ÖÜ´Î·¶Î§£º</dt>
+                <dd>µÚ <%= CurrentSession.StartWeek %> - <%= CurrentSession.EndWeek %> ÖÜ</dd>
+
+                <dt>ÉÏ¿ÎÊ±¼ä£º</dt>
+                <dd><%= H(DayName(CurrentSession.DayOfWeek)) %> µÚ <%= CurrentSession.StartPeriod %> - <%= CurrentSession.EndPeriod %> ½Ú</dd>
+
+                <dt>½ÌÊÒ£º</dt>
+                <dd><%= H(CurrentSession.Classroom) %></dd>
+
+                <dt>¼ÙÈÕ×´Ì¬£º</dt>
+                <dd>
+                    <% if (HasHolidayConflict()) { %>
+                        <span class="label label-warning">°üº¬¼ÙÈÕÖÜ´Î</span>
+                    <% } else { %>
+                        <span class="label label-success">ÎŞ¼ÙÈÕ³åÍ»</span>
+                    <% } %>
+                </dd>
+            </dl>
         </div>
     </div>
-</body>
-</html>
 
+    <form method="post" class="form-actions">
+        <input type="hidden" name="SessionID" value="<%= CurrentSession.SessionID %>" />
+        <button type="submit" class="btn btn-danger" onclick="return confirm('ÄúÈ·¶¨ÒªÉ¾³ıÕâ¸ö¿Î³Ì°²ÅÅÂğ£¿´Ë²Ù×÷ÎŞ·¨³·Ïú£¡');">È·ÈÏÉ¾³ı</button>
+        <a class="btn btn-default" href='CourseSchedule.aspx?courseId=<%= CurrentSession.CourseID %>'>È¡Ïû</a>
+    </form>
+<% } %>
+
+<style>
+    .dl-horizontal dt { text-align: left; width: 100px; }
+    .dl-horizontal dd { margin-left: 120px; }
+    .form-actions { padding-top: 20px; border-top: 1px solid #e5e5e5; }
+</style>
+
+<!--#include file="_AdminLayoutBottom.inc" -->

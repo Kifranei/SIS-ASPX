@@ -1,86 +1,96 @@
-Ôªø<%@ Page Language="C#" AutoEventWireup="true" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
-<%@ Import Namespace="StudentInformationSystem.Models" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
+<!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
-    protected string SourceView = "Views/Admin/ClassDetails.cshtml";
-    protected void EnsureRole()
-    {
-        var currentUser = Session["User"] as Users;
-        if (currentUser == null || currentUser.Role != 0)
-        {
-            Response.Redirect("~/WebForms/Login.aspx", true);
-            return;
-        }
-    }
+    protected Classes CurrentClass;
+    protected List<Students> StudentsInClass = new List<Students>();
+    protected string MessageText = string.Empty;
+
     protected void Page_Load(object sender, EventArgs e)
     {
-        EnsureRole();
-        if (TryRedirectToMvc())
+        PageTitle = "∞‡º∂œÍ«È";
+        if (!EnsureAdminRole())
         {
             return;
         }
-    }
 
-    protected bool TryRedirectToMvc()
-    {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
+        int id;
+        if (!int.TryParse(Request.QueryString["id"], out id) || id <= 0)
         {
-            return false;
+            MessageText = "∞‡º∂≤Œ ˝Œﬁ–ß°£";
+            return;
         }
 
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
+        using (var db = new StudentManagementDBEntities())
         {
-            return false;
-        }
+            CurrentClass = db.Classes.Find(id);
+            if (CurrentClass == null)
+            {
+                MessageText = "∞‡º∂≤ª¥Ê‘⁄°£";
+                return;
+            }
 
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
-        {
-            return false;
+            StudentsInClass = db.Students.Where(s => s.ClassID == id).OrderBy(s => s.StudentID).ToList();
         }
-
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
-
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
-        }
-
-        Response.Redirect(target, true);
-        return true;
     }
 </script>
 
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head runat="server">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin/ClassDetails</title>
-    <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
-</head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            Ê≠£Âú®Ë∑≥ËΩ¨Âà∞ÂéüÈ°µÈù¢Ôºö<code><%= SourceView %></code>
-        </div>
-    </div>
-</body>
-</html>
+<!--#include file="_AdminLayoutTop.inc" -->
 
+<h2>∞‡º∂œÍ«È</h2>
+
+<% if (!string.IsNullOrEmpty(MessageText)) { %>
+    <div class="alert alert-danger"><%= H(MessageText) %></div>
+<% } else { %>
+    <h4><%= H(CurrentClass.ClassName) %></h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>◊®“µ</dt>
+        <dd><%= H(CurrentClass.Major) %></dd>
+
+        <dt>—ßƒÍ</dt>
+        <dd><%= CurrentClass.AcademicYear.HasValue ? CurrentClass.AcademicYear.Value.ToString() : "-" %></dd>
+
+        <dt>∞‡∫≈</dt>
+        <dd><%= CurrentClass.ClassNumber.HasValue ? CurrentClass.ClassNumber.Value.ToString() : "-" %></dd>
+
+        <dt>∞‡º∂»À ˝</dt>
+        <dd><%= StudentsInClass.Count %> »À</dd>
+    </dl>
+    <hr />
+
+    <h4>∞‡º∂—ß…˙√˚µ•</h4>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>—ß∫≈</th>
+                    <th>–’√˚</th>
+                    <th>–‘±</th>
+                    <th>≤Ÿ◊˜</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (StudentsInClass.Any()) { %>
+                    <% foreach (var student in StudentsInClass) { %>
+                        <tr>
+                            <td><%= H(student.StudentID) %></td>
+                            <td><%= H(student.StudentName) %></td>
+                            <td><%= H(student.Gender) %></td>
+                            <td><a href='Edit.aspx?id=<%= Server.UrlEncode(student.StudentID) %>'>±‡º≠∏√—ß…˙</a></td>
+                        </tr>
+                    <% } %>
+                <% } else { %>
+                    <tr><td colspan="4" class="text-center text-muted">∏√∞‡º∂‘›Œﬁ—ß…˙°£</td></tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <p>
+        <a class="btn btn-primary" href='AddStudent.aspx?classId=<%= CurrentClass.ClassID %>'>ÃÌº”–¬—ß…˙</a>
+        <a class="btn btn-default" href="ClassList.aspx">∑µªÿ∞‡º∂¡–±Ì</a>
+    </p>
+<% } %>
+
+<!--#include file="_AdminLayoutBottom.inc" -->

@@ -1,69 +1,55 @@
-Ôªø<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
 <%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
+<%@ Import Namespace="System.Linq" %>
+<%@ Import Namespace="System.Data.Entity" %>
 <%@ Import Namespace="StudentInformationSystem.Models" %>
 
 <script runat="server">
-    protected string SourceView = "Views/Teacher/DetailsExam.cshtml";
-    protected void EnsureRole()
+    protected Exams CurrentExam;
+    protected string MessageType = string.Empty;
+    protected string MessageText = string.Empty;
+
+    protected void Page_Load(object sender, EventArgs e)
     {
         var currentUser = Session["User"] as Users;
         if (currentUser == null || currentUser.Role != 1)
         {
-            Response.Redirect("~/WebForms/Login.aspx", true);
+            Response.Redirect("~/Login.aspx", true);
             return;
         }
-    }
-    protected void Page_Load(object sender, EventArgs e)
-    {
-        EnsureRole();
-        if (TryRedirectToMvc())
+
+        int examId;
+        if (!int.TryParse(Request.QueryString["id"], out examId) || examId <= 0)
         {
+            MessageType = "danger";
+            MessageText = "Œﬁ–ßµƒøº ‘≤Œ ˝°£";
             return;
         }
+
+        using (var db = new StudentManagementDBEntities())
+        {
+            var teacher = db.Teachers.FirstOrDefault(t => t.UserID == currentUser.UserID);
+            if (teacher == null)
+            {
+                Response.Redirect("~/Login.aspx", true);
+                return;
+            }
+
+            var taughtCourseIds = db.Courses.Where(c => c.TeacherID == teacher.TeacherID).Select(c => c.CourseID).ToList();
+            CurrentExam = db.Exams.Include("Courses").FirstOrDefault(ei => ei.ExamID == examId);
+            if (CurrentExam == null || !taughtCourseIds.Contains(CurrentExam.CourseID))
+            {
+                CurrentExam = null;
+                MessageType = "danger";
+                MessageText = "øº ‘º«¬º≤ª¥Ê‘⁄ªÚ≤ª Ù”⁄µ±«∞ΩÃ ¶°£";
+            }
+        }
     }
 
-    protected bool TryRedirectToMvc()
+    protected string Active(string page)
     {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
-        {
-            return false;
-        }
-
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
-        {
-            return false;
-        }
-
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
-
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
-        }
-
-        Response.Redirect(target, true);
-        return true;
+        var current = VirtualPathUtility.GetFileName(Request.AppRelativeCurrentExecutionFilePath) ?? string.Empty;
+        return current.Equals(page, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty;
     }
 </script>
 
@@ -72,15 +58,88 @@
 <head runat="server">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Teacher/DetailsExam</title>
+    <script>
+        (function () {
+            var theme = localStorage.getItem('theme');
+            var isDark = theme === 'dark';
+            if (isDark) {
+                document.documentElement.classList.add('dark-mode');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+            }
+        })();
+    </script>
+    <title>øº ‘œÍ«È</title>
     <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
+    <link href="<%= ResolveUrl("~/Content/theme-system.css") %>" rel="stylesheet" />
+    <link href="<%= ResolveUrl("~/Content/webforms-student-layout.css") %>" rel="stylesheet" />
 </head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            Ê≠£Âú®Ë∑≥ËΩ¨Âà∞ÂéüÈ°µÈù¢Ôºö<code><%= SourceView %></code>
+<body class="webforms-student">
+    <div class="page-wrapper">
+        <div class="sidebar-overlay"></div>
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="–£ª’" class="sidebar-logo-img" />
+            </div>
+            <ul class="sidebar-menu">
+                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx"> ◊“≥</a></li>
+                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">Œ“µƒøŒ±Ì</a></li>
+                <li><a class="<%= Active("CourseList.aspx") %>" href="CourseList.aspx">≥…º®¬º»Î</a></li>
+                <li><a class="<%= Active("ExamList.aspx") %>" href="ExamList.aspx">øº ‘π‹¿Ì</a></li>
+                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">–ﬁ∏ƒ√‹¬Î</a></li>
+            </ul>
+        </aside>
+
+        <div class="main-content">
+            <header class="header-bar">
+                <div class="header-left">
+                    <button class="hamburger-menu" type="button" aria-label="≤Àµ•">&#9776;</button>
+                </div>
+                <div class="header-right">
+                    <button class='dark-toggle-btn' type='button'>∞µ…´ƒ£ Ω</button>
+                    <div class="user-info">
+                        <span class="username">ª∂”≠ƒ˙, <%= ((Session["User"] as Users)?.Username ?? "ΩÃ ¶") %></span>
+                        <span class="sep">|</span>
+                        <a class="logout-link" href="../Logout.aspx">∞≤»´ÕÀ≥ˆ</a>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content-body">
+                <div class="container-fluid">
+                    <h2>øº ‘œÍ«È</h2>
+
+                    <% if (!string.IsNullOrEmpty(MessageText)) { %>
+                        <div class="alert alert-<%= MessageType %>"><%= MessageText %></div>
+                    <% } %>
+
+                    <% if (CurrentExam != null) { %>
+                        <div>
+                            <h4><%= CurrentExam.Courses == null ? "-" : CurrentExam.Courses.CourseName %></h4>
+                            <hr />
+                            <dl class="dl-horizontal">
+                                <dt>øŒ≥Ã√˚≥∆</dt>
+                                <dd><%= CurrentExam.Courses == null ? "-" : CurrentExam.Courses.CourseName %></dd>
+                                <dt>øº ‘ ±º‰</dt>
+                                <dd><%= CurrentExam.ExamTime.ToString("yyyy-MM-dd HH:mm") %></dd>
+                                <dt>øº ‘µÿµ„</dt>
+                                <dd><%= CurrentExam.Location %></dd>
+                                <dt>±∏◊¢</dt>
+                                <dd><%= string.IsNullOrWhiteSpace(CurrentExam.Details) ? "-" : CurrentExam.Details %></dd>
+                            </dl>
+                        </div>
+                        <p>
+                            <a class="btn btn-primary" href="EditExam.aspx?id=<%= CurrentExam.ExamID %>">±‡º≠</a>
+                            <a class="btn btn-default" href="ExamList.aspx">∑µªÿ¡–±Ì</a>
+                        </p>
+                    <% } else { %>
+                        <a class="btn btn-default" href="ExamList.aspx">∑µªÿ¡–±Ì</a>
+                    <% } %>
+                </div>
+            </main>
         </div>
     </div>
+    <script src="<%= ResolveUrl("~/Scripts/webforms-student-layout.js") %>"></script>
 </body>
 </html>
 

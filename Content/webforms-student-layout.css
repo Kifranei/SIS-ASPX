@@ -50,8 +50,12 @@ body.webforms-student.transitions-enabled .sidebar-menu li a {
     display: block;
 }
 
-body.webforms-student:not(.dark-mode) .sidebar-logo-img {
+html:not(.dark-mode) body.webforms-student .sidebar-logo-img {
     filter: invert(1);
+}
+
+html.dark-mode body.webforms-student .sidebar-logo-img {
+    filter: none;
 }
 
 .sidebar-menu {
@@ -227,3 +231,31 @@ body.webforms-student:not(.dark-mode) .sidebar-logo-img {
         z-index: 1000;
     }
 }
+
+
+/* 暗色模式下提升次级文字可读性 */
+html.dark-mode body.webforms-student .text-muted,
+html.dark-mode body.webforms-student small,
+body.dark-mode.webforms-student .text-muted,
+body.dark-mode.webforms-student small {
+    color: #c9d1d9 !important;
+}
+
+
+/* 暗色模式下增强默认按钮可读性 */
+html.dark-mode body.webforms-student .btn-default,
+body.dark-mode.webforms-student .btn-default {
+    color: #f3f4f6 !important;
+    background-color: #2f3745 !important;
+    border-color: #5a6578 !important;
+}
+
+html.dark-mode body.webforms-student .btn-default:hover,
+html.dark-mode body.webforms-student .btn-default:focus,
+body.dark-mode.webforms-student .btn-default:hover,
+body.dark-mode.webforms-student .btn-default:focus {
+    color: #ffffff !important;
+    background-color: #3c475a !important;
+    border-color: #7a879d !important;
+}
+

@@ -1,86 +1,94 @@
-ï»¿<%@ Page Language="C#" AutoEventWireup="true" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
-<%@ Import Namespace="StudentInformationSystem.Models" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
+<!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
-    protected string SourceView = "Views/Admin/DeleteCourse.cshtml";
-    protected void EnsureRole()
-    {
-        var currentUser = Session["User"] as Users;
-        if (currentUser == null || currentUser.Role != 0)
-        {
-            Response.Redirect("~/WebForms/Login.aspx", true);
-            return;
-        }
-    }
+    protected Courses CurrentCourse;
+    protected string MessageText = string.Empty;
+
     protected void Page_Load(object sender, EventArgs e)
     {
-        EnsureRole();
-        if (TryRedirectToMvc())
+        PageTitle = "É¾³ı¿Î³Ì";
+        if (!EnsureAdminRole())
         {
             return;
         }
-    }
 
-    protected bool TryRedirectToMvc()
-    {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
+        int id;
+        if (!int.TryParse(Request.QueryString["id"] ?? Request.Form["CourseID"], out id) || id <= 0)
         {
-            return false;
+            MessageText = "¿Î³Ì²ÎÊıÎŞĞ§¡£";
+            return;
         }
 
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
+        using (var db = new StudentManagementDBEntities())
         {
-            return false;
-        }
+            CurrentCourse = db.Courses.Include("Teachers").FirstOrDefault(c => c.CourseID == id);
+            if (CurrentCourse == null)
+            {
+                MessageText = "¿Î³Ì²»´æÔÚ¡£";
+                return;
+            }
 
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
-        {
-            return false;
-        }
+            if (Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase))
+            {
+                var isEnrolled = db.StudentCourses.Any(sc => sc.CourseID == id);
+                if (isEnrolled)
+                {
+                    Session["AdminFlashError"] = "É¾³ıÊ§°Ü£¡¸Ã¿Î³ÌÒÑ±»Ñ§ÉúÑ¡Ôñ£¬ÎŞ·¨É¾³ı¡£";
+                    Response.Redirect("CourseList.aspx", true);
+                    return;
+                }
 
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
+                var sessionsToDelete = db.ClassSessions.Where(cs => cs.CourseID == id).ToList();
+                if (sessionsToDelete.Any())
+                {
+                    db.ClassSessions.RemoveRange(sessionsToDelete);
+                }
 
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
-        }
+                var examsToDelete = db.Exams.Where(ei => ei.CourseID == id).ToList();
+                if (examsToDelete.Any())
+                {
+                    db.Exams.RemoveRange(examsToDelete);
+                }
 
-        Response.Redirect(target, true);
-        return true;
+                db.Courses.Remove(CurrentCourse);
+                db.SaveChanges();
+                Session["AdminFlashMessage"] = "¿Î³ÌÉ¾³ı³É¹¦£¡";
+                Response.Redirect("CourseList.aspx", true);
+            }
+        }
     }
 </script>
 
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head runat="server">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin/DeleteCourse</title>
-    <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
-</head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            æ­£åœ¨è·³è½¬åˆ°åŸé¡µé¢ï¼š<code><%= SourceView %></code>
-        </div>
+<!--#include file="_AdminLayoutTop.inc" -->
+
+<h2>É¾³ı¿Î³Ì</h2>
+
+<% if (!string.IsNullOrEmpty(MessageText)) { %>
+    <div class="alert alert-danger"><%= H(MessageText) %></div>
+<% } else { %>
+    <h3>ÄúÈ·¶¨ÒªÉ¾³ıÕâ¸ö¿Î³ÌÂğ£¿</h3>
+    <div>
+        <h4><%= H(CurrentCourse.CourseName) %></h4>
+        <hr />
+        <dl class="dl-horizontal">
+            <dt>¿Î³ÌÃû³Æ</dt>
+            <dd><%= H(CurrentCourse.CourseName) %></dd>
+
+            <dt>Ñ§·Ö</dt>
+            <dd><%= CurrentCourse.Credits %></dd>
+
+            <dt>½ÌÊ¦Ãû³Æ</dt>
+            <dd><%= CurrentCourse.Teachers == null ? "-" : H(CurrentCourse.Teachers.TeacherName) %></dd>
+        </dl>
+
+        <form method="post" class="form-actions no-color">
+            <input type="hidden" name="CourseID" value="<%= CurrentCourse.CourseID %>" />
+            <button type="submit" class="btn btn-danger">È·ÈÏÉ¾³ı</button>
+            <a class="btn btn-default" href="CourseList.aspx">·µ»ØÁĞ±í</a>
+        </form>
     </div>
-</body>
-</html>
+<% } %>
+
+<!--#include file="_AdminLayoutBottom.inc" -->
 

@@ -434,6 +434,7 @@
     <Content Include="WebForms\Teacher\ChangePassword.aspx" />
     <Content Include="WebForms\Teacher\ClassRoster.aspx" />
     <Content Include="WebForms\Teacher\CourseList.aspx" />
+    <Content Include="WebForms\Teacher\CourseStudentManage.aspx" />
     <Content Include="WebForms\Teacher\DeleteClassSession.aspx" />
     <Content Include="WebForms\Teacher\DeleteExam.aspx" />
     <Content Include="WebForms\Teacher\DetailsExam.aspx" />
@@ -525,3 +526,4 @@
   <Import Project="packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets" Condition="Exists('packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets')" />
   <Import Project="packages\Fido2.2.0.2\build\fido2.targets" Condition="Exists('packages\Fido2.2.0.2\build\fido2.targets')" />
 </Project>
+

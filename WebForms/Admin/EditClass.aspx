@@ -1,86 +1,131 @@
-Ôªø<%@ Page Language="C#" AutoEventWireup="true" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
-<%@ Import Namespace="StudentInformationSystem.Models" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
+<!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
-    protected string SourceView = "Views/Admin/EditClass.cshtml";
-    protected void EnsureRole()
-    {
-        var currentUser = Session["User"] as Users;
-        if (currentUser == null || currentUser.Role != 0)
-        {
-            Response.Redirect("~/WebForms/Login.aspx", true);
-            return;
-        }
-    }
+    protected Classes CurrentClass;
+    protected string MessageText = string.Empty;
+    protected int FormClassID = 0;
+    protected string FormMajor = string.Empty;
+    protected string FormAcademicYear = string.Empty;
+    protected string FormClassNumber = string.Empty;
+
     protected void Page_Load(object sender, EventArgs e)
     {
-        EnsureRole();
-        if (TryRedirectToMvc())
+        PageTitle = "±‡º≠∞‡º∂–≈œ¢";
+        if (!EnsureAdminRole())
         {
             return;
         }
-    }
 
-    protected bool TryRedirectToMvc()
-    {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
+        if (Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase))
         {
-            return false;
-        }
-
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
-        {
-            return false;
-        }
-
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
+            int.TryParse(Request.Form["ClassID"], out FormClassID);
+            FormMajor = (Request.Form["Major"] ?? string.Empty).Trim();
+            FormAcademicYear = (Request.Form["AcademicYear"] ?? string.Empty).Trim();
+            FormClassNumber = (Request.Form["ClassNumber"] ?? string.Empty).Trim();
+            SaveClass();
         }
         else
         {
-            target = "~/" + controller + "/" + action;
-        }
+            int id;
+            if (!int.TryParse(Request.QueryString["id"], out id) || id <= 0)
+            {
+                MessageText = "∞‡º∂≤Œ ˝Œﬁ–ß°£";
+            }
+            else
+            {
+                using (var db = new StudentManagementDBEntities())
+                {
+                    CurrentClass = db.Classes.Find(id);
+                }
 
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
+                if (CurrentClass == null)
+                {
+                    MessageText = "∞‡º∂≤ª¥Ê‘⁄°£";
+                }
+                else
+                {
+                    FormClassID = CurrentClass.ClassID;
+                    FormMajor = CurrentClass.Major;
+                    FormAcademicYear = CurrentClass.AcademicYear.HasValue ? CurrentClass.AcademicYear.Value.ToString() : string.Empty;
+                    FormClassNumber = CurrentClass.ClassNumber.HasValue ? CurrentClass.ClassNumber.Value.ToString() : string.Empty;
+                }
+            }
+        }
+    }
+
+    private void SaveClass()
+    {
+        int year;
+        int classNumber;
+        if (FormClassID <= 0 || string.IsNullOrWhiteSpace(FormMajor) || !int.TryParse(FormAcademicYear, out year) || !int.TryParse(FormClassNumber, out classNumber))
         {
-            target += qs;
+            MessageText = "«Î’˝»∑ÃÓ–¥◊®“µ°¢—ßƒÍ∫Õ∞‡∫≈°£";
+            return;
         }
 
-        Response.Redirect(target, true);
-        return true;
+        var className = FormMajor + year.ToString().Substring(2, 2) + classNumber.ToString("D2") + "∞‡";
+
+        using (var db = new StudentManagementDBEntities())
+        {
+            var classModel = db.Classes.Find(FormClassID);
+            if (classModel == null)
+            {
+                MessageText = "∞‡º∂≤ª¥Ê‘⁄°£";
+                return;
+            }
+
+            classModel.Major = FormMajor;
+            classModel.AcademicYear = year;
+            classModel.ClassNumber = classNumber;
+            classModel.ClassName = className;
+            db.Entry(classModel).State = EntityState.Modified;
+            db.SaveChanges();
+
+            Response.Redirect("ClassList.aspx", true);
+        }
     }
 </script>
 
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head runat="server">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin/EditClass</title>
-    <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
-</head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            Ê≠£Âú®Ë∑≥ËΩ¨Âà∞ÂéüÈ°µÈù¢Ôºö<code><%= SourceView %></code>
-        </div>
-    </div>
-</body>
-</html>
+<!--#include file="_AdminLayoutTop.inc" -->
 
+<h2>±‡º≠∞‡º∂–≈œ¢</h2>
+<% if (FormClassID > 0) { %><h4><%= H(FormMajor) %></h4><% } %>
+
+<% if (!string.IsNullOrEmpty(MessageText)) { %>
+    <div class="alert alert-danger"><%= H(MessageText) %></div>
+<% } else { %>
+    <form method="post" class="form-horizontal" style="max-width:900px;">
+        <input type="hidden" name="ClassID" value="<%= FormClassID %>" />
+
+        <div class="form-group">
+            <label class="control-label col-md-2">◊®“µ</label>
+            <div class="col-md-10">
+                <input class="form-control" name="Major" value="<%= H(FormMajor) %>" required />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-md-2">—ßƒÍ</label>
+            <div class="col-md-10">
+                <input class="form-control" name="AcademicYear" value="<%= H(FormAcademicYear) %>" required />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-md-2">∞‡∫≈</label>
+            <div class="col-md-10">
+                <input class="form-control" name="ClassNumber" value="<%= H(FormClassNumber) %>" required />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <button type="submit" class="btn btn-success">±£ ¥Ê</button>
+                <a class="btn btn-default" href="ClassList.aspx">∑µªÿ¡–±Ì</a>
+            </div>
+        </div>
+    </form>
+<% } %>
+
+<!--#include file="_AdminLayoutBottom.inc" -->

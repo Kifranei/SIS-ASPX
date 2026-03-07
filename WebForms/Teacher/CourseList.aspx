@@ -1,69 +1,41 @@
-ï»¿<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
 <%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
+<%@ Import Namespace="System.Collections.Generic" %>
+<%@ Import Namespace="System.Linq" %>
 <%@ Import Namespace="StudentInformationSystem.Models" %>
 
 <script runat="server">
-    protected string SourceView = "Views/Teacher/CourseList.cshtml";
-    protected void EnsureRole()
+    protected List<Courses> TeacherCourses = new List<Courses>();
+
+    protected void Page_Load(object sender, EventArgs e)
     {
         var currentUser = Session["User"] as Users;
         if (currentUser == null || currentUser.Role != 1)
         {
-            Response.Redirect("~/WebForms/Login.aspx", true);
+            Response.Redirect("~/Login.aspx", true);
             return;
         }
-    }
-    protected void Page_Load(object sender, EventArgs e)
-    {
-        EnsureRole();
-        if (TryRedirectToMvc())
+
+        using (var db = new StudentManagementDBEntities())
         {
-            return;
+            var teacher = db.Teachers.FirstOrDefault(t => t.UserID == currentUser.UserID);
+            if (teacher == null)
+            {
+                Response.Redirect("~/Login.aspx", true);
+                return;
+            }
+
+            TeacherCourses = db.Courses
+                .Where(c => c.TeacherID == teacher.TeacherID)
+                .OrderBy(c => c.CourseID)
+                .ToList();
         }
     }
 
-    protected bool TryRedirectToMvc()
+    protected string Active(string page)
     {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
-        {
-            return false;
-        }
-
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
-        {
-            return false;
-        }
-
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
-
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
-        }
-
-        Response.Redirect(target, true);
-        return true;
+        var current = VirtualPathUtility.GetFileName(Request.AppRelativeCurrentExecutionFilePath) ?? string.Empty;
+        return current.Equals(page, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty;
     }
 </script>
 
@@ -72,15 +44,90 @@
 <head runat="server">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Teacher/CourseList</title>
+    <script>
+        (function () {
+            var theme = localStorage.getItem('theme');
+            var isDark = theme === 'dark';
+            if (isDark) {
+                document.documentElement.classList.add('dark-mode');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+            }
+        })();
+    </script>
+    <title>ÎÒµÄÊÚ¿ÎÁĞ±í</title>
     <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
+    <link href="<%= ResolveUrl("~/Content/theme-system.css") %>" rel="stylesheet" />
+    <link href="<%= ResolveUrl("~/Content/webforms-student-layout.css") %>" rel="stylesheet" />
 </head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            æ­£åœ¨è·³è½¬åˆ°åŸé¡µé¢ï¼š<code><%= SourceView %></code>
+<body class="webforms-student">
+    <div class="page-wrapper">
+        <div class="sidebar-overlay"></div>
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="Ğ£»Õ" class="sidebar-logo-img" />
+            </div>
+            <ul class="sidebar-menu">
+                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">Ê×Ò³</a></li>
+                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">ÎÒµÄ¿Î±í</a></li>
+                <li><a class="<%= Active("CourseList.aspx") %>" href="CourseList.aspx">³É¼¨Â¼Èë</a></li>
+                <li><a class="<%= Active("ExamList.aspx") %>" href="ExamList.aspx">¿¼ÊÔ¹ÜÀí</a></li>
+                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">ĞŞ¸ÄÃÜÂë</a></li>
+            </ul>
+        </aside>
+
+        <div class="main-content">
+            <header class="header-bar">
+                <div class="header-left">
+                    <button class="hamburger-menu" type="button" aria-label="²Ëµ¥">&#9776;</button>
+                </div>
+                <div class="header-right">
+                    <button class='dark-toggle-btn' type='button'>°µÉ«Ä£Ê½</button>
+                    <div class="user-info">
+                        <span class="username">»¶Ó­Äú, <%= ((Session["User"] as Users)?.Username ?? "½ÌÊ¦") %></span>
+                        <span class="sep">|</span>
+                        <a class="logout-link" href="../Logout.aspx">°²È«ÍË³ö</a>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content-body">
+                <div class="container-fluid">
+                    <h2>ÎÒµÄÊÚ¿ÎÁĞ±í</h2>
+                    <p class="text-muted">ÒÔÏÂÊÇÄú±¾Ñ§ÆÚËù½ÌÊÚµÄÈ«²¿¿Î³Ì¡£ÇëÑ¡ÔñÒ»ÃÅ¿Î³Ì½øÈë³É¼¨Â¼Èë¡£</p>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>¿Î³ÌÃû³Æ</th>
+                                    <th>Ñ§·Ö</th>
+                                    <th>²Ù×÷</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (TeacherCourses.Any()) { %>
+                                    <% foreach (var item in TeacherCourses) { %>
+                                        <tr>
+                                            <td><%= item.CourseName %></td>
+                                            <td><%= item.Credits %></td>
+                                            <td>
+                                                <a class="btn btn-primary btn-sm" href="GradeEntry.aspx?courseId=<%= item.CourseID %>">½øÈë³É¼¨Â¼Èë</a>
+                                                <a class="btn btn-default btn-sm" target="_blank" href="ClassRoster.aspx?courseId=<%= item.CourseID %>">´òÓ¡Ãûµ¥</a>
+                                            </td>
+                                        </tr>
+                                    <% } %>
+                                <% } else { %>
+                                    <tr><td colspan="3" class="text-center text-muted">ÔİÎŞÊÚ¿Î¿Î³Ì¡£</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
+    <script src="<%= ResolveUrl("~/Scripts/webforms-student-layout.js") %>"></script>
 </body>
 </html>
 

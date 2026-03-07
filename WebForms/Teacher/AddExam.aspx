@@ -1,69 +1,94 @@
-Ôªø<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
 <%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
+<%@ Import Namespace="System.Collections.Generic" %>
+<%@ Import Namespace="System.Linq" %>
 <%@ Import Namespace="StudentInformationSystem.Models" %>
 
 <script runat="server">
-    protected string SourceView = "Views/Teacher/AddExam.cshtml";
-    protected void EnsureRole()
+    protected List<Courses> TeacherCourses = new List<Courses>();
+    protected string MessageType = string.Empty;
+    protected string MessageText = string.Empty;
+
+    protected int FormCourseId = 0;
+    protected string FormExamTime = string.Empty;
+    protected string FormLocation = string.Empty;
+    protected string FormDetails = string.Empty;
+
+    protected void Page_Load(object sender, EventArgs e)
     {
         var currentUser = Session["User"] as Users;
         if (currentUser == null || currentUser.Role != 1)
         {
-            Response.Redirect("~/WebForms/Login.aspx", true);
+            Response.Redirect("~/Login.aspx", true);
             return;
         }
-    }
-    protected void Page_Load(object sender, EventArgs e)
-    {
-        EnsureRole();
-        if (TryRedirectToMvc())
+
+        using (var db = new StudentManagementDBEntities())
         {
-            return;
+            var teacher = db.Teachers.FirstOrDefault(t => t.UserID == currentUser.UserID);
+            if (teacher == null)
+            {
+                Response.Redirect("~/Login.aspx", true);
+                return;
+            }
+
+            TeacherCourses = db.Courses.Where(c => c.TeacherID == teacher.TeacherID).OrderBy(c => c.CourseName).ToList();
+
+            if (!Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase))
+            {
+                if (TeacherCourses.Any())
+                {
+                    FormCourseId = TeacherCourses[0].CourseID;
+                }
+                return;
+            }
+
+            int.TryParse(Request.Form["CourseID"], out FormCourseId);
+            FormExamTime = (Request.Form["ExamTime"] ?? string.Empty).Trim();
+            FormLocation = (Request.Form["Location"] ?? string.Empty).Trim();
+            FormDetails = (Request.Form["Details"] ?? string.Empty).Trim();
+
+            if (!TeacherCourses.Any(c => c.CourseID == FormCourseId))
+            {
+                MessageType = "danger";
+                MessageText = "øŒ≥Ã≤Œ ˝Œﬁ–ß°£";
+                return;
+            }
+
+            DateTime examTime;
+            if (!DateTime.TryParse(FormExamTime, out examTime))
+            {
+                MessageType = "danger";
+                MessageText = "øº ‘ ±º‰∏Ò ΩŒﬁ–ß°£";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(FormLocation))
+            {
+                MessageType = "danger";
+                MessageText = "«ÎÃÓ–¥øº ‘µÿµ„°£";
+                return;
+            }
+
+            var exam = new Exams
+            {
+                CourseID = FormCourseId,
+                ExamTime = examTime,
+                Location = FormLocation,
+                Details = FormDetails
+            };
+
+            db.Exams.Add(exam);
+            db.SaveChanges();
+
+            Response.Redirect("ExamList.aspx?msg=" + Server.UrlEncode("øº ‘∞≤≈≈¥¥Ω®≥…π¶°£"), true);
         }
     }
 
-    protected bool TryRedirectToMvc()
+    protected string Active(string page)
     {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
-        {
-            return false;
-        }
-
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
-        {
-            return false;
-        }
-
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
-
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
-        }
-
-        Response.Redirect(target, true);
-        return true;
+        var current = VirtualPathUtility.GetFileName(Request.AppRelativeCurrentExecutionFilePath) ?? string.Empty;
+        return current.Equals(page, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty;
     }
 </script>
 
@@ -72,15 +97,108 @@
 <head runat="server">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Teacher/AddExam</title>
+    <script>
+        (function () {
+            var theme = localStorage.getItem('theme');
+            var isDark = theme === 'dark';
+            if (isDark) {
+                document.documentElement.classList.add('dark-mode');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+            }
+        })();
+    </script>
+    <title>ÃÌº”–¬øº ‘</title>
     <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
+    <link href="<%= ResolveUrl("~/Content/theme-system.css") %>" rel="stylesheet" />
+    <link href="<%= ResolveUrl("~/Content/webforms-student-layout.css") %>" rel="stylesheet" />
 </head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            Ê≠£Âú®Ë∑≥ËΩ¨Âà∞ÂéüÈ°µÈù¢Ôºö<code><%= SourceView %></code>
+<body class="webforms-student">
+    <div class="page-wrapper">
+        <div class="sidebar-overlay"></div>
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="–£ª’" class="sidebar-logo-img" />
+            </div>
+            <ul class="sidebar-menu">
+                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx"> ◊“≥</a></li>
+                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">Œ“µƒøŒ±Ì</a></li>
+                <li><a class="<%= Active("CourseList.aspx") %>" href="CourseList.aspx">≥…º®¬º»Î</a></li>
+                <li><a class="<%= Active("ExamList.aspx") %>" href="ExamList.aspx">øº ‘π‹¿Ì</a></li>
+                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">–ﬁ∏ƒ√‹¬Î</a></li>
+            </ul>
+        </aside>
+
+        <div class="main-content">
+            <header class="header-bar">
+                <div class="header-left">
+                    <button class="hamburger-menu" type="button" aria-label="≤Àµ•">&#9776;</button>
+                </div>
+                <div class="header-right">
+                    <button class='dark-toggle-btn' type='button'>∞µ…´ƒ£ Ω</button>
+                    <div class="user-info">
+                        <span class="username">ª∂”≠ƒ˙, <%= ((Session["User"] as Users)?.Username ?? "ΩÃ ¶") %></span>
+                        <span class="sep">|</span>
+                        <a class="logout-link" href="../Logout.aspx">∞≤»´ÕÀ≥ˆ</a>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content-body">
+                <div class="container-fluid">
+                    <h2>ÃÌº”–¬øº ‘</h2>
+                    <hr />
+
+                    <% if (!string.IsNullOrEmpty(MessageText)) { %>
+                        <div class="alert alert-<%= MessageType %>"><%= MessageText %></div>
+                    <% } %>
+
+                    <form method="post" class="form-horizontal" style="max-width: 820px;">
+                        <div class="form-group">
+                            <label class="control-label col-md-2">øŒ≥Ã√˚≥∆</label>
+                            <div class="col-md-10">
+                                <select class="form-control" name="CourseID" required>
+                                    <option value="">--«Î—°‘ÒøŒ≥Ã--</option>
+                                    <% foreach (var c in TeacherCourses) { %>
+                                        <option value="<%= c.CourseID %>" <%= c.CourseID == FormCourseId ? "selected" : "" %>><%= c.CourseName %></option>
+                                    <% } %>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-md-2">øº ‘ ±º‰</label>
+                            <div class="col-md-10">
+                                <input class="form-control" type="datetime-local" name="ExamTime" value="<%= FormExamTime %>" required />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-md-2">øº ‘µÿµ„</label>
+                            <div class="col-md-10">
+                                <input class="form-control" name="Location" value="<%= FormLocation %>" required />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-md-2">±∏◊¢</label>
+                            <div class="col-md-10">
+                                <input class="form-control" name="Details" value="<%= FormDetails %>" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-10">
+                                <button type="submit" class="btn btn-success">¥¥Ω®</button>
+                                <a class="btn btn-default" href="ExamList.aspx">∑µªÿ¡–±Ì</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </main>
         </div>
     </div>
+    <script src="<%= ResolveUrl("~/Scripts/webforms-student-layout.js") %>"></script>
 </body>
 </html>
 

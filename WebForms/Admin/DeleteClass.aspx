@@ -1,86 +1,84 @@
-ï»¿<%@ Page Language="C#" AutoEventWireup="true" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
-<%@ Import Namespace="StudentInformationSystem.Models" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
+<!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
-    protected string SourceView = "Views/Admin/DeleteClass.cshtml";
-    protected void EnsureRole()
-    {
-        var currentUser = Session["User"] as Users;
-        if (currentUser == null || currentUser.Role != 0)
-        {
-            Response.Redirect("~/WebForms/Login.aspx", true);
-            return;
-        }
-    }
+    protected Classes CurrentClass;
+    protected string MessageText = string.Empty;
+
     protected void Page_Load(object sender, EventArgs e)
     {
-        EnsureRole();
-        if (TryRedirectToMvc())
+        PageTitle = "É¾³ı°à¼¶";
+        if (!EnsureAdminRole())
         {
             return;
         }
-    }
 
-    protected bool TryRedirectToMvc()
-    {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
+        int id;
+        if (!int.TryParse(Request.QueryString["id"] ?? Request.Form["ClassID"], out id) || id <= 0)
         {
-            return false;
+            MessageText = "°à¼¶²ÎÊıÎŞĞ§¡£";
+            return;
         }
 
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
+        using (var db = new StudentManagementDBEntities())
         {
-            return false;
-        }
+            CurrentClass = db.Classes.Find(id);
+            if (CurrentClass == null)
+            {
+                MessageText = "°à¼¶²»´æÔÚ¡£";
+                return;
+            }
 
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
-        {
-            return false;
-        }
+            if (Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase))
+            {
+                var hasStudents = db.Students.Any(s => s.ClassID == id);
+                if (hasStudents)
+                {
+                    Session["AdminFlashError"] = "É¾³ıÊ§°Ü£¡¸Ã°à¼¶ÏÂÈÔÓĞÑ§Éú£¬ÇëÏÈ×ªÒÆ»òÉ¾³ıÑ§Éú¡£";
+                    Response.Redirect("ClassList.aspx", true);
+                    return;
+                }
 
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
+                db.Classes.Remove(CurrentClass);
+                db.SaveChanges();
+                Session["AdminFlashMessage"] = "°à¼¶É¾³ı³É¹¦£¡";
+                Response.Redirect("ClassList.aspx", true);
+            }
         }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
-
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
-        }
-
-        Response.Redirect(target, true);
-        return true;
     }
 </script>
 
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head runat="server">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin/DeleteClass</title>
-    <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
-</head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            æ­£åœ¨è·³è½¬åˆ°åŸé¡µé¢ï¼š<code><%= SourceView %></code>
-        </div>
-    </div>
-</body>
-</html>
+<!--#include file="_AdminLayoutTop.inc" -->
 
+<h2>É¾³ı°à¼¶</h2>
+
+<% if (!string.IsNullOrEmpty(MessageText)) { %>
+    <div class="alert alert-danger"><%= H(MessageText) %></div>
+<% } else { %>
+    <h3>ÄúÈ·¶¨ÒªÉ¾³ıÕâ¸ö°à¼¶Âğ£¿</h3>
+    <div>
+        <h4><%= H(CurrentClass.ClassName) %></h4>
+        <hr />
+        <dl class="dl-horizontal">
+            <dt>°à¼¶Ãû³Æ</dt>
+            <dd><%= H(CurrentClass.ClassName) %></dd>
+
+            <dt>×¨Òµ</dt>
+            <dd><%= H(CurrentClass.Major) %></dd>
+
+            <dt>Ñ§Äê</dt>
+            <dd><%= CurrentClass.AcademicYear.HasValue ? CurrentClass.AcademicYear.Value.ToString() : "-" %></dd>
+
+            <dt>°àºÅ</dt>
+            <dd><%= CurrentClass.ClassNumber.HasValue ? CurrentClass.ClassNumber.Value.ToString() : "-" %></dd>
+        </dl>
+
+        <form method="post" class="form-actions no-color">
+            <input type="hidden" name="ClassID" value="<%= CurrentClass.ClassID %>" />
+            <button type="submit" class="btn btn-danger">È·ÈÏÉ¾³ı</button>
+            <a class="btn btn-default" href="ClassList.aspx">·µ»ØÁĞ±í</a>
+        </form>
+    </div>
+<% } %>
+
+<!--#include file="_AdminLayoutBottom.inc" -->

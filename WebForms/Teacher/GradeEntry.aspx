@@ -1,69 +1,119 @@
-Ôªø<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
 <%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
+<%@ Import Namespace="System.Collections.Generic" %>
+<%@ Import Namespace="System.Globalization" %>
+<%@ Import Namespace="System.Linq" %>
+<%@ Import Namespace="System.Data.Entity" %>
 <%@ Import Namespace="StudentInformationSystem.Models" %>
 
 <script runat="server">
-    protected string SourceView = "Views/Teacher/GradeEntry.cshtml";
-    protected void EnsureRole()
+    protected int CourseId = 0;
+    protected Courses CurrentCourse;
+    protected List<StudentCourses> Enrollments = new List<StudentCourses>();
+    protected string MessageType = string.Empty;
+    protected string MessageText = string.Empty;
+
+    protected void Page_Load(object sender, EventArgs e)
     {
         var currentUser = Session["User"] as Users;
         if (currentUser == null || currentUser.Role != 1)
         {
-            Response.Redirect("~/WebForms/Login.aspx", true);
+            Response.Redirect("~/Login.aspx", true);
             return;
         }
-    }
-    protected void Page_Load(object sender, EventArgs e)
-    {
-        EnsureRole();
-        if (TryRedirectToMvc())
+
+        if (!int.TryParse(Request.QueryString["courseId"], out CourseId) || CourseId <= 0)
         {
+            MessageType = "danger";
+            MessageText = "≤Œ ˝ courseId Œﬁ–ß°£";
             return;
         }
+
+        using (var db = new StudentManagementDBEntities())
+        {
+            var teacher = db.Teachers.FirstOrDefault(t => t.UserID == currentUser.UserID);
+            if (teacher == null)
+            {
+                Response.Redirect("~/Login.aspx", true);
+                return;
+            }
+
+            CurrentCourse = db.Courses.Include("Teachers").FirstOrDefault(c => c.CourseID == CourseId && c.TeacherID == teacher.TeacherID);
+            if (CurrentCourse == null)
+            {
+                MessageType = "danger";
+                MessageText = "øŒ≥Ã≤ª¥Ê‘⁄ªÚ≤ª Ù”⁄µ±«∞ΩÃ ¶°£";
+                return;
+            }
+
+            if (Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase))
+            {
+                var studentIds = Request.Form.GetValues("studentIds");
+                var grades = Request.Form.GetValues("grades");
+                if (studentIds != null && grades != null && studentIds.Length == grades.Length)
+                {
+                    for (int i = 0; i < studentIds.Length; i++)
+                    {
+                        var studentId = (studentIds[i] ?? string.Empty).Trim();
+                        var gradeText = (grades[i] ?? string.Empty).Trim();
+
+                        float? parsedGrade = null;
+                        if (!string.IsNullOrEmpty(gradeText))
+                        {
+                            float g;
+                            var ok = float.TryParse(gradeText, NumberStyles.Float, CultureInfo.CurrentCulture, out g)
+                                || float.TryParse(gradeText, NumberStyles.Float, CultureInfo.InvariantCulture, out g);
+                            if (ok)
+                            {
+                                if (g < 0f || g > 100f)
+                                {
+                                    MessageType = "danger";
+                                    MessageText = "≥…º®±ÿ–Î‘⁄ 0-100 ÷Æº‰°£";
+                                    break;
+                                }
+                                parsedGrade = g;
+                            }
+                            else
+                            {
+                                MessageType = "danger";
+                                MessageText = "¥Ê‘⁄Œﬁ∑® ∂±µƒ≥…º® ˝÷µ£¨«ÎºÏ≤È∫Û÷ÿ ‘°£";
+                                break;
+                            }
+                        }
+
+                        var enrollment = db.StudentCourses.FirstOrDefault(sc => sc.StudentID == studentId && sc.CourseID == CourseId);
+                        if (enrollment != null)
+                        {
+                            enrollment.Grade = parsedGrade;
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(MessageText))
+                    {
+                        db.SaveChanges();
+                        MessageType = "success";
+                        MessageText = "≥…º®±£¥Ê≥…π¶°£";
+                    }
+                }
+                else
+                {
+                    MessageType = "danger";
+                    MessageText = "Ã·Ωª ˝æ›≤ªÕÍ’˚£¨«ÎÀ¢–¬“≥√Ê∫Û÷ÿ ‘°£";
+                }
+            }
+
+            Enrollments = db.StudentCourses
+                .Include("Students")
+                .Where(sc => sc.CourseID == CourseId)
+                .OrderBy(sc => sc.Students.StudentID)
+                .ToList();
+        }
     }
 
-    protected bool TryRedirectToMvc()
+    protected string Active(string page)
     {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
-        {
-            return false;
-        }
-
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
-        {
-            return false;
-        }
-
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
-
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
-        }
-
-        Response.Redirect(target, true);
-        return true;
+        var current = VirtualPathUtility.GetFileName(Request.AppRelativeCurrentExecutionFilePath) ?? string.Empty;
+        return current.Equals(page, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty;
     }
 </script>
 
@@ -72,15 +122,105 @@
 <head runat="server">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Teacher/GradeEntry</title>
+    <script>
+        (function () {
+            var theme = localStorage.getItem('theme');
+            var isDark = theme === 'dark';
+            if (isDark) {
+                document.documentElement.classList.add('dark-mode');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+            }
+        })();
+    </script>
+    <title>≥…º®¬º»Î</title>
     <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
+    <link href="<%= ResolveUrl("~/Content/theme-system.css") %>" rel="stylesheet" />
+    <link href="<%= ResolveUrl("~/Content/webforms-student-layout.css") %>" rel="stylesheet" />
 </head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            Ê≠£Âú®Ë∑≥ËΩ¨Âà∞ÂéüÈ°µÈù¢Ôºö<code><%= SourceView %></code>
+<body class="webforms-student">
+    <div class="page-wrapper">
+        <div class="sidebar-overlay"></div>
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="–£ª’" class="sidebar-logo-img" />
+            </div>
+            <ul class="sidebar-menu">
+                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx"> ◊“≥</a></li>
+                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">Œ“µƒøŒ±Ì</a></li>
+                <li><a class="<%= Active("CourseList.aspx") %>" href="CourseList.aspx">≥…º®¬º»Î</a></li>
+                <li><a class="<%= Active("ExamList.aspx") %>" href="ExamList.aspx">øº ‘π‹¿Ì</a></li>
+                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">–ﬁ∏ƒ√‹¬Î</a></li>
+            </ul>
+        </aside>
+
+        <div class="main-content">
+            <header class="header-bar">
+                <div class="header-left">
+                    <button class="hamburger-menu" type="button" aria-label="≤Àµ•">&#9776;</button>
+                </div>
+                <div class="header-right">
+                    <button class='dark-toggle-btn' type='button'>∞µ…´ƒ£ Ω</button>
+                    <div class="user-info">
+                        <span class="username">ª∂”≠ƒ˙, <%= ((Session["User"] as Users)?.Username ?? "ΩÃ ¶") %></span>
+                        <span class="sep">|</span>
+                        <a class="logout-link" href="../Logout.aspx">∞≤»´ÕÀ≥ˆ</a>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content-body">
+                <div class="container-fluid">
+                    <% if (!string.IsNullOrEmpty(MessageText)) { %>
+                        <div class="alert alert-<%= MessageType %>"><%= MessageText %></div>
+                    <% } %>
+
+                    <% if (CurrentCourse != null) { %>
+                        <h2>Œ™øŒ≥Ã °∞<%= CurrentCourse.CourseName %>°± ¬º»Î≥…º®</h2>
+                        <hr />
+                        <form method="post">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>—ß∫≈</th>
+                                            <th>–’√˚</th>
+                                            <th>≥…º® (0-100)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% if (Enrollments.Any()) { %>
+                                            <% foreach (var item in Enrollments) { %>
+                                                <tr>
+                                                    <td>
+                                                        <%= item.Students == null ? "-" : item.Students.StudentID %>
+                                                        <input type="hidden" name="studentIds" value="<%= item.Students == null ? "" : item.Students.StudentID %>" />
+                                                    </td>
+                                                    <td><%= item.Students == null ? "-" : item.Students.StudentName %></td>
+                                                    <td>
+                                                        <input type="number" name="grades" value="<%= item.Grade.HasValue ? item.Grade.Value.ToString("0.##", CultureInfo.InvariantCulture) : "" %>" class="form-control" min="0" max="100" step="0.1" />
+                                                    </td>
+                                                </tr>
+                                            <% } %>
+                                        <% } else { %>
+                                            <tr><td colspan="3" class="text-center text-muted">∏√øŒ≥Ã‘›Œﬁ—°øŒ—ß…˙°£</td></tr>
+                                        <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="form-group" style="margin-top: 12px;">
+                                <button type="submit" class="btn btn-success">±£¥Ê»´≤ø≥…º®</button>
+                                <a class="btn btn-default" href="CourseList.aspx">∑µªÿ¡–±Ì</a>
+                            </div>
+                        </form>
+                    <% } else { %>
+                        <a class="btn btn-default" href="CourseList.aspx">∑µªÿøŒ≥Ã¡–±Ì</a>
+                    <% } %>
+                </div>
+            </main>
         </div>
     </div>
+    <script src="<%= ResolveUrl("~/Scripts/webforms-student-layout.js") %>"></script>
 </body>
 </html>
 

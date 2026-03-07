@@ -1,86 +1,181 @@
-Ôªø<%@ Page Language="C#" AutoEventWireup="true" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
-<%@ Import Namespace="StudentInformationSystem.Models" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
+<!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
-    protected string SourceView = "Views/Admin/Edit.cshtml";
-    protected void EnsureRole()
-    {
-        var currentUser = Session["User"] as Users;
-        if (currentUser == null || currentUser.Role != 0)
-        {
-            Response.Redirect("~/WebForms/Login.aspx", true);
-            return;
-        }
-    }
+    protected Students CurrentStudent;
+    protected List<Classes> ClassOptions = new List<Classes>();
+    protected string MessageText = string.Empty;
+
+    protected string FormStudentID = string.Empty;
+    protected string FormStudentName = string.Empty;
+    protected string FormGender = string.Empty;
+    protected int FormUserID = 0;
+    protected int? FormClassID = null;
+
     protected void Page_Load(object sender, EventArgs e)
     {
-        EnsureRole();
-        if (TryRedirectToMvc())
+        PageTitle = "±‡º≠—ß…˙–≈œ¢";
+        if (!EnsureAdminRole())
         {
             return;
         }
-    }
 
-    protected bool TryRedirectToMvc()
-    {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
+        if (Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase))
         {
-            return false;
-        }
+            FormStudentID = (Request.Form["StudentID"] ?? string.Empty).Trim();
+            FormStudentName = (Request.Form["StudentName"] ?? string.Empty).Trim();
+            FormGender = NormalizeGender(Request.Form["Gender"]);
+            int uid;
+            if (int.TryParse(Request.Form["UserID"], out uid))
+            {
+                FormUserID = uid;
+            }
+            int cid;
+            if (int.TryParse(Request.Form["ClassID"], out cid))
+            {
+                FormClassID = cid;
+            }
 
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
-        {
-            return false;
-        }
-
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
+            SaveStudent();
         }
         else
         {
-            target = "~/" + controller + "/" + action;
+            var id = (Request.QueryString["id"] ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                MessageText = "»±…Ÿ—ß…˙ID≤Œ ˝°£";
+            }
+            else
+            {
+                using (var db = new StudentManagementDBEntities())
+                {
+                    CurrentStudent = db.Students.Find(id);
+                }
+
+                if (CurrentStudent == null)
+                {
+                    MessageText = "—ß…˙≤ª¥Ê‘⁄°£";
+                }
+                else
+                {
+                    FormStudentID = CurrentStudent.StudentID;
+                    FormStudentName = CurrentStudent.StudentName;
+                    FormGender = NormalizeGender(CurrentStudent.Gender);
+                    FormClassID = CurrentStudent.ClassID;
+                    FormUserID = CurrentStudent.UserID;
+                }
+            }
         }
 
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
+        using (var db = new StudentManagementDBEntities())
         {
-            target += qs;
+            ClassOptions = db.Classes.OrderBy(c => c.ClassName).ToList();
+            if (CurrentStudent == null && !string.IsNullOrWhiteSpace(FormStudentID))
+            {
+                CurrentStudent = db.Students.Find(FormStudentID);
+            }
+        }
+    }
+
+    private void SaveStudent()
+    {
+        if (string.IsNullOrWhiteSpace(FormStudentID) || string.IsNullOrWhiteSpace(FormStudentName))
+        {
+            MessageText = "—ß∫≈∫Õ–’√˚≤ªƒ‹Œ™ø’°£";
+            return;
         }
 
-        Response.Redirect(target, true);
-        return true;
+        if (!IsValidGender(FormGender))
+        {
+            MessageText = "–‘±÷ªƒ‹—°‘Ò°∞ƒ–°±ªÚ°∞≈Æ°±°£";
+            return;
+        }
+
+        using (var db = new StudentManagementDBEntities())
+        {
+            var student = db.Students.Find(FormStudentID);
+            if (student == null)
+            {
+                MessageText = "—ß…˙≤ª¥Ê‘⁄°£";
+                return;
+            }
+
+            student.StudentName = FormStudentName;
+            student.Gender = FormGender;
+            student.ClassID = FormClassID;
+            if (FormUserID > 0)
+            {
+                student.UserID = FormUserID;
+            }
+
+            db.Entry(student).State = EntityState.Modified;
+            db.SaveChanges();
+
+            Response.Redirect("StudentList.aspx", true);
+        }
     }
 </script>
 
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head runat="server">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin/Edit</title>
-    <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
-</head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            Ê≠£Âú®Ë∑≥ËΩ¨Âà∞ÂéüÈ°µÈù¢Ôºö<code><%= SourceView %></code>
+<!--#include file="_AdminLayoutTop.inc" -->
+
+<h2>±‡º≠—ß…˙–≈œ¢</h2>
+<% if (!string.IsNullOrWhiteSpace(FormStudentName)) { %>
+    <h4><%= H(FormStudentName) %></h4>
+<% } %>
+<hr />
+
+<% if (!string.IsNullOrEmpty(MessageText)) { %>
+    <div class="alert alert-danger"><%= H(MessageText) %></div>
+<% } else { %>
+    <form method="post" class="form-horizontal" style="max-width:900px;">
+        <input type="hidden" name="StudentID" value="<%= H(FormStudentID) %>" />
+        <input type="hidden" name="UserID" value="<%= FormUserID %>" />
+
+        <div class="form-group">
+            <label class="control-label col-md-2">—ß∫≈ (≤ªø…–ﬁ∏ƒ)</label>
+            <div class="col-md-10">
+                <input class="form-control" value="<%= H(FormStudentID) %>" readonly />
+            </div>
         </div>
-    </div>
-</body>
-</html>
+
+        <div class="form-group">
+            <label class="control-label col-md-2">–’√˚</label>
+            <div class="col-md-10">
+                <input class="form-control" name="StudentName" value="<%= H(FormStudentName) %>" required />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-md-2">–‘±</label>
+            <div class="col-md-10">
+                <select class="form-control" name="Gender" required>
+                    <option value="">--«Î—°‘Ò–‘±--</option>
+                    <option value="ƒ–" <%= FormGender == "ƒ–" ? "selected" : "" %>>ƒ–</option>
+                    <option value="≈Æ" <%= FormGender == "≈Æ" ? "selected" : "" %>>≈Æ</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-md-2">∞‡º∂</label>
+            <div class="col-md-10">
+                <select class="form-control" name="ClassID">
+                    <option value="">--«Î—°‘Ò∞‡º∂--</option>
+                    <% foreach (var cls in ClassOptions) { %>
+                        <option value="<%= cls.ClassID %>" <%= FormClassID.HasValue && FormClassID.Value == cls.ClassID ? "selected" : "" %>><%= H(cls.ClassName) %></option>
+                    <% } %>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <button type="submit" class="btn btn-success">±£ ¥Ê</button>
+                <a class="btn btn-default" href="StudentList.aspx">∑µªÿ¡–±Ì</a>
+            </div>
+        </div>
+    </form>
+<% } %>
+
+<!--#include file="_AdminLayoutBottom.inc" -->
 

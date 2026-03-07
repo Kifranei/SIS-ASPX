@@ -1,86 +1,91 @@
-Ôªø<%@ Page Language="C#" AutoEventWireup="true" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
-<%@ Import Namespace="StudentInformationSystem.Models" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
+<!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
-    protected string SourceView = "Views/Admin/ClassList.cshtml";
-    protected void EnsureRole()
-    {
-        var currentUser = Session["User"] as Users;
-        if (currentUser == null || currentUser.Role != 0)
-        {
-            Response.Redirect("~/WebForms/Login.aspx", true);
-            return;
-        }
-    }
+    protected string SearchString = string.Empty;
+    protected string FlashMessage = string.Empty;
+    protected string FlashError = string.Empty;
+    protected List<Classes> ClassListData = new List<Classes>();
+
     protected void Page_Load(object sender, EventArgs e)
     {
-        EnsureRole();
-        if (TryRedirectToMvc())
+        PageTitle = "∞‡º∂¡–±Ì";
+        if (!EnsureAdminRole())
         {
             return;
         }
-    }
 
-    protected bool TryRedirectToMvc()
-    {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
+        SearchString = (Request.QueryString["searchString"] ?? string.Empty).Trim();
+        FlashMessage = (Session["AdminFlashMessage"] as string) ?? string.Empty;
+        FlashError = (Session["AdminFlashError"] as string) ?? string.Empty;
+        Session.Remove("AdminFlashMessage");
+        Session.Remove("AdminFlashError");
+
+        using (var db = new StudentManagementDBEntities())
         {
-            return false;
-        }
+            var query = db.Classes.AsQueryable();
+            if (!string.IsNullOrWhiteSpace(SearchString))
+            {
+                query = query.Where(c => c.Major.Contains(SearchString) || c.ClassName.Contains(SearchString) || c.AcademicYear.ToString().Contains(SearchString));
+            }
 
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
-        {
-            return false;
+            ClassListData = query.OrderBy(c => c.ClassName).ToList();
         }
-
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
-
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
-        }
-
-        Response.Redirect(target, true);
-        return true;
     }
 </script>
 
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head runat="server">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin/ClassList</title>
-    <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
-</head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            Ê≠£Âú®Ë∑≥ËΩ¨Âà∞ÂéüÈ°µÈù¢Ôºö<code><%= SourceView %></code>
-        </div>
-    </div>
-</body>
-</html>
+<!--#include file="_AdminLayoutTop.inc" -->
 
+<% if (!string.IsNullOrEmpty(FlashError)) { %>
+    <div class="alert alert-danger"><%= H(FlashError) %></div>
+<% } %>
+<% if (!string.IsNullOrEmpty(FlashMessage)) { %>
+    <div class="alert alert-success"><%= H(FlashMessage) %></div>
+<% } %>
+
+<h2>∞‡º∂¡–±Ì</h2>
+
+<form method="get" class="form-inline">
+    <div class="form-group">
+        <label>≤È’“∞‡º∂:</label>
+        <input type="text" name="searchString" value="<%= H(SearchString) %>" class="form-control" placeholder=" ‰»Î◊®“µ/—ßƒÍ/∞‡º∂√˚" />
+    </div>
+    <button type="submit" class="btn btn-default">À— À˜</button>
+</form>
+<br />
+
+<p><a class="btn btn-primary" href="AddClass.aspx">ÃÌº”–¬∞‡º∂</a></p>
+<div class="table-responsive">
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>∞‡º∂√˚≥∆</th>
+                <th>◊®“µ</th>
+                <th>—ßƒÍ</th>
+                <th>∞‡∫≈</th>
+                <th>≤Ÿ◊˜</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (ClassListData.Any()) { %>
+                <% foreach (var item in ClassListData) { %>
+                    <tr>
+                        <td><%= H(item.ClassName) %></td>
+                        <td><%= H(item.Major) %></td>
+                        <td><%= item.AcademicYear.HasValue ? item.AcademicYear.Value.ToString() : "-" %></td>
+                        <td><%= item.ClassNumber.HasValue ? item.ClassNumber.Value.ToString() : "-" %></td>
+                        <td>
+                            <a href='EditClass.aspx?id=<%= item.ClassID %>'>±‡º≠</a> |
+                            <a href='ClassDetails.aspx?id=<%= item.ClassID %>'>œÍ«È</a> |
+                            <a href='DeleteClass.aspx?id=<%= item.ClassID %>'>…æ≥˝</a>
+                        </td>
+                    </tr>
+                <% } %>
+            <% } else { %>
+                <tr><td colspan="5" class="text-center text-muted">‘›Œﬁ∞‡º∂º«¬º°£</td></tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>
+
+<!--#include file="_AdminLayoutBottom.inc" -->

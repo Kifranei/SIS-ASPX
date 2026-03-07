@@ -1,86 +1,83 @@
-Ôªø<%@ Page Language="C#" AutoEventWireup="true" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
-<%@ Import Namespace="StudentInformationSystem.Models" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
+<!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
-    protected string SourceView = "Views/Admin/DeleteTeacher.cshtml";
-    protected void EnsureRole()
-    {
-        var currentUser = Session["User"] as Users;
-        if (currentUser == null || currentUser.Role != 0)
-        {
-            Response.Redirect("~/WebForms/Login.aspx", true);
-            return;
-        }
-    }
+    protected Teachers CurrentTeacher;
+    protected string MessageText = string.Empty;
+
     protected void Page_Load(object sender, EventArgs e)
     {
-        EnsureRole();
-        if (TryRedirectToMvc())
+        PageTitle = "…æ≥˝ΩÃ ¶";
+        if (!EnsureAdminRole())
         {
             return;
         }
-    }
 
-    protected bool TryRedirectToMvc()
-    {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
+        var id = (Request.QueryString["id"] ?? Request.Form["TeacherID"] ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(id))
         {
-            return false;
+            MessageText = "»±…ŸΩÃ ¶ID≤Œ ˝°£";
+            return;
         }
 
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
+        using (var db = new StudentManagementDBEntities())
         {
-            return false;
-        }
+            CurrentTeacher = db.Teachers.Include("Courses").FirstOrDefault(t => t.TeacherID == id);
+            if (CurrentTeacher == null)
+            {
+                MessageText = "ΩÃ ¶≤ª¥Ê‘⁄°£";
+                return;
+            }
 
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
-        {
-            return false;
-        }
+            if (Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (var course in CurrentTeacher.Courses.ToList())
+                {
+                    course.TeacherID = null;
+                }
 
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
+                var user = db.Users.Find(CurrentTeacher.UserID);
+                db.Teachers.Remove(CurrentTeacher);
+                if (user != null)
+                {
+                    db.Users.Remove(user);
+                }
 
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
+                db.SaveChanges();
+                Response.Redirect("TeacherList.aspx", true);
+            }
         }
-
-        Response.Redirect(target, true);
-        return true;
     }
 </script>
 
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head runat="server">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin/DeleteTeacher</title>
-    <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
-</head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            Ê≠£Âú®Ë∑≥ËΩ¨Âà∞ÂéüÈ°µÈù¢Ôºö<code><%= SourceView %></code>
-        </div>
-    </div>
-</body>
-</html>
+<!--#include file="_AdminLayoutTop.inc" -->
 
+<h2>…æ≥˝ΩÃ ¶</h2>
+
+<% if (!string.IsNullOrEmpty(MessageText)) { %>
+    <div class="alert alert-danger"><%= H(MessageText) %></div>
+<% } else { %>
+    <h3 class="text-danger">ƒ˙»∑∂®“™…æ≥˝’‚ŒªΩÃ ¶¬£ø∆‰µ«¬º’À∫≈“≤Ω´“ª≤¢“∆≥˝°£</h3>
+    <div>
+        <h4><%= H(CurrentTeacher.TeacherName) %></h4>
+        <hr />
+        <dl class="dl-horizontal">
+            <dt>ΩÃ ¶π§∫≈</dt>
+            <dd><%= H(CurrentTeacher.TeacherID) %></dd>
+
+            <dt>–’√˚</dt>
+            <dd><%= H(CurrentTeacher.TeacherName) %></dd>
+
+            <dt>÷∞≥∆</dt>
+            <dd><%= H(CurrentTeacher.Title) %></dd>
+        </dl>
+
+        <form method="post" class="form-actions no-color">
+            <input type="hidden" name="TeacherID" value="<%= H(CurrentTeacher.TeacherID) %>" />
+            <button type="submit" class="btn btn-danger">»∑»œ…æ≥˝</button>
+            <a class="btn btn-default" href="TeacherList.aspx">∑µªÿ¡–±Ì</a>
+        </form>
+    </div>
+<% } %>
+
+<!--#include file="_AdminLayoutBottom.inc" -->

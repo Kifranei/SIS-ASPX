@@ -1,86 +1,135 @@
-ï»¿<%@ Page Language="C#" AutoEventWireup="true" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
-<%@ Import Namespace="StudentInformationSystem.Models" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
+<!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
-    protected string SourceView = "Views/Admin/AddCourse.cshtml";
-    protected void EnsureRole()
-    {
-        var currentUser = Session["User"] as Users;
-        if (currentUser == null || currentUser.Role != 0)
-        {
-            Response.Redirect("~/WebForms/Login.aspx", true);
-            return;
-        }
-    }
+    protected string MessageText = string.Empty;
+    protected List<Teachers> TeacherOptions = new List<Teachers>();
+
+    protected string FormCourseName = string.Empty;
+    protected string FormCredits = string.Empty;
+    protected string FormTeacherID = string.Empty;
+    protected string FormCourseType = string.Empty;
+
     protected void Page_Load(object sender, EventArgs e)
     {
-        EnsureRole();
-        if (TryRedirectToMvc())
+        PageTitle = "Ìí¼ÓĞÂ¿Î³Ì";
+        if (!EnsureAdminRole())
         {
             return;
         }
+
+        if (Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase))
+        {
+            FormCourseName = (Request.Form["CourseName"] ?? string.Empty).Trim();
+            FormCredits = (Request.Form["Credits"] ?? string.Empty).Trim();
+            FormTeacherID = (Request.Form["TeacherID"] ?? string.Empty).Trim();
+            FormCourseType = (Request.Form["CourseType"] ?? string.Empty).Trim();
+            SaveCourse();
+        }
+
+        using (var db = new StudentManagementDBEntities())
+        {
+            TeacherOptions = db.Teachers.OrderBy(t => t.TeacherName).ToList();
+        }
     }
 
-    protected bool TryRedirectToMvc()
+    private void SaveCourse()
     {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
+        if (string.IsNullOrWhiteSpace(FormCourseName))
         {
-            return false;
+            MessageText = "¿Î³ÌÃû³Æ²»ÄÜÎª¿Õ¡£";
+            return;
         }
 
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
+        double credits;
+        if (!double.TryParse(FormCredits, out credits))
         {
-            return false;
+            MessageText = "Ñ§·Ö¸ñÊ½²»ÕıÈ·¡£";
+            return;
         }
 
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
+        int courseType;
+        if (!int.TryParse(FormCourseType, out courseType))
         {
-            return false;
+            MessageText = "ÇëÑ¡Ôñ¿Î³ÌÀà±ğ¡£";
+            return;
         }
 
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
+        using (var db = new StudentManagementDBEntities())
         {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
+            var course = new Courses
+            {
+                CourseName = FormCourseName,
+                Credits = credits,
+                TeacherID = string.IsNullOrWhiteSpace(FormTeacherID) ? null : FormTeacherID,
+                CourseType = courseType
+            };
 
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
+            db.Courses.Add(course);
+            db.SaveChanges();
+            Response.Redirect("CourseList.aspx", true);
         }
-
-        Response.Redirect(target, true);
-        return true;
     }
 </script>
 
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head runat="server">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin/AddCourse</title>
-    <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
-</head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            æ­£åœ¨è·³è½¬åˆ°åŸé¡µé¢ï¼š<code><%= SourceView %></code>
+<!--#include file="_AdminLayoutTop.inc" -->
+
+<h2>Ìí¼ÓĞÂ¿Î³Ì</h2>
+
+<% if (!string.IsNullOrEmpty(MessageText)) { %>
+    <div class="alert alert-danger"><%= H(MessageText) %></div>
+<% } %>
+
+<form method="post" class="form-horizontal" style="max-width:900px;">
+    <h4>¿Î³ÌĞÅÏ¢</h4>
+    <hr />
+
+    <div class="form-group">
+        <label class="control-label col-md-2">¿Î³ÌÃû³Æ</label>
+        <div class="col-md-10">
+            <input class="form-control" name="CourseName" value="<%= H(FormCourseName) %>" required />
         </div>
     </div>
-</body>
-</html>
 
+    <div class="form-group">
+        <label class="control-label col-md-2">Ñ§·Ö</label>
+        <div class="col-md-10">
+            <input class="form-control" name="Credits" value="<%= H(FormCredits) %>" required />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">ÊÚ¿Î½ÌÊ¦</label>
+        <div class="col-md-10">
+            <select class="form-control" name="TeacherID">
+                <option value="">--ÇëÑ¡Ôñ½ÌÊ¦--</option>
+                <% foreach (var t in TeacherOptions) { %>
+                    <option value="<%= H(t.TeacherID) %>" <%= string.Equals(FormTeacherID, t.TeacherID, StringComparison.OrdinalIgnoreCase) ? "selected" : "" %>><%= H(t.TeacherName) %></option>
+                <% } %>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">¿Î³ÌÀà±ğ</label>
+        <div class="col-md-10">
+            <select class="form-control" name="CourseType" required>
+                <option value="">--ÇëÑ¡ÔñÀà±ğ--</option>
+                <option value="1" <%= FormCourseType == "1" ? "selected" : "" %>>×¨Òµ±ØĞŞ</option>
+                <option value="2" <%= FormCourseType == "2" ? "selected" : "" %>>¹«¹²±ØĞŞ</option>
+                <option value="3" <%= FormCourseType == "3" ? "selected" : "" %>>×¨ÒµÑ¡ĞŞ</option>
+                <option value="4" <%= FormCourseType == "4" ? "selected" : "" %>>¹«¹²Ñ¡ĞŞ</option>
+                <option value="5" <%= FormCourseType == "5" ? "selected" : "" %>>ÌåÓıÑ¡ĞŞ</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <button type="submit" class="btn btn-success">´´½¨</button>
+            <a class="btn btn-default" href="CourseList.aspx">·µ»ØÁĞ±í</a>
+        </div>
+    </div>
+</form>
+
+<!--#include file="_AdminLayoutBottom.inc" -->

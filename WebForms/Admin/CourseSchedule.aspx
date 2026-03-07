@@ -1,86 +1,181 @@
-Ôªø<%@ Page Language="C#" AutoEventWireup="true" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
-<%@ Import Namespace="StudentInformationSystem.Models" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
+<!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
-    protected string SourceView = "Views/Admin/CourseSchedule.cshtml";
-    protected void EnsureRole()
-    {
-        var currentUser = Session["User"] as Users;
-        if (currentUser == null || currentUser.Role != 0)
-        {
-            Response.Redirect("~/WebForms/Login.aspx", true);
-            return;
-        }
-    }
+    protected Courses CurrentCourse;
+    protected List<ClassSessions> SessionList = new List<ClassSessions>();
+    protected List<int> HolidayWeeks = new List<int>();
+    protected Dictionary<int, string> HolidayDescriptions = new Dictionary<int, string>();
+    protected string FlashMessage = string.Empty;
+    protected string MessageText = string.Empty;
+
     protected void Page_Load(object sender, EventArgs e)
     {
-        EnsureRole();
-        if (TryRedirectToMvc())
+        PageTitle = "øŒ≥Ã∞≤≈≈π‹¿Ì";
+        if (!EnsureAdminRole())
         {
             return;
         }
+
+        FlashMessage = (Session["AdminFlashMessage"] as string) ?? string.Empty;
+        Session.Remove("AdminFlashMessage");
+
+        int courseId;
+        if (!int.TryParse(Request.QueryString["courseId"], out courseId) || courseId <= 0)
+        {
+            MessageText = "øŒ≥Ã≤Œ ˝Œﬁ–ß°£";
+            return;
+        }
+
+        using (var db = new StudentManagementDBEntities())
+        {
+            CurrentCourse = db.Courses.Include("Teachers").FirstOrDefault(c => c.CourseID == courseId);
+            if (CurrentCourse == null)
+            {
+                MessageText = "øŒ≥Ã≤ª¥Ê‘⁄°£";
+                return;
+            }
+
+            SessionList = db.ClassSessions.Include("Courses")
+                .Where(cs => cs.CourseID == courseId)
+                .OrderBy(cs => cs.StartWeek)
+                .ThenBy(cs => cs.DayOfWeek)
+                .ThenBy(cs => cs.StartPeriod)
+                .ToList();
+        }
+
+        HolidayWeeks = HolidayHelper.GetCurrentSemesterHolidayWeeks();
+        HolidayDescriptions = HolidayHelper.GetHolidayWeekDescriptions();
     }
 
-    protected bool TryRedirectToMvc()
+    protected string SessionTimeText(ClassSessions session)
     {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
+        var start = GetPeriodTime(session.StartPeriod);
+        var end = GetPeriodTime(session.EndPeriod);
+        var startText = string.IsNullOrWhiteSpace(start) ? "" : start.Split('-')[0];
+        var endText = string.IsNullOrWhiteSpace(end) ? "" : end.Split('-')[1];
+        return DayName(session.DayOfWeek) + " µ⁄ " + session.StartPeriod + " - " + session.EndPeriod + " Ω⁄" + (string.IsNullOrWhiteSpace(startText) ? "" : " (" + startText + " - " + endText + ")");
+    }
+
+    protected string HolidayStatus(ClassSessions session)
+    {
+        var weeks = new List<int>();
+        for (int week = session.StartWeek; week <= session.EndWeek; week++)
         {
-            return false;
+            if (HolidayWeeks.Contains(week))
+            {
+                weeks.Add(week);
+            }
         }
 
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
+        if (!weeks.Any())
         {
-            return false;
+            return "<span class='label label-success'><span class='glyphicon glyphicon-ok'></span> ’˝≥£</span>";
         }
 
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
-
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
-        }
-
-        Response.Redirect(target, true);
-        return true;
+        return "<span class='label label-warning' title='∞¸∫¨ºŸ»’÷‹¥Œ£∫µ⁄" + string.Join("°¢", weeks) + "÷‹'><span class='glyphicon glyphicon-calendar'></span> ∫¨ºŸ»’</span>";
     }
 </script>
 
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head runat="server">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin/CourseSchedule</title>
-    <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
-</head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            Ê≠£Âú®Ë∑≥ËΩ¨Âà∞ÂéüÈ°µÈù¢Ôºö<code><%= SourceView %></code>
+<!--#include file="_AdminLayoutTop.inc" -->
+
+<% if (!string.IsNullOrEmpty(MessageText)) { %>
+    <div class="alert alert-danger"><%= H(MessageText) %></div>
+<% } else { %>
+    <% if (!string.IsNullOrEmpty(FlashMessage)) { %>
+        <div class="alert alert-success"><strong><span class="glyphicon glyphicon-ok-circle"></span> ≥…π¶£°</strong> <%= H(FlashMessage) %></div>
+    <% } %>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h2>øŒ≥Ã∞≤≈≈π‹¿Ì</h2>
+        <div>
+            <a class="btn btn-primary" href='AddCourseSchedule.aspx?courseId=<%= CurrentCourse.CourseID %>'>ÃÌº”–¬∞≤≈≈</a>
+            <a class="btn btn-default" href="CourseList.aspx">∑µªÿøŒ≥Ã¡–±Ì</a>
         </div>
     </div>
-</body>
-</html>
+    <hr />
 
+    <div class="panel panel-info">
+        <div class="panel-heading"><h4><span class="glyphicon glyphicon-info-sign"></span> øŒ≥Ã–≈œ¢</h4></div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>øŒ≥Ã√˚≥∆£∫</strong><%= H(CurrentCourse.CourseName) %></p>
+                    <p><strong>—ß∑÷£∫</strong><%= CurrentCourse.Credits %> —ß∑÷</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>»ŒøŒΩÃ ¶£∫</strong><%= CurrentCourse.Teachers == null ? "<span class='text-danger'>Œ¥∑÷≈‰ΩÃ ¶</span>" : H(CurrentCourse.Teachers.TeacherName) %></p>
+                    <p><strong>øŒ≥Ã¿‡–Õ£∫</strong><span class="label label-info"><%= H(CourseTypeText(CurrentCourse.CourseType)) %></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <% if (HolidayDescriptions.Any()) { %>
+        <div class="alert alert-info">
+            <h5><span class="glyphicon glyphicon-calendar"></span> ±æ—ß∆⁄∑®∂®ºŸ»’Ã·–—</h5>
+            <p>“‘œ¬÷‹¥ŒŒ™∑®∂®ºŸ»’£¨œ‡”¶µƒøŒ≥Ã∞≤≈≈≤ªª·‘⁄øŒ±Ì÷–œ‘ æ£∫</p>
+            <p>
+                <% foreach (var holiday in HolidayDescriptions) { %>
+                    <span class="label label-warning" style="margin-right:8px;">µ⁄<%= holiday.Key %>÷‹£∫<%= H(holiday.Value) %></span>
+                <% } %>
+            </p>
+        </div>
+    <% } %>
+
+    <% if (SessionList.Any()) { %>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>÷‹¥Œ∑∂Œß</th>
+                        <th>…œøŒ ±º‰</th>
+                        <th>ΩÃ “</th>
+                        <th>ºŸ»’◊¥Ã¨</th>
+                        <th>≤Ÿ◊˜</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% foreach (var session in SessionList) { %>
+                        <tr>
+                            <td><span class="label label-info">µ⁄ <%= session.StartWeek %> - <%= session.EndWeek %> ÷‹</span></td>
+                            <td><%= H(SessionTimeText(session)) %></td>
+                            <td><span class="label label-default"><%= H(session.Classroom) %></span></td>
+                            <td><%= HolidayStatus(session) %></td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a class="btn btn-warning" href='EditCourseSchedule.aspx?sessionId=<%= session.SessionID %>'>±‡º≠</a>
+                                    <a class="btn btn-danger" href='DeleteCourseSchedule.aspx?sessionId=<%= session.SessionID %>'>…æ≥˝</a>
+                                </div>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="well well-sm">
+            <p class="text-muted"><span class="glyphicon glyphicon-info-sign"></span> <strong>Õ≥º∆–≈œ¢£∫</strong>∏√øŒ≥Ã◊‹π≤”– <strong><%= SessionList.Count %></strong> ∏ˆ ±º‰∞≤≈≈°£</p>
+        </div>
+    <% } else { %>
+        <div class="well text-center">
+            <h4><span class="glyphicon glyphicon-info-sign text-muted"></span> ‘›ŒﬁøŒ≥Ã∞≤≈≈</h4>
+            <% if (CurrentCourse.Teachers == null) { %>
+                <p class="text-danger">∏√øŒ≥Ã…–Œ¥∑÷≈‰ΩÃ ¶£¨Œﬁ∑®ÃÌº”øŒ≥Ã∞≤≈≈°£«Îœ»Œ™øŒ≥Ã∑÷≈‰ΩÃ ¶°£</p>
+                <a class="btn btn-warning btn-lg" href='EditCourse.aspx?id=<%= CurrentCourse.CourseID %>'>±‡º≠øŒ≥Ã</a>
+            <% } else { %>
+                <p class="text-muted">∏√øŒ≥Ãªπ√ª”–ÃÌº”»Œ∫Œ ±º‰∞≤≈≈°£œ÷‘⁄æÕø™ º¥¥Ω®µ⁄“ª∏ˆøŒ≥Ã∞≤≈≈∞…£°</p>
+                <a class="btn btn-primary btn-lg" href='AddCourseSchedule.aspx?courseId=<%= CurrentCourse.CourseID %>'>¡¢º¥ÃÌº”</a>
+            <% } %>
+        </div>
+    <% } %>
+<% } %>
+
+<style>
+    .label { font-size: 85%; padding: 0.3em 0.6em; }
+    .btn-group-sm > .btn { padding: 5px 10px; font-size: 12px; }
+    .table > tbody > tr:hover { background-color: #f5f5f5; }
+    .well-sm { padding: 9px; border-radius: 3px; }
+</style>
+
+<!--#include file="_AdminLayoutBottom.inc" -->

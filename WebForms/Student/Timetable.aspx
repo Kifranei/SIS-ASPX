@@ -1,4 +1,4 @@
-ï»¿<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
 <%@ Import Namespace="System" %>
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="System.Linq" %>
@@ -13,7 +13,7 @@
     protected Dictionary<string, ClassSessions> MasterTimetable = new Dictionary<string, ClassSessions>();
     protected Dictionary<string, ClassSessions> WeeklyTimetable = new Dictionary<string, ClassSessions>();
 
-    protected string[] DayNames = new[] { "", "å‘¨ä¸€", "å‘¨äºŒ", "å‘¨ä¸‰", "å‘¨å››", "å‘¨äº”", "å‘¨å…­", "å‘¨æ—¥" };
+    protected string[] DayNames = new[] { "", "ÖÜÒ»", "ÖÜ¶ş", "ÖÜÈı", "ÖÜËÄ", "ÖÜÎå", "ÖÜÁù", "ÖÜÈÕ" };
     protected string[] PeriodTimes = new[]
     {
         "08:40-09:25", "09:30-10:15", "10:35-11:20", "11:25-12:10",
@@ -26,7 +26,7 @@
         var currentUser = Session["User"] as Users;
         if (currentUser == null || currentUser.Role != 2)
         {
-            Response.Redirect("~/WebForms/Login.aspx", true);
+            Response.Redirect("~/Login.aspx", true);
             return;
         }
 
@@ -40,7 +40,7 @@
             var student = db.Students.FirstOrDefault(s => s.UserID == currentUser.UserID);
             if (student == null)
             {
-                Response.Redirect("~/WebForms/Login.aspx", true);
+                Response.Redirect("~/Login.aspx", true);
                 return;
             }
 
@@ -124,7 +124,7 @@
             }
         })();
     </script>
-    <title>æˆ‘çš„è¯¾è¡¨</title>
+    <title>ÎÒµÄ¿Î±í</title>
     <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
     <link href="<%= ResolveUrl("~/Content/theme-system.css") %>" rel="stylesheet" />
     <link href="<%= ResolveUrl("~/Content/webforms-student-layout.css") %>" rel="stylesheet" />
@@ -168,28 +168,28 @@
         <div class="sidebar-overlay"></div>
         <aside class="sidebar">
             <div class="sidebar-header">
-                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="æ ¡å¾½" class="sidebar-logo-img" />
+                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="Ğ£»Õ" class="sidebar-logo-img" />
             </div>
             <ul class="sidebar-menu">
-                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">ä¸ªäººä¸­å¿ƒ</a></li>
-                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">æˆ‘çš„è¯¾è¡¨</a></li>
-                <li><a class="<%= Active("CourseSelection.aspx") %>" href="CourseSelection.aspx">åœ¨çº¿é€‰è¯¾</a></li>
-                <li><a class="<%= Active("MyExams.aspx") %>" href="MyExams.aspx">æˆ‘çš„è€ƒè¯•</a></li>
-                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">ä¿®æ”¹å¯†ç </a></li>
+                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">¸öÈËÖĞĞÄ</a></li>
+                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">ÎÒµÄ¿Î±í</a></li>
+                <li><a class="<%= Active("CourseSelection.aspx") %>" href="CourseSelection.aspx">ÔÚÏßÑ¡¿Î</a></li>
+                <li><a class="<%= Active("MyExams.aspx") %>" href="MyExams.aspx">ÎÒµÄ¿¼ÊÔ</a></li>
+                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">ĞŞ¸ÄÃÜÂë</a></li>
             </ul>
         </aside>
 
         <div class="main-content">
             <header class="header-bar">
                 <div class="header-left">
-                    <button class="hamburger-menu" type="button" aria-label="èœå•">&#9776;</button>
+                    <button class="hamburger-menu" type="button" aria-label="²Ëµ¥">&#9776;</button>
                 </div>
                 <div class="header-right">
-                    <button class='dark-toggle-btn' type='button'>æš—è‰²æ¨¡å¼</button>
+                    <button class='dark-toggle-btn' type='button'>°µÉ«Ä£Ê½</button>
                     <div class="user-info">
-                        <span class="username">æ¬¢è¿æ‚¨, <%= ((Session["User"] as Users)?.Username ?? "å­¦ç”Ÿ") %></span>
+                        <span class="username">»¶Ó­Äú, <%= ((Session["User"] as Users)?.Username ?? "Ñ§Éú") %></span>
                         <span class="sep">|</span>
-                        <a class="logout-link" href="../Logout.aspx">å®‰å…¨é€€å‡º</a>
+                        <a class="logout-link" href="../Logout.aspx">°²È«ÍË³ö</a>
                     </div>
                 </div>
             </header>
@@ -197,13 +197,13 @@
             <main class="content-body">
                 <div class="container-fluid">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <h2>æˆ‘çš„è¯¾è¡¨</h2>
-                        <button id="export-timetable-btn" class="btn btn-success" type="button">å¯¼å‡ºä¸ºå›¾ç‰‡</button>
+                        <h2>ÎÒµÄ¿Î±í</h2>
+                        <button id="export-timetable-btn" class="btn btn-success" type="button">µ¼³öÎªÍ¼Æ¬</button>
                     </div>
 
                     <div class="timetable-tabs">
-                        <button id="master-view-btn" class="btn btn-primary active" type="button">æ€»è¯¾è¡¨</button>
-                        <button id="weekly-view-btn" class="btn btn-default" type="button">å‘¨è¯¾è¡¨</button>
+                        <button id="master-view-btn" class="btn btn-primary active" type="button">×Ü¿Î±í</button>
+                        <button id="weekly-view-btn" class="btn btn-default" type="button">ÖÜ¿Î±í</button>
                     </div>
                     <hr />
 
@@ -211,13 +211,13 @@
                         <div class="view-card">
                             <form method="get" class="form-inline" style="margin-bottom: 12px;">
                                 <div class="form-group">
-                                    <label style="margin-right: 8px;">é€‰æ‹©å‘¨æ•°ï¼š</label>
+                                    <label style="margin-right: 8px;">Ñ¡ÔñÖÜÊı£º</label>
                                     <select name="selectedWeek" class="form-control" style="width: 140px; display:inline-block; margin-right:8px;">
                                         <% for (int w = 1; w <= 21; w++) { %>
-                                            <option value="<%= w %>" <%= w == CurrentWeek ? "selected" : "" %>>ç¬¬ <%= w %> å‘¨</option>
+                                            <option value="<%= w %>" <%= w == CurrentWeek ? "selected" : "" %>>µÚ <%= w %> ÖÜ</option>
                                         <% } %>
                                     </select>
-                                    <button type="submit" class="btn btn-primary">æŸ¥è¯¢</button>
+                                    <button type="submit" class="btn btn-primary">²éÑ¯</button>
                                 </div>
                             </form>
 
@@ -225,7 +225,7 @@
                                 <table class="table table-bordered timetable" id="weekly-timetable-table">
                                     <thead>
                                         <tr>
-                                            <th style="width:120px;">æ—¶é—´</th>
+                                            <th style="width:120px;">Ê±¼ä</th>
                                             <% for (int day = 1; day <= 7; day++) { %>
                                                 <th><%= DayNames[day] %></th>
                                             <% } %>
@@ -234,7 +234,7 @@
                                     <tbody>
                                         <% for (int period = 1; period <= 12; period++) { %>
                                             <tr>
-                                                <td><strong>ç¬¬ <%= period %> èŠ‚</strong><br /><small class="text-muted"><%= PeriodTimes[period - 1] %></small></td>
+                                                <td><strong>µÚ <%= period %> ½Ú</strong><br /><small class="text-muted"><%= PeriodTimes[period - 1] %></small></td>
                                                 <% for (int day = 1; day <= 7; day++) {
                                                        if (HasCell(WeeklyTimetable, day, period)) {
                                                            var session = GetCell(WeeklyTimetable, day, period);
@@ -243,7 +243,7 @@
                                                 %>
                                                     <td rowspan="<%= rowspan %>" class="has-class">
                                                         <strong><%= SafeCourseName(session) %></strong><br />
-                                                        <small>(<%= session.StartWeek %>-<%= session.EndWeek %> å‘¨)</small><br />
+                                                        <small>(<%= session.StartWeek %>-<%= session.EndWeek %> ÖÜ)</small><br />
                                                         <small><%= session.Classroom %></small>
                                                     </td>
                                                 <%         }
@@ -265,7 +265,7 @@
                                 <table class="table table-bordered timetable" id="master-timetable-table">
                                     <thead>
                                         <tr>
-                                            <th style="width:120px;">æ—¶é—´</th>
+                                            <th style="width:120px;">Ê±¼ä</th>
                                             <% for (int day = 1; day <= 7; day++) { %>
                                                 <th><%= DayNames[day] %></th>
                                             <% } %>
@@ -274,7 +274,7 @@
                                     <tbody>
                                         <% for (int period = 1; period <= 12; period++) { %>
                                             <tr>
-                                                <td><strong>ç¬¬ <%= period %> èŠ‚</strong><br /><small class="text-muted"><%= PeriodTimes[period - 1] %></small></td>
+                                                <td><strong>µÚ <%= period %> ½Ú</strong><br /><small class="text-muted"><%= PeriodTimes[period - 1] %></small></td>
                                                 <% for (int day = 1; day <= 7; day++) {
                                                        if (HasCell(MasterTimetable, day, period)) {
                                                            var session = GetCell(MasterTimetable, day, period);
@@ -283,7 +283,7 @@
                                                 %>
                                                     <td rowspan="<%= rowspan %>" class="has-class">
                                                         <strong><%= SafeCourseName(session) %></strong><br />
-                                                        <small>(<%= session.StartWeek %>-<%= session.EndWeek %> å‘¨)</small><br />
+                                                        <small>(<%= session.StartWeek %>-<%= session.EndWeek %> ÖÜ)</small><br />
                                                         <small><%= session.Classroom %></small>
                                                     </td>
                                                 <%         }
@@ -329,7 +329,7 @@
 
             $('#export-timetable-btn').on('click', function () {
                 if (!window.html2canvas) {
-                    alert('å¯¼å‡ºç»„ä»¶æœªåŠ è½½æˆåŠŸï¼Œè¯·ç¨åé‡è¯•ã€‚');
+                    alert('µ¼³ö×é¼şÎ´¼ÓÔØ³É¹¦£¬ÇëÉÔºóÖØÊÔ¡£');
                     return;
                 }
 
@@ -337,22 +337,23 @@
                 var timetableElement = document.getElementById(activeTableId);
                 var button = $(this);
 
-                button.text('æ­£åœ¨ç”Ÿæˆ...').prop('disabled', true);
+                button.text('ÕıÔÚÉú³É...').prop('disabled', true);
                 html2canvas(timetableElement).then(function (canvas) {
                     var link = document.createElement('a');
-                    link.download = 'æˆ‘çš„è¯¾è¡¨.png';
+                    link.download = 'ÎÒµÄ¿Î±í.png';
                     link.href = canvas.toDataURL('image/png');
                     link.click();
-                    button.text('å¯¼å‡ºä¸ºå›¾ç‰‡').prop('disabled', false);
+                    button.text('µ¼³öÎªÍ¼Æ¬').prop('disabled', false);
                 }).catch(function () {
-                    button.text('å¯¼å‡ºä¸ºå›¾ç‰‡').prop('disabled', false);
-                    alert('å¯¼å‡ºå¤±è´¥ï¼Œè¯·é‡è¯•ã€‚');
+                    button.text('µ¼³öÎªÍ¼Æ¬').prop('disabled', false);
+                    alert('µ¼³öÊ§°Ü£¬ÇëÖØÊÔ¡£');
                 });
             });
         });
     </script>
 </body>
 </html>
+
 
 
 

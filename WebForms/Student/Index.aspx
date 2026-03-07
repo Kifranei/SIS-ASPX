@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
 <%@ Import Namespace="System" %>
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="System.Linq" %>
@@ -16,7 +16,7 @@
         var currentUser = Session["User"] as Users;
         if (currentUser == null || currentUser.Role != 2)
         {
-            Response.Redirect("~/WebForms/Login.aspx", true);
+            Response.Redirect("~/Login.aspx", true);
             return;
         }
 
@@ -25,7 +25,7 @@
             var student = db.Students.FirstOrDefault(s => s.UserID == currentUser.UserID);
             if (student == null)
             {
-                Response.Redirect("~/WebForms/Login.aspx", true);
+                Response.Redirect("~/Login.aspx", true);
                 return;
             }
 
@@ -84,7 +84,7 @@
             }
         })();
     </script>
-    <title>学生中心</title>
+    <title>ѧ������</title>
     <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
     <link href="<%= ResolveUrl("~/Content/theme-system.css") %>" rel="stylesheet" />
     <link href="<%= ResolveUrl("~/Content/webforms-student-layout.css") %>" rel="stylesheet" />
@@ -94,42 +94,42 @@
         <div class="sidebar-overlay"></div>
         <aside class="sidebar">
             <div class="sidebar-header">
-                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="校徽" class="sidebar-logo-img" />
+                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="У��" class="sidebar-logo-img" />
             </div>
             <ul class="sidebar-menu">
-                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">个人中心</a></li>
-                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">我的课表</a></li>
-                <li><a class="<%= Active("CourseSelection.aspx") %>" href="CourseSelection.aspx">在线选课</a></li>
-                <li><a class="<%= Active("MyExams.aspx") %>" href="MyExams.aspx">我的考试</a></li>
-                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">修改密码</a></li>
+                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">��������</a></li>
+                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">�ҵĿα�</a></li>
+                <li><a class="<%= Active("CourseSelection.aspx") %>" href="CourseSelection.aspx">����ѡ��</a></li>
+                <li><a class="<%= Active("MyExams.aspx") %>" href="MyExams.aspx">�ҵĿ���</a></li>
+                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">�޸�����</a></li>
             </ul>
         </aside>
 
         <div class="main-content">
             <header class="header-bar">
                 <div class="header-left">
-                    <button class="hamburger-menu" type="button" aria-label="菜单">&#9776;</button>
+                    <button class="hamburger-menu" type="button" aria-label="�˵�">&#9776;</button>
                 </div>
                 <div class="header-right">
-                    <button class='dark-toggle-btn' type='button'>暗色模式</button>
+                    <button class='dark-toggle-btn' type='button'>��ɫģʽ</button>
                     <div class="user-info">
-                        <span class="username">欢迎您, <%= ((Session["User"] as Users)?.Username ?? "学生") %></span>
+                        <span class="username">��ӭ��, <%= ((Session["User"] as Users)?.Username ?? "ѧ��") %></span>
                         <span class="sep">|</span>
-                        <a class="logout-link" href="../Logout.aspx">安全退出</a>
+                        <a class="logout-link" href="../Logout.aspx">��ȫ�˳�</a>
                     </div>
                 </div>
             </header>
             <main class="content-body">
                 <div class="container-fluid">
         <div class="mb-4">
-            <h2>欢迎回来，<%= StudentName %>！</h2>
-            <p class="text-muted">今天是 <%= DateTime.Now.ToString("yyyy年MM月dd日, dddd") %></p>
+            <h2>��ӭ������<%= StudentName %>��</h2>
+            <p class="text-muted">������ <%= DateTime.Now.ToString("yyyy��MM��dd��, dddd") %></p>
         </div>
 
         <div class="row g-3">
             <div class="col-md-6">
                 <div class="card h-100">
-                    <div class="card-header bg-info text-white">今日课程提醒</div>
+                    <div class="card-header bg-info text-white">���տγ�����</div>
                     <div class="card-body">
                         <% if (TodaysClasses.Any()) { %>
                             <ul class="list-group">
@@ -137,14 +137,14 @@
                                     <li class="list-group-item">
                                         <strong><%= session.Courses == null ? "-" : session.Courses.CourseName %></strong><br />
                                         <small>
-                                            时间：第 <%= session.StartPeriod %>-<%= session.EndPeriod %> 节（<%= GetTimeRange(session) %>）<br />
-                                            地点：<%= session.Classroom %>
+                                            ʱ�䣺�� <%= session.StartPeriod %>-<%= session.EndPeriod %> �ڣ�<%= GetTimeRange(session) %>��<br />
+                                            �ص㣺<%= session.Classroom %>
                                         </small>
                                     </li>
                                 <% } %>
                             </ul>
                         <% } else { %>
-                            <div class="text-center py-5"><h5>今天没课，祝你过得愉快！</h5></div>
+                            <div class="text-center py-5"><h5>����û�Σ�ף�������죡</h5></div>
                         <% } %>
                     </div>
                 </div>
@@ -152,7 +152,7 @@
 
             <div class="col-md-6">
                 <div class="card h-100">
-                    <div class="card-header bg-success text-white">最新成绩公布</div>
+                    <div class="card-header bg-success text-white">���³ɼ�����</div>
                     <div class="card-body">
                         <% if (GradedCourses.Any()) { %>
                             <ul class="list-group">
@@ -164,7 +164,7 @@
                                 <% } %>
                             </ul>
                         <% } else { %>
-                            <div class="text-center py-5"><h5>暂无已公布的成绩。</h5></div>
+                            <div class="text-center py-5"><h5>�����ѹ����ĳɼ���</h5></div>
                         <% } %>
                     </div>
                 </div>
@@ -177,6 +177,7 @@
     <script src="<%= ResolveUrl("~/Scripts/webforms-student-layout.js") %>"></script>
     </body>
 </html>
+
 
 
 

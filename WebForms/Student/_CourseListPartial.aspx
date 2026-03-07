@@ -1,4 +1,4 @@
-ï»¿<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
 <%@ Import Namespace="System" %>
 <%@ Import Namespace="System.IO" %>
 <%@ Import Namespace="StudentInformationSystem.Models" %>
@@ -10,7 +10,7 @@
         var currentUser = Session["User"] as Users;
         if (currentUser == null || currentUser.Role != 2)
         {
-            Response.Redirect("~/WebForms/Login.aspx", true);
+            Response.Redirect("~/Login.aspx", true);
             return;
         }
     }
@@ -49,7 +49,7 @@
         string target;
         if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
         {
-            target = "~/WebForms/Login.aspx";
+            target = "~/Login.aspx";
         }
         else
         {
@@ -78,11 +78,12 @@
 <body class="bg-light">
     <div class="container py-4">
         <div class="alert alert-info">
-            æ­£åœ¨è·³è½¬åˆ°åŸé¡µé¢ï¼š<code><%= SourceView %></code>
+            ÕıÔÚÌø×ªµ½Ô­Ò³Ãæ£º<code><%= SourceView %></code>
         </div>
     </div>
 </body>
 </html>
+
 
 
 

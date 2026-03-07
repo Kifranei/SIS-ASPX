@@ -1,69 +1,174 @@
-ï»¿<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
 <%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
+<%@ Import Namespace="System.Collections.Generic" %>
+<%@ Import Namespace="System.Linq" %>
+<%@ Import Namespace="System.Data.Entity" %>
+<%@ Import Namespace="StudentInformationSystem.Helpers" %>
 <%@ Import Namespace="StudentInformationSystem.Models" %>
 
 <script runat="server">
-    protected string SourceView = "Views/Teacher/AdjustClass.cshtml";
-    protected void EnsureRole()
+    protected ClassSessions CurrentSession;
+    protected Dictionary<int, string> HolidayDescriptions = new Dictionary<int, string>();
+    protected List<int> HolidayWeeks = new List<int>();
+    protected string MessageType = string.Empty;
+    protected string MessageText = string.Empty;
+
+    protected int FormSessionId = 0;
+    protected int FormCourseId = 0;
+    protected int FormStartWeek = 1;
+    protected int FormEndWeek = 1;
+    protected int FormDayOfWeek = 1;
+    protected int FormStartPeriod = 1;
+    protected int FormEndPeriod = 1;
+    protected string FormClassroom = string.Empty;
+
+    protected void Page_Load(object sender, EventArgs e)
     {
         var currentUser = Session["User"] as Users;
         if (currentUser == null || currentUser.Role != 1)
         {
-            Response.Redirect("~/WebForms/Login.aspx", true);
+            Response.Redirect("~/Login.aspx", true);
             return;
         }
-    }
-    protected void Page_Load(object sender, EventArgs e)
-    {
-        EnsureRole();
-        if (TryRedirectToMvc())
+
+        HolidayDescriptions = HolidayHelper.GetHolidayWeekDescriptions();
+        HolidayWeeks = HolidayHelper.GetCurrentSemesterHolidayWeeks();
+
+        using (var db = new StudentManagementDBEntities())
         {
-            return;
+            var teacher = db.Teachers.FirstOrDefault(t => t.UserID == currentUser.UserID);
+            if (teacher == null)
+            {
+                Response.Redirect("~/Login.aspx", true);
+                return;
+            }
+
+            var taughtCourseIds = db.Courses.Where(c => c.TeacherID == teacher.TeacherID).Select(c => c.CourseID).ToList();
+
+            if (Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase))
+            {
+                int.TryParse(Request.Form["SessionID"], out FormSessionId);
+            }
+            else
+            {
+                int.TryParse(Request.QueryString["sessionId"], out FormSessionId);
+            }
+
+            if (FormSessionId <= 0)
+            {
+                MessageType = "danger";
+                MessageText = "ÎŞĞ§µÄ¿Î³Ì°²ÅÅ²ÎÊı¡£";
+                return;
+            }
+
+            CurrentSession = db.ClassSessions.Include("Courses").FirstOrDefault(cs => cs.SessionID == FormSessionId);
+            if (CurrentSession == null || !taughtCourseIds.Contains(CurrentSession.CourseID))
+            {
+                MessageType = "danger";
+                MessageText = "¿Î³Ì°²ÅÅ²»´æÔÚ»ò²»ÊôÓÚµ±Ç°½ÌÊ¦¡£";
+                CurrentSession = null;
+                return;
+            }
+
+            if (!Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase))
+            {
+                FormCourseId = CurrentSession.CourseID;
+                FormStartWeek = CurrentSession.StartWeek;
+                FormEndWeek = CurrentSession.EndWeek;
+                FormDayOfWeek = CurrentSession.DayOfWeek;
+                FormStartPeriod = CurrentSession.StartPeriod;
+                FormEndPeriod = CurrentSession.EndPeriod;
+                FormClassroom = CurrentSession.Classroom;
+                return;
+            }
+
+            int.TryParse(Request.Form["CourseID"], out FormCourseId);
+            int.TryParse(Request.Form["StartWeek"], out FormStartWeek);
+            int.TryParse(Request.Form["EndWeek"], out FormEndWeek);
+            int.TryParse(Request.Form["DayOfWeek"], out FormDayOfWeek);
+            int.TryParse(Request.Form["StartPeriod"], out FormStartPeriod);
+            int.TryParse(Request.Form["EndPeriod"], out FormEndPeriod);
+            FormClassroom = (Request.Form["Classroom"] ?? string.Empty).Trim();
+
+            if (!taughtCourseIds.Contains(FormCourseId))
+            {
+                MessageType = "danger";
+                MessageText = "ÄúÖ»ÄÜµ÷Õû×Ô¼º½ÌÊÚµÄ¿Î³Ì¡£";
+                return;
+            }
+
+            if (FormStartWeek < 1 || FormEndWeek > 21 || FormStartWeek > FormEndWeek)
+            {
+                MessageType = "danger";
+                MessageText = "ÖÜ´Î·¶Î§²»ºÏ·¨¡£";
+                return;
+            }
+
+            if (FormDayOfWeek < 1 || FormDayOfWeek > 7)
+            {
+                MessageType = "danger";
+                MessageText = "ĞÇÆÚ²ÎÊı²»ºÏ·¨¡£";
+                return;
+            }
+
+            if (FormStartPeriod < 1 || FormEndPeriod > 12 || FormStartPeriod > FormEndPeriod)
+            {
+                MessageType = "danger";
+                MessageText = "½Ú´Î·¶Î§²»ºÏ·¨¡£";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(FormClassroom))
+            {
+                MessageType = "danger";
+                MessageText = "ÇëÌîĞ´½ÌÊÒ¡£";
+                return;
+            }
+
+            var conflictingSessions = db.ClassSessions.Include("Courses")
+                .Where(cs => cs.SessionID != FormSessionId
+                           && taughtCourseIds.Contains(cs.CourseID)
+                           && cs.DayOfWeek == FormDayOfWeek
+                           && !(FormEndWeek < cs.StartWeek || FormStartWeek > cs.EndWeek)
+                           && !(FormEndPeriod < cs.StartPeriod || FormStartPeriod > cs.EndPeriod))
+                .ToList();
+
+            if (conflictingSessions.Any())
+            {
+                var conflictDescription = string.Join("£»", conflictingSessions.Select(cs =>
+                    (cs.Courses == null ? "¿Î³Ì" : cs.Courses.CourseName) + "(µÚ" + cs.StartWeek + "-" + cs.EndWeek + "ÖÜ, µÚ" + cs.StartPeriod + "-" + cs.EndPeriod + "½Ú)"));
+                MessageType = "danger";
+                MessageText = "Ê±¼ä³åÍ»£¡ÄúÔÚ¸ÃÊ±¼ä¶ÎÒÑÓĞÒÔÏÂ¿Î³Ì°²ÅÅ£º" + conflictDescription;
+                return;
+            }
+
+            CurrentSession.CourseID = FormCourseId;
+            CurrentSession.StartWeek = FormStartWeek;
+            CurrentSession.EndWeek = FormEndWeek;
+            CurrentSession.DayOfWeek = FormDayOfWeek;
+            CurrentSession.StartPeriod = FormStartPeriod;
+            CurrentSession.EndPeriod = FormEndPeriod;
+            CurrentSession.Classroom = FormClassroom;
+            db.Entry(CurrentSession).State = EntityState.Modified;
+            db.SaveChanges();
+
+            var course = db.Courses.Find(FormCourseId);
+            var courseName = course == null ? "¿Î³Ì" : course.CourseName;
+            var msg = "¿Î³Ìµ÷Õû³É¹¦£¡" + courseName + " ÒÑµ÷ÕûÎª£ºµÚ" + FormStartWeek + "-" + FormEndWeek + "ÖÜ£¬ĞÇÆÚ" + DayName(FormDayOfWeek) + "µÚ" + FormStartPeriod + "-" + FormEndPeriod + "½Ú£¬" + FormClassroom + "½ÌÊÒ¡£";
+            Response.Redirect("Timetable.aspx?msg=" + Server.UrlEncode(msg), true);
         }
     }
 
-    protected bool TryRedirectToMvc()
+    protected string DayName(int day)
     {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
-        {
-            return false;
-        }
+        string[] days = { "", "Ò»", "¶ş", "Èı", "ËÄ", "Îå", "Áù", "ÈÕ" };
+        return day >= 1 && day <= 7 ? days[day] : "?";
+    }
 
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
-        {
-            return false;
-        }
-
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
-
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
-        }
-
-        Response.Redirect(target, true);
-        return true;
+    protected string Active(string page)
+    {
+        var current = VirtualPathUtility.GetFileName(Request.AppRelativeCurrentExecutionFilePath) ?? string.Empty;
+        return current.Equals(page, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty;
     }
 </script>
 
@@ -72,15 +177,164 @@
 <head runat="server">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Teacher/AdjustClass</title>
+    <script>
+        (function () {
+            var theme = localStorage.getItem('theme');
+            var isDark = theme === 'dark';
+            if (isDark) {
+                document.documentElement.classList.add('dark-mode');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+            }
+        })();
+    </script>
+    <title>µ÷Õû¿Î³Ì°²ÅÅ</title>
     <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
+    <link href="<%= ResolveUrl("~/Content/theme-system.css") %>" rel="stylesheet" />
+    <link href="<%= ResolveUrl("~/Content/webforms-student-layout.css") %>" rel="stylesheet" />
 </head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            æ­£åœ¨è·³è½¬åˆ°åŸé¡µé¢ï¼š<code><%= SourceView %></code>
+<body class="webforms-student">
+    <div class="page-wrapper">
+        <div class="sidebar-overlay"></div>
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="Ğ£»Õ" class="sidebar-logo-img" />
+            </div>
+            <ul class="sidebar-menu">
+                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">Ê×Ò³</a></li>
+                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">ÎÒµÄ¿Î±í</a></li>
+                <li><a class="<%= Active("CourseList.aspx") %>" href="CourseList.aspx">³É¼¨Â¼Èë</a></li>
+                <li><a class="<%= Active("ExamList.aspx") %>" href="ExamList.aspx">¿¼ÊÔ¹ÜÀí</a></li>
+                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">ĞŞ¸ÄÃÜÂë</a></li>
+            </ul>
+        </aside>
+
+        <div class="main-content">
+            <header class="header-bar">
+                <div class="header-left">
+                    <button class="hamburger-menu" type="button" aria-label="²Ëµ¥">&#9776;</button>
+                </div>
+                <div class="header-right">
+                    <button class='dark-toggle-btn' type='button'>°µÉ«Ä£Ê½</button>
+                    <div class="user-info">
+                        <span class="username">»¶Ó­Äú, <%= ((Session["User"] as Users)?.Username ?? "½ÌÊ¦") %></span>
+                        <span class="sep">|</span>
+                        <a class="logout-link" href="../Logout.aspx">°²È«ÍË³ö</a>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content-body">
+                <div class="container-fluid">
+                    <h2>µ÷Õû¿Î³Ì°²ÅÅ</h2>
+                    <hr />
+
+                    <% if (!string.IsNullOrEmpty(MessageText)) { %>
+                        <div class="alert alert-<%= MessageType %>"><%= MessageText %></div>
+                    <% } %>
+
+                    <% if (CurrentSession != null) { %>
+                        <div class="alert alert-info">
+                            <p><strong>µ±Ç°¿Î³Ì£º</strong><%= CurrentSession.Courses == null ? "-" : CurrentSession.Courses.CourseName %></p>
+                            <p><strong>µ±Ç°°²ÅÅ£º</strong>µÚ <%= CurrentSession.StartWeek %>-<%= CurrentSession.EndWeek %> ÖÜ£¬ĞÇÆÚ<%= DayName(CurrentSession.DayOfWeek) %>£¬µÚ <%= CurrentSession.StartPeriod %>-<%= CurrentSession.EndPeriod %> ½Ú£¬<%= CurrentSession.Classroom %></p>
+                        </div>
+
+                        <form method="post" class="form-horizontal" style="max-width: 880px;">
+                            <input type="hidden" name="SessionID" value="<%= FormSessionId %>" />
+                            <input type="hidden" name="CourseID" value="<%= FormCourseId %>" />
+
+                            <div class="form-group">
+                                <label class="control-label col-md-2">¿ªÊ¼ÖÜÊı</label>
+                                <div class="col-md-4"><input class="form-control" type="number" min="1" max="21" name="StartWeek" id="StartWeek" value="<%= FormStartWeek %>" required /></div>
+                                <label class="control-label col-md-2">½áÊøÖÜÊı</label>
+                                <div class="col-md-4"><input class="form-control" type="number" min="1" max="21" name="EndWeek" id="EndWeek" value="<%= FormEndWeek %>" required /></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-2">ĞÇÆÚ¼¸</label>
+                                <div class="col-md-4">
+                                    <select class="form-control" name="DayOfWeek" id="DayOfWeek" required>
+                                        <% for (int d = 1; d <= 7; d++) { %>
+                                            <option value="<%= d %>" <%= d == FormDayOfWeek ? "selected" : "" %>>ĞÇÆÚ<%= DayName(d) %></option>
+                                        <% } %>
+                                    </select>
+                                </div>
+                                <label class="control-label col-md-2">½ÌÊÒ</label>
+                                <div class="col-md-4"><input class="form-control" name="Classroom" id="Classroom" value="<%= FormClassroom %>" required /></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-2">¿ªÊ¼½Ú´Î</label>
+                                <div class="col-md-4">
+                                    <select class="form-control" name="StartPeriod" id="StartPeriod" required>
+                                        <% for (int p = 1; p <= 12; p++) { %>
+                                            <option value="<%= p %>" <%= p == FormStartPeriod ? "selected" : "" %>>µÚ <%= p %> ½Ú</option>
+                                        <% } %>
+                                    </select>
+                                </div>
+                                <label class="control-label col-md-2">½áÊø½Ú´Î</label>
+                                <div class="col-md-4">
+                                    <select class="form-control" name="EndPeriod" id="EndPeriod" required>
+                                        <% for (int p = 1; p <= 12; p++) { %>
+                                            <option value="<%= p %>" <%= p == FormEndPeriod ? "selected" : "" %>>µÚ <%= p %> ½Ú</option>
+                                        <% } %>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-md-offset-2 col-md-10">
+                                    <button type="submit" class="btn btn-success">È·ÈÏµ÷Õû</button>
+                                    <a class="btn btn-default" href="Timetable.aspx">È¡Ïû</a>
+                                </div>
+                            </div>
+                        </form>
+
+                        <% if (HolidayDescriptions.Any()) { %>
+                            <div class="panel panel-info" style="margin-top:20px;">
+                                <div class="panel-heading"><h4>±¾Ñ§ÆÚ·¨¶¨¼ÙÈÕ</h4></div>
+                                <div class="panel-body">
+                                    <% foreach (var holiday in HolidayDescriptions) { %>
+                                        <span class="label label-info" style="margin-right:8px;display:inline-block;margin-bottom:5px;">µÚ<%= holiday.Key %>ÖÜ£º<%= holiday.Value %></span>
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% } %>
+                    <% } else { %>
+                        <a class="btn btn-default" href="Timetable.aspx">·µ»Ø¿Î±í</a>
+                    <% } %>
+                </div>
+            </main>
         </div>
     </div>
+    <script src="<%= ResolveUrl("~/Scripts/webforms-student-layout.js") %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/jquery-3.7.1.min.js") %>"></script>
+    <script>
+        $(function () {
+            $('#StartPeriod').on('change', function () {
+                var startPeriod = parseInt($(this).val(), 10);
+                var endPeriodSelect = $('#EndPeriod');
+                var currentEnd = parseInt(endPeriodSelect.val(), 10);
+                if (currentEnd < startPeriod) {
+                    endPeriodSelect.val(startPeriod);
+                }
+                endPeriodSelect.find('option').each(function () {
+                    var v = parseInt($(this).val(), 10);
+                    $(this).prop('disabled', v < startPeriod);
+                });
+            }).trigger('change');
+
+            $('#StartWeek').on('change', function () {
+                var startWeek = parseInt($(this).val(), 10);
+                var endWeekInput = $('#EndWeek');
+                var currentEnd = parseInt(endWeekInput.val(), 10);
+                if (currentEnd < startWeek) {
+                    endWeekInput.val(startWeek);
+                }
+                endWeekInput.attr('min', startWeek);
+            }).trigger('change');
+        });
+    </script>
 </body>
 </html>
 

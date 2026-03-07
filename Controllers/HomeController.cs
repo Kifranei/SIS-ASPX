@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -10,8 +10,8 @@ namespace StudentInformationSystem.Controllers
     {
         public ActionResult Index()
         {
-            // å°†å…¶é‡å®šå‘åˆ° AccountController çš„ Login æ–¹æ³•
-            return Redirect("~/WebForms/Login.aspx");
+            // ½«ÆäÖØ¶¨Ïòµ½ AccountController µÄ Login ·½·¨
+            return Redirect("~/Login.aspx");
         }
 
         public ActionResult About()
@@ -29,3 +29,4 @@ namespace StudentInformationSystem.Controllers
         }
     }
 }
+

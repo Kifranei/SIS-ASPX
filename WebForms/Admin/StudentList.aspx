@@ -1,86 +1,125 @@
-ï»¿<%@ Page Language="C#" AutoEventWireup="true" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
-<%@ Import Namespace="StudentInformationSystem.Models" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
+<!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
-    protected string SourceView = "Views/Admin/StudentList.cshtml";
-    protected void EnsureRole()
-    {
-        var currentUser = Session["User"] as Users;
-        if (currentUser == null || currentUser.Role != 0)
-        {
-            Response.Redirect("~/WebForms/Login.aspx", true);
-            return;
-        }
-    }
+    protected string SearchString = string.Empty;
+    protected string FlashMessage = string.Empty;
+    protected List<Students> StudentsList = new List<Students>();
+
     protected void Page_Load(object sender, EventArgs e)
     {
-        EnsureRole();
-        if (TryRedirectToMvc())
+        PageTitle = "Ñ§ÉúÁĞ±í";
+        if (!EnsureAdminRole())
         {
             return;
         }
+
+        if (Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(Request.Form["ResetUserID"]))
+        {
+            SearchString = (Request.Form["searchString"] ?? string.Empty).Trim();
+            ResetPassword_Click(null, EventArgs.Empty);
+            return;
+        }
+
+        SearchString = (Request.QueryString["searchString"] ?? string.Empty).Trim();
+        FlashMessage = (Session["AdminFlashMessage"] as string) ?? string.Empty;
+        Session.Remove("AdminFlashMessage");
+
+        using (var db = new StudentManagementDBEntities())
+        {
+            var query = db.Students.Include("Classes").Include("Users").AsQueryable();
+            if (!string.IsNullOrWhiteSpace(SearchString))
+            {
+                query = query.Where(s => s.StudentName.Contains(SearchString) || s.StudentID.Contains(SearchString));
+            }
+
+            StudentsList = query.OrderBy(s => s.StudentID).ToList();
+        }
     }
 
-    protected bool TryRedirectToMvc()
+    protected void ResetPassword_Click(object sender, EventArgs e)
     {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
+        var userIdValue = Request.Form["ResetUserID"];
+        int userId;
+        if (!int.TryParse(userIdValue, out userId) || userId <= 0)
         {
-            return false;
+            return;
         }
 
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
+        using (var db = new StudentManagementDBEntities())
         {
-            return false;
+            var userToReset = db.Users.Find(userId);
+            if (userToReset == null)
+            {
+                return;
+            }
+
+            userToReset.Password = "Hzd@123456";
+            db.Entry(userToReset).State = EntityState.Modified;
+            db.SaveChanges();
+
+            Session["AdminFlashMessage"] = "ÓÃ»§ " + (userToReset.Username ?? "") + " µÄÃÜÂëÒÑ³É¹¦ÖØÖÃÎª \"Hzd@123456\"¡£";
         }
 
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
-
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
-        }
-
+        var target = "StudentList.aspx" + BuildQueryString(new KeyValuePair<string, string>("searchString", SearchString));
         Response.Redirect(target, true);
-        return true;
     }
 </script>
 
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head runat="server">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin/StudentList</title>
-    <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
-</head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            æ­£åœ¨è·³è½¬åˆ°åŸé¡µé¢ï¼š<code><%= SourceView %></code>
-        </div>
-    </div>
-</body>
-</html>
+<!--#include file="_AdminLayoutTop.inc" -->
 
+<h2>Ñ§ÉúÁĞ±í</h2>
+
+<% if (!string.IsNullOrEmpty(FlashMessage)) { %>
+    <div class="alert alert-success"><%= H(FlashMessage) %></div>
+<% } %>
+
+<form method="get" class="form-inline">
+    <div class="form-group">
+        <label>²éÕÒÑ§Éú:</label>
+        <input type="text" name="searchString" value="<%= H(SearchString) %>" class="form-control" placeholder="ÊäÈëĞÕÃû»òÑ§ºÅ" />
+    </div>
+    <button type="submit" class="btn btn-default">ËÑ Ë÷</button>
+</form>
+<br />
+<p><a class="btn btn-primary" href="AddStudent.aspx">Ìí¼ÓĞÂÑ§Éú</a></p>
+
+<div class="table-responsive">
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Ñ§ÉúĞÕÃû</th>
+                <th>ĞÔ±ğ</th>
+                <th>°à¼¶</th>
+                <th>µÇÂ¼ÕËºÅ</th>
+                <th>²Ù×÷</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (StudentsList.Any()) { %>
+                <% foreach (var item in StudentsList) { %>
+                    <tr>
+                        <td><%= H(item.StudentName) %></td>
+                        <td><%= H(item.Gender) %></td>
+                        <td><%= item.Classes == null ? "-" : H(item.Classes.ClassName) %></td>
+                        <td><%= item.Users == null ? "-" : H(item.Users.Username) %></td>
+                        <td>
+                            <a href='Edit.aspx?id=<%= Server.UrlEncode(item.StudentID) %>'>±à¼­</a> |
+                            <a href='Details.aspx?id=<%= Server.UrlEncode(item.StudentID) %>'>ÏêÇé</a> |
+                            <a href='Delete.aspx?id=<%= Server.UrlEncode(item.StudentID) %>'>É¾³ı</a> |
+                            <form method="post" style="display:inline;" onsubmit='return confirm("ÄúÈ·¶¨Òª½«ÓÃ»§ <%= H(item.Users == null ? item.StudentID : item.Users.Username) %> µÄÃÜÂëÖØÖÃÎª Hzd@123456 Âğ£¿");'>
+                                <input type="hidden" name="ResetUserID" value="<%= item.UserID %>" />
+                                <input type="hidden" name="searchString" value="<%= H(SearchString) %>" />
+                                <button type="submit" class="btn btn-link" style="padding:0;border:0;vertical-align:baseline;">ÖØÖÃÃÜÂë</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% } %>
+            <% } else { %>
+                <tr><td colspan="5" class="text-center text-muted">ÔİÎŞÑ§Éú¼ÇÂ¼¡£</td></tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>
+
+<!--#include file="_AdminLayoutBottom.inc" -->

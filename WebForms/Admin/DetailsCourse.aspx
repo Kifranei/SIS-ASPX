@@ -1,86 +1,65 @@
-Ôªø<%@ Page Language="C#" AutoEventWireup="true" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
-<%@ Import Namespace="StudentInformationSystem.Models" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
+<!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
-    protected string SourceView = "Views/Admin/DetailsCourse.cshtml";
-    protected void EnsureRole()
-    {
-        var currentUser = Session["User"] as Users;
-        if (currentUser == null || currentUser.Role != 0)
-        {
-            Response.Redirect("~/WebForms/Login.aspx", true);
-            return;
-        }
-    }
+    protected Courses CurrentCourse;
+    protected string MessageText = string.Empty;
+
     protected void Page_Load(object sender, EventArgs e)
     {
-        EnsureRole();
-        if (TryRedirectToMvc())
+        PageTitle = "øŒ≥ÃœÍ«È";
+        if (!EnsureAdminRole())
         {
             return;
         }
-    }
 
-    protected bool TryRedirectToMvc()
-    {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
+        int id;
+        if (!int.TryParse(Request.QueryString["id"], out id) || id <= 0)
         {
-            return false;
+            MessageText = "øŒ≥Ã≤Œ ˝Œﬁ–ß°£";
+            return;
         }
 
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
+        using (var db = new StudentManagementDBEntities())
         {
-            return false;
+            CurrentCourse = db.Courses.Include("Teachers").FirstOrDefault(c => c.CourseID == id);
         }
 
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
+        if (CurrentCourse == null)
         {
-            return false;
+            MessageText = "øŒ≥Ã≤ª¥Ê‘⁄°£";
         }
-
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
-
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
-        }
-
-        Response.Redirect(target, true);
-        return true;
     }
 </script>
 
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head runat="server">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin/DetailsCourse</title>
-    <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
-</head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            Ê≠£Âú®Ë∑≥ËΩ¨Âà∞ÂéüÈ°µÈù¢Ôºö<code><%= SourceView %></code>
-        </div>
-    </div>
-</body>
-</html>
+<!--#include file="_AdminLayoutTop.inc" -->
 
+<h2>øŒ≥ÃœÍ«È</h2>
+
+<% if (!string.IsNullOrEmpty(MessageText)) { %>
+    <div class="alert alert-danger"><%= H(MessageText) %></div>
+<% } else { %>
+    <div>
+        <h4><%= H(CurrentCourse.CourseName) %></h4>
+        <hr />
+        <dl class="dl-horizontal">
+            <dt>øŒ≥Ã√˚≥∆</dt>
+            <dd><%= H(CurrentCourse.CourseName) %></dd>
+
+            <dt>—ß∑÷</dt>
+            <dd><%= CurrentCourse.Credits %></dd>
+
+            <dt>ΩÃ ¶√˚≥∆</dt>
+            <dd><%= CurrentCourse.Teachers == null ? "-" : H(CurrentCourse.Teachers.TeacherName) %></dd>
+
+            <dt>øŒ≥Ã¿‡±</dt>
+            <dd><%= H(CourseTypeText(CurrentCourse.CourseType)) %></dd>
+        </dl>
+    </div>
+    <p>
+        <a class="btn btn-primary" href='EditCourse.aspx?id=<%= CurrentCourse.CourseID %>'>±‡º≠</a>
+        <a class="btn btn-default" href="CourseList.aspx">∑µªÿ¡–±Ì</a>
+    </p>
+<% } %>
+
+<!--#include file="_AdminLayoutBottom.inc" -->

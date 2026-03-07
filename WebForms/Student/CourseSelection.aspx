@@ -1,4 +1,4 @@
-ï»¿<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
 <%@ Import Namespace="System" %>
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="System.Linq" %>
@@ -22,7 +22,7 @@
         var currentUser = Session["User"] as Users;
         if (currentUser == null || currentUser.Role != 2)
         {
-            Response.Redirect("~/WebForms/Login.aspx", true);
+            Response.Redirect("~/Login.aspx", true);
             return;
         }
 
@@ -31,7 +31,7 @@
             var student = db.Students.FirstOrDefault(s => s.UserID == currentUser.UserID);
             if (student == null)
             {
-                Response.Redirect("~/WebForms/Login.aspx", true);
+                Response.Redirect("~/Login.aspx", true);
                 return;
             }
 
@@ -52,7 +52,7 @@
         int courseId;
         if (!int.TryParse(Request.Form["courseId"], out courseId))
         {
-            SetFlash("danger", "è¯¾ç¨‹å‚æ•°æ— æ•ˆã€‚");
+            SetFlash("danger", "¿Î³Ì²ÎÊıÎŞĞ§¡£");
             Response.Redirect("CourseSelection.aspx", true);
             return;
         }
@@ -60,7 +60,7 @@
         var course = db.Courses.Find(courseId);
         if (course == null)
         {
-            SetFlash("danger", "è¯¾ç¨‹ä¸å­˜åœ¨ã€‚");
+            SetFlash("danger", "¿Î³Ì²»´æÔÚ¡£");
             Response.Redirect("CourseSelection.aspx", true);
             return;
         }
@@ -70,7 +70,7 @@
             var isEnrolled = db.StudentCourses.Any(sc => sc.StudentID == studentId && sc.CourseID == courseId);
             if (isEnrolled)
             {
-                SetFlash("danger", "æ‚¨å·²ç»é€‰è¿‡è¿™é—¨è¯¾äº†ã€‚");
+                SetFlash("danger", "ÄúÒÑ¾­Ñ¡¹ıÕâÃÅ¿ÎÁË¡£");
                 Response.Redirect("CourseSelection.aspx", true);
                 return;
             }
@@ -80,7 +80,7 @@
                 var hasPE = db.StudentCourses.Any(sc => sc.StudentID == studentId && sc.Courses.CourseType == 5);
                 if (hasPE)
                 {
-                    SetFlash("danger", "ä½“è‚²é€‰ä¿®è¯¾æ¯äººé™é€‰ä¸€é—¨ï¼Œè¯·å…ˆé€€é€‰åŸä½“è‚²è¯¾åå†é€‰ï¼");
+                    SetFlash("danger", "ÌåÓıÑ¡ĞŞ¿ÎÃ¿ÈËÏŞÑ¡Ò»ÃÅ£¬ÇëÏÈÍËÑ¡Ô­ÌåÓı¿ÎºóÔÙÑ¡£¡");
                     Response.Redirect("CourseSelection.aspx", true);
                     return;
                 }
@@ -93,7 +93,7 @@
                 Grade = null
             });
             db.SaveChanges();
-            SetFlash("success", "é€‰è¯¾æˆåŠŸï¼");
+            SetFlash("success", "Ñ¡¿Î³É¹¦£¡");
             Response.Redirect("CourseSelection.aspx", true);
             return;
         }
@@ -102,7 +102,7 @@
         {
             if (course.CourseType == 1 || course.CourseType == 2)
             {
-                SetFlash("danger", "å¿…ä¿®è¯¾ç¨‹ä¸ºæ•™åŠ¡å¤„ç»Ÿä¸€æ’è¯¾ï¼Œå­¦ç”Ÿä¸å¯è‡ªè¡Œé€€é€‰ï¼");
+                SetFlash("danger", "±ØĞŞ¿Î³ÌÎª½ÌÎñ´¦Í³Ò»ÅÅ¿Î£¬Ñ§Éú²»¿É×ÔĞĞÍËÑ¡£¡");
                 Response.Redirect("CourseSelection.aspx", true);
                 return;
             }
@@ -112,18 +112,18 @@
             {
                 db.StudentCourses.Remove(enrollment);
                 db.SaveChanges();
-                SetFlash("success", "é€€è¯¾æˆåŠŸï¼");
+                SetFlash("success", "ÍË¿Î³É¹¦£¡");
             }
             else
             {
-                SetFlash("danger", "æœªæ‰¾åˆ°è¯¥é€‰è¯¾è®°å½•ã€‚");
+                SetFlash("danger", "Î´ÕÒµ½¸ÃÑ¡¿Î¼ÇÂ¼¡£");
             }
 
             Response.Redirect("CourseSelection.aspx", true);
             return;
         }
 
-        SetFlash("danger", "ä¸æ”¯æŒçš„æ“ä½œã€‚");
+        SetFlash("danger", "²»Ö§³ÖµÄ²Ù×÷¡£");
         Response.Redirect("CourseSelection.aspx", true);
     }
 
@@ -192,12 +192,12 @@
     {
         switch (t)
         {
-            case 1: return "ä¸“ä¸šå¿…ä¿®";
-            case 2: return "å…¬å…±/æ€æ”¿å¿…ä¿®";
-            case 3: return "ä¸“ä¸šé€‰ä¿®";
-            case 4: return "å…¬å…±é€‰ä¿®";
-            case 5: return "ä½“è‚²é€‰ä¿®";
-            default: return "æœªçŸ¥";
+            case 1: return "×¨Òµ±ØĞŞ";
+            case 2: return "¹«¹²/Ë¼Õş±ØĞŞ";
+            case 3: return "×¨ÒµÑ¡ĞŞ";
+            case 4: return "¹«¹²Ñ¡ĞŞ";
+            case 5: return "ÌåÓıÑ¡ĞŞ";
+            default: return "Î´Öª";
         }
     }
 
@@ -210,24 +210,24 @@
 
     protected string TeacherName(Courses c)
     {
-        return c != null && c.Teachers != null ? c.Teachers.TeacherName : "å¾…åˆ†é…";
+        return c != null && c.Teachers != null ? c.Teachers.TeacherName : "´ı·ÖÅä";
     }
 
     protected string RenderScheduleHtml(int courseId)
     {
         if (!ScheduleMap.ContainsKey(courseId) || !ScheduleMap[courseId].Any())
         {
-            return "<small class='text-muted'>æ—¶é—´åœ°ç‚¹å¾…å®š</small>";
+            return "<small class='text-muted'>Ê±¼äµØµã´ı¶¨</small>";
         }
 
-        var dayNames = new[] { "", "å‘¨ä¸€", "å‘¨äºŒ", "å‘¨ä¸‰", "å‘¨å››", "å‘¨äº”", "å‘¨å…­", "å‘¨æ—¥" };
+        var dayNames = new[] { "", "ÖÜÒ»", "ÖÜ¶ş", "ÖÜÈı", "ÖÜËÄ", "ÖÜÎå", "ÖÜÁù", "ÖÜÈÕ" };
         var sb = new StringBuilder();
         foreach (var s in ScheduleMap[courseId])
         {
-            var day = s.DayOfWeek >= 1 && s.DayOfWeek <= 7 ? dayNames[s.DayOfWeek] : "æœªçŸ¥";
+            var day = s.DayOfWeek >= 1 && s.DayOfWeek <= 7 ? dayNames[s.DayOfWeek] : "Î´Öª";
             sb.Append("<div style='margin-bottom:4px;'>");
-            sb.Append("<span class='badge bg-secondary'>ç¬¬" + s.StartWeek + "-" + s.EndWeek + "å‘¨</span> ");
-            sb.Append("<span class='badge bg-secondary'>" + day + " ç¬¬" + s.StartPeriod + "-" + s.EndPeriod + "èŠ‚</span> ");
+            sb.Append("<span class='badge bg-secondary'>µÚ" + s.StartWeek + "-" + s.EndWeek + "ÖÜ</span> ");
+            sb.Append("<span class='badge bg-secondary'>" + day + " µÚ" + s.StartPeriod + "-" + s.EndPeriod + "½Ú</span> ");
             sb.Append("<span class='badge bg-success'>" + HttpUtility.HtmlEncode(s.Classroom) + "</span>");
             sb.Append("</div>");
         }
@@ -256,7 +256,7 @@
             }
         })();
     </script>
-    <title>åœ¨çº¿é€‰è¯¾</title>
+    <title>ÔÚÏßÑ¡¿Î</title>
     <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
     <link href="<%= ResolveUrl("~/Content/theme-system.css") %>" rel="stylesheet" />
     <link href="<%= ResolveUrl("~/Content/webforms-student-layout.css") %>" rel="stylesheet" />
@@ -271,48 +271,48 @@
         <div class="sidebar-overlay"></div>
         <aside class="sidebar">
             <div class="sidebar-header">
-                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="æ ¡å¾½" class="sidebar-logo-img" />
+                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="Ğ£»Õ" class="sidebar-logo-img" />
             </div>
             <ul class="sidebar-menu">
-                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">ä¸ªäººä¸­å¿ƒ</a></li>
-                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">æˆ‘çš„è¯¾è¡¨</a></li>
-                <li><a class="<%= Active("CourseSelection.aspx") %>" href="CourseSelection.aspx">åœ¨çº¿é€‰è¯¾</a></li>
-                <li><a class="<%= Active("MyExams.aspx") %>" href="MyExams.aspx">æˆ‘çš„è€ƒè¯•</a></li>
-                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">ä¿®æ”¹å¯†ç </a></li>
+                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">¸öÈËÖĞĞÄ</a></li>
+                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">ÎÒµÄ¿Î±í</a></li>
+                <li><a class="<%= Active("CourseSelection.aspx") %>" href="CourseSelection.aspx">ÔÚÏßÑ¡¿Î</a></li>
+                <li><a class="<%= Active("MyExams.aspx") %>" href="MyExams.aspx">ÎÒµÄ¿¼ÊÔ</a></li>
+                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">ĞŞ¸ÄÃÜÂë</a></li>
             </ul>
         </aside>
 
         <div class="main-content">
             <header class="header-bar">
                 <div class="header-left">
-                    <button class="hamburger-menu" type="button" aria-label="èœå•">&#9776;</button>
+                    <button class="hamburger-menu" type="button" aria-label="²Ëµ¥">&#9776;</button>
                 </div>
                 <div class="header-right">
-                    <button class='dark-toggle-btn' type='button'>æš—è‰²æ¨¡å¼</button>
+                    <button class='dark-toggle-btn' type='button'>°µÉ«Ä£Ê½</button>
                     <div class="user-info">
-                        <span class="username">æ¬¢è¿æ‚¨, <%= ((Session["User"] as Users)?.Username ?? "å­¦ç”Ÿ") %></span>
+                        <span class="username">»¶Ó­Äú, <%= ((Session["User"] as Users)?.Username ?? "Ñ§Éú") %></span>
                         <span class="sep">|</span>
-                        <a class="logout-link" href="../Logout.aspx">å®‰å…¨é€€å‡º</a>
+                        <a class="logout-link" href="../Logout.aspx">°²È«ÍË³ö</a>
                     </div>
                 </div>
             </header>
             <main class="content-body">
                 <div class="container-fluid">
-        <h2>åœ¨çº¿é€‰è¯¾ä¸é€€é€‰</h2>
-        <p class="text-muted">è¯·æ ¹æ®åŸ¹å…»è®¡åˆ’è¦æ±‚ï¼Œå®Œæˆæœ¬å­¦æœŸè¯¾ç¨‹é€‰æ‹©ã€‚</p>
+        <h2>ÔÚÏßÑ¡¿ÎÓëÍËÑ¡</h2>
+        <p class="text-muted">Çë¸ù¾İÅàÑø¼Æ»®ÒªÇó£¬Íê³É±¾Ñ§ÆÚ¿Î³ÌÑ¡Ôñ¡£</p>
 
         <% if (!string.IsNullOrEmpty(MessageText)) { %>
             <div class="alert alert-<%= MessageType %>"><%= MessageText %></div>
         <% } %>
 
         <div class="alert alert-warning" style="padding:10px; margin-bottom:15px;">
-            <strong>æ³¨æ„ï¼š</strong> å¸¦æœ‰ <span class="badge bg-danger">å¿…ä¿®</span> æ ‡è®°çš„è¯¾ç¨‹ä¸å¯è‡ªè¡Œé€€é€‰ã€‚
+            <strong>×¢Òâ£º</strong> ´øÓĞ <span class="badge bg-danger">±ØĞŞ</span> ±ê¼ÇµÄ¿Î³Ì²»¿É×ÔĞĞÍËÑ¡¡£
         </div>
 
         <div class="mb-3">
-            <button class="btn btn-primary tab-btn active" data-target="my-selected">æˆ‘çš„å·²é€‰è¯¾ç¨‹ <span class="badge bg-light text-dark"><%= EnrolledCourses.Count %></span></button>
-            <button class="btn btn-light tab-btn" data-target="sports-market">ä½“è‚²é€‰ä¿®åŒº</button>
-            <button class="btn btn-light tab-btn" data-target="other-market">å…¶ä»–é€‰ä¿®åŒº</button>
+            <button class="btn btn-primary tab-btn active" data-target="my-selected">ÎÒµÄÒÑÑ¡¿Î³Ì <span class="badge bg-light text-dark"><%= EnrolledCourses.Count %></span></button>
+            <button class="btn btn-light tab-btn" data-target="sports-market">ÌåÓıÑ¡ĞŞÇø</button>
+            <button class="btn btn-light tab-btn" data-target="other-market">ÆäËûÑ¡ĞŞÇø</button>
         </div>
 
         <div id="my-selected" class="tab-pane active">
@@ -320,11 +320,11 @@
                 <table class="table table-hover bg-white">
                     <thead>
                         <tr>
-                            <th>è¯¾ç¨‹åç§°</th>
-                            <th>æˆè¯¾æ•™å¸ˆ</th>
-                            <th>å­¦åˆ†</th>
-                            <th>ä¸Šè¯¾æ—¶é—´ä¸åœ°ç‚¹</th>
-                            <th style="width:130px;" class="text-center">æ“ä½œ</th>
+                            <th>¿Î³ÌÃû³Æ</th>
+                            <th>ÊÚ¿Î½ÌÊ¦</th>
+                            <th>Ñ§·Ö</th>
+                            <th>ÉÏ¿ÎÊ±¼äÓëµØµã</th>
+                            <th style="width:130px;" class="text-center">²Ù×÷</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -339,18 +339,18 @@
                                 <td><%= RenderScheduleHtml(item.CourseID) %></td>
                                 <td class="text-center">
                                     <% if (IsMustCourse(item.Courses)) { %>
-                                        <button type="button" class="btn btn-secondary btn-sm" disabled>ä¸å¯é€€é€‰</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" disabled>²»¿ÉÍËÑ¡</button>
                                     <% } else { %>
                                         <form method="post" style="display:inline;">
                                             <input type="hidden" name="op" value="withdraw" />
                                             <input type="hidden" name="courseId" value="<%= item.CourseID %>" />
-                                            <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('ç¡®å®šé€€é€‰è¯¥è¯¾ç¨‹å—ï¼Ÿ');">é€€é€‰</button>
+                                            <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('È·¶¨ÍËÑ¡¸Ã¿Î³ÌÂğ£¿');">ÍËÑ¡</button>
                                         </form>
                                     <% } %>
                                 </td>
                             </tr>
                         <% } } else { %>
-                            <tr><td colspan="5" class="text-center text-muted py-4">æ‚¨å½“å‰è¯¾è¡¨ä¸ºç©ºã€‚</td></tr>
+                            <tr><td colspan="5" class="text-center text-muted py-4">Äúµ±Ç°¿Î±íÎª¿Õ¡£</td></tr>
                         <% } %>
                     </tbody>
                 </table>
@@ -358,10 +358,10 @@
         </div>
 
         <div id="sports-market" class="tab-pane">
-            <div class="alert alert-success">ä½“è‚²é€‰ä¿®è¯¾æ¯äººæ¯å­¦æœŸé™é€‰ 1 é—¨ï¼Œæ‚¨å½“å‰å·²é€‰ <strong><%= SportsCoursesTaken %></strong> é—¨ã€‚</div>
+            <div class="alert alert-success">ÌåÓıÑ¡ĞŞ¿ÎÃ¿ÈËÃ¿Ñ§ÆÚÏŞÑ¡ 1 ÃÅ£¬Äúµ±Ç°ÒÑÑ¡ <strong><%= SportsCoursesTaken %></strong> ÃÅ¡£</div>
             <div class="table-responsive">
                 <table class="table table-hover bg-white">
-                    <thead><tr><th>è¯¾ç¨‹åç§°</th><th>æ•™å¸ˆ</th><th>å­¦åˆ†</th><th>æ—¶é—´</th><th class="text-center" style="width:100px;">æ“ä½œ</th></tr></thead>
+                    <thead><tr><th>¿Î³ÌÃû³Æ</th><th>½ÌÊ¦</th><th>Ñ§·Ö</th><th>Ê±¼ä</th><th class="text-center" style="width:100px;">²Ù×÷</th></tr></thead>
                     <tbody>
                         <% if (SportsElectives.Any()) { foreach (var c in SportsElectives) { %>
                             <tr>
@@ -373,12 +373,12 @@
                                     <form method="post" style="display:inline;">
                                         <input type="hidden" name="op" value="select" />
                                         <input type="hidden" name="courseId" value="<%= c.CourseID %>" />
-                                        <button type="submit" class="btn btn-success btn-sm">é€‰è¯¾</button>
+                                        <button type="submit" class="btn btn-success btn-sm">Ñ¡¿Î</button>
                                     </form>
                                 </td>
                             </tr>
                         <% } } else { %>
-                            <tr><td colspan="5" class="text-center text-muted py-4">æš‚æ— å¯é€‰ä½“è‚²è¯¾ã€‚</td></tr>
+                            <tr><td colspan="5" class="text-center text-muted py-4">ÔİÎŞ¿ÉÑ¡ÌåÓı¿Î¡£</td></tr>
                         <% } %>
                     </tbody>
                 </table>
@@ -386,10 +386,10 @@
         </div>
 
         <div id="other-market" class="tab-pane">
-            <div class="alert alert-info">å…¬å…±é€‰ä¿®è¯¾ç¨‹å½“å‰å·²é€‰ <strong><%= OtherCoursesTaken %></strong> é—¨ã€‚</div>
+            <div class="alert alert-info">¹«¹²Ñ¡ĞŞ¿Î³Ìµ±Ç°ÒÑÑ¡ <strong><%= OtherCoursesTaken %></strong> ÃÅ¡£</div>
             <div class="table-responsive">
                 <table class="table table-hover bg-white">
-                    <thead><tr><th>è¯¾ç¨‹åç§°</th><th>æ•™å¸ˆ</th><th>å­¦åˆ†</th><th>æ—¶é—´</th><th class="text-center" style="width:100px;">æ“ä½œ</th></tr></thead>
+                    <thead><tr><th>¿Î³ÌÃû³Æ</th><th>½ÌÊ¦</th><th>Ñ§·Ö</th><th>Ê±¼ä</th><th class="text-center" style="width:100px;">²Ù×÷</th></tr></thead>
                     <tbody>
                         <% if (OtherElectives.Any()) { foreach (var c in OtherElectives) { %>
                             <tr>
@@ -401,12 +401,12 @@
                                     <form method="post" style="display:inline;">
                                         <input type="hidden" name="op" value="select" />
                                         <input type="hidden" name="courseId" value="<%= c.CourseID %>" />
-                                        <button type="submit" class="btn btn-success btn-sm">é€‰è¯¾</button>
+                                        <button type="submit" class="btn btn-success btn-sm">Ñ¡¿Î</button>
                                     </form>
                                 </td>
                             </tr>
                         <% } } else { %>
-                            <tr><td colspan="5" class="text-center text-muted py-4">æš‚æ— å¯é€‰å…¬å…±é€‰ä¿®è¯¾ã€‚</td></tr>
+                            <tr><td colspan="5" class="text-center text-muted py-4">ÔİÎŞ¿ÉÑ¡¹«¹²Ñ¡ĞŞ¿Î¡£</td></tr>
                         <% } %>
                     </tbody>
                 </table>
@@ -432,6 +432,7 @@
     </script>
 </body>
 </html>
+
 
 
 

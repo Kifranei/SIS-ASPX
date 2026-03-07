@@ -1,86 +1,93 @@
-Ôªø<%@ Page Language="C#" AutoEventWireup="true" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
-<%@ Import Namespace="StudentInformationSystem.Models" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
+<!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
-    protected string SourceView = "Views/Admin/AddClass.cshtml";
-    protected void EnsureRole()
-    {
-        var currentUser = Session["User"] as Users;
-        if (currentUser == null || currentUser.Role != 0)
-        {
-            Response.Redirect("~/WebForms/Login.aspx", true);
-            return;
-        }
-    }
+    protected string MessageText = string.Empty;
+    protected string FormMajor = string.Empty;
+    protected string FormAcademicYear = string.Empty;
+    protected string FormClassNumber = string.Empty;
+
     protected void Page_Load(object sender, EventArgs e)
     {
-        EnsureRole();
-        if (TryRedirectToMvc())
+        PageTitle = "ÃÌº”∞‡º∂";
+        if (!EnsureAdminRole())
         {
             return;
         }
-    }
 
-    protected bool TryRedirectToMvc()
-    {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
+        if (!Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase))
         {
-            return false;
+            return;
         }
 
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
+        FormMajor = (Request.Form["Major"] ?? string.Empty).Trim();
+        FormAcademicYear = (Request.Form["AcademicYear"] ?? string.Empty).Trim();
+        FormClassNumber = (Request.Form["ClassNumber"] ?? string.Empty).Trim();
 
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
+        int year;
+        int classNumber;
+        if (string.IsNullOrWhiteSpace(FormMajor) || !int.TryParse(FormAcademicYear, out year) || !int.TryParse(FormClassNumber, out classNumber))
         {
-            return false;
+            MessageText = "«Î’˝»∑ÃÓ–¥◊®“µ°¢—ßƒÍ∫Õ∞‡∫≈°£";
+            return;
         }
 
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
+        var className = FormMajor + year.ToString().Substring(2, 2) + classNumber.ToString("D2") + "∞‡";
+        using (var db = new StudentManagementDBEntities())
         {
-            return false;
+            var classModel = new Classes
+            {
+                Major = FormMajor,
+                AcademicYear = year,
+                ClassNumber = classNumber,
+                ClassName = className
+            };
+            db.Classes.Add(classModel);
+            db.SaveChanges();
+            Response.Redirect("ClassList.aspx", true);
         }
-
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
-
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
-        }
-
-        Response.Redirect(target, true);
-        return true;
     }
 </script>
 
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head runat="server">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin/AddClass</title>
-    <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
-</head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            Ê≠£Âú®Ë∑≥ËΩ¨Âà∞ÂéüÈ°µÈù¢Ôºö<code><%= SourceView %></code>
+<!--#include file="_AdminLayoutTop.inc" -->
+
+<h2>ÃÌº”∞‡º∂</h2>
+
+<% if (!string.IsNullOrEmpty(MessageText)) { %>
+    <div class="alert alert-danger"><%= H(MessageText) %></div>
+<% } %>
+
+<form method="post" class="form-horizontal" style="max-width:900px;">
+    <h4>∞‡º∂–≈œ¢</h4>
+    <hr />
+
+    <div class="form-group">
+        <label class="control-label col-md-2">◊®“µ</label>
+        <div class="col-md-10">
+            <input class="form-control" name="Major" value="<%= H(FormMajor) %>" required />
         </div>
     </div>
-</body>
-</html>
 
+    <div class="form-group">
+        <label class="control-label col-md-2">—ßƒÍ</label>
+        <div class="col-md-10">
+            <input class="form-control" name="AcademicYear" value="<%= H(FormAcademicYear) %>" required />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">∞‡∫≈</label>
+        <div class="col-md-10">
+            <input class="form-control" name="ClassNumber" value="<%= H(FormClassNumber) %>" required />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <button type="submit" class="btn btn-success">¥¥Ω®</button>
+            <a class="btn btn-default" href="ClassList.aspx">∑µªÿ¡–±Ì</a>
+        </div>
+    </div>
+</form>
+
+<!--#include file="_AdminLayoutBottom.inc" -->

@@ -1,86 +1,60 @@
-Ôªø<%@ Page Language="C#" AutoEventWireup="true" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.IO" %>
-<%@ Import Namespace="StudentInformationSystem.Models" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
+<!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
-    protected string SourceView = "Views/Admin/DetailsTeacher.cshtml";
-    protected void EnsureRole()
-    {
-        var currentUser = Session["User"] as Users;
-        if (currentUser == null || currentUser.Role != 0)
-        {
-            Response.Redirect("~/WebForms/Login.aspx", true);
-            return;
-        }
-    }
+    protected Teachers CurrentTeacher;
+    protected string MessageText = string.Empty;
+
     protected void Page_Load(object sender, EventArgs e)
     {
-        EnsureRole();
-        if (TryRedirectToMvc())
+        PageTitle = "ΩÃ ¶œÍ«È";
+        if (!EnsureAdminRole())
         {
             return;
         }
-    }
 
-    protected bool TryRedirectToMvc()
-    {
-        var normalized = (SourceView ?? string.Empty).Replace('\\', '/');
-        var parts = normalized.Split('/');
-        if (parts.Length < 3)
+        var id = (Request.QueryString["id"] ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(id))
         {
-            return false;
+            MessageText = "»±…ŸΩÃ ¶ID≤Œ ˝°£";
+            return;
         }
 
-        var controller = parts[1];
-        var viewFile = parts[2];
-        var action = Path.GetFileNameWithoutExtension(viewFile);
-
-        if (string.IsNullOrWhiteSpace(controller) || string.IsNullOrWhiteSpace(action))
+        using (var db = new StudentManagementDBEntities())
         {
-            return false;
+            CurrentTeacher = db.Teachers.Find(id);
         }
 
-        if (controller.Equals("Shared", StringComparison.OrdinalIgnoreCase) || action.StartsWith("_", StringComparison.Ordinal))
+        if (CurrentTeacher == null)
         {
-            return false;
+            MessageText = "ΩÃ ¶≤ª¥Ê‘⁄°£";
         }
-
-        string target;
-        if (controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && action.Equals("Login", StringComparison.OrdinalIgnoreCase))
-        {
-            target = "~/WebForms/Login.aspx";
-        }
-        else
-        {
-            target = "~/" + controller + "/" + action;
-        }
-
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs))
-        {
-            target += qs;
-        }
-
-        Response.Redirect(target, true);
-        return true;
     }
 </script>
 
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head runat="server">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin/DetailsTeacher</title>
-    <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
-</head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="alert alert-info">
-            Ê≠£Âú®Ë∑≥ËΩ¨Âà∞ÂéüÈ°µÈù¢Ôºö<code><%= SourceView %></code>
-        </div>
-    </div>
-</body>
-</html>
+<!--#include file="_AdminLayoutTop.inc" -->
 
+<h2>ΩÃ ¶œÍ«È</h2>
+
+<% if (!string.IsNullOrEmpty(MessageText)) { %>
+    <div class="alert alert-danger"><%= H(MessageText) %></div>
+<% } else { %>
+    <h4><%= H(CurrentTeacher.TeacherName) %></h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>ΩÃ ¶π§∫≈</dt>
+        <dd><%= H(CurrentTeacher.TeacherID) %></dd>
+
+        <dt>–’√˚</dt>
+        <dd><%= H(CurrentTeacher.TeacherName) %></dd>
+
+        <dt>÷∞≥∆</dt>
+        <dd><%= H(CurrentTeacher.Title) %></dd>
+    </dl>
+    <p>
+        <a class="btn btn-primary" href='EditTeacher.aspx?id=<%= Server.UrlEncode(CurrentTeacher.TeacherID) %>'>±‡º≠</a>
+        <a class="btn btn-default" href="TeacherList.aspx">∑µªÿ¡–±Ì</a>
+    </p>
+<% } %>
+
+<!--#include file="_AdminLayoutBottom.inc" -->

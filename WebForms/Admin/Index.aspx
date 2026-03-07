@@ -1,20 +1,140 @@
-ï»¿<%@ Page Language="C#" AutoEventWireup="true" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="StudentInformationSystem.Models" %>
+<%@ Page Language="C#" AutoEventWireup="true" %>
+<!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
+    protected int StudentsCount;
+    protected int TeachersCount;
+    protected int CoursesCount;
+    protected int EnrollmentsCount;
+    protected string ServerName = string.Empty;
+    protected string ServerSoftware = string.Empty;
+    protected string DotNetVersion = string.Empty;
+    protected double MemoryUsage;
+    protected DateTime StartTime;
+    protected TimeSpan RunningTime;
+
     protected void Page_Load(object sender, EventArgs e)
     {
-        var currentUser = Session["User"] as Users;
-        if (currentUser == null || currentUser.Role != 0)
+        PageTitle = "¹ÜÀíÔ±¿ØÖÆÌ¨";
+        if (!EnsureAdminRole())
         {
-            Response.Redirect("~/WebForms/Login.aspx", true);
             return;
         }
 
-        var target = "~/Admin/Index";
-        var qs = Request?.Url?.Query;
-        if (!string.IsNullOrEmpty(qs)) target += qs;
-        Response.Redirect(target, true);
+        using (var db = new StudentManagementDBEntities())
+        {
+            StudentsCount = db.Students.Count();
+            TeachersCount = db.Teachers.Count();
+            CoursesCount = db.Courses.Count();
+            EnrollmentsCount = db.StudentCourses.Count();
+        }
+
+        var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+        ServerName = Environment.MachineName;
+        ServerSoftware = Request.ServerVariables["SERVER_SOFTWARE"] ?? "-";
+        DotNetVersion = Environment.Version.ToString();
+        MemoryUsage = Math.Round(currentProcess.WorkingSet64 / 1024.0 / 1024.0, 2);
+        StartTime = currentProcess.StartTime;
+        RunningTime = DateTime.Now - currentProcess.StartTime;
     }
 </script>
+
+<!--#include file="_AdminLayoutTop.inc" -->
+
+<div class="jumbotron">
+    <h1>¹ÜÀíÔ±¿ØÖÆÌ¨</h1>
+    <p class="lead">»¶Ó­»ØÀ´£¬¹ÜÀíÔ±£¡ÒÔÏÂÊÇµ±Ç°ÏµÍ³µÄºËÐÄÊý¾ÝÍ³¼Æ¡£</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-3 col-md-6">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3"><i class="glyphicon glyphicon-user" style="font-size:50px;"></i></div>
+                    <div class="col-xs-9 text-right">
+                        <div style="font-size:40px;"><%= StudentsCount %></div>
+                        <div>Ñ§Éú×ÜÊý</div>
+                    </div>
+                </div>
+            </div>
+            <a href="StudentList.aspx"><div class="panel-footer"><span class="pull-left">²é¿´ÏêÇé</span><span class="pull-right"><i class="glyphicon glyphicon-circle-arrow-right"></i></span><div class="clearfix"></div></div></a>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="panel panel-green">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3"><i class="glyphicon glyphicon-education" style="font-size:50px;"></i></div>
+                    <div class="col-xs-9 text-right">
+                        <div style="font-size:40px;"><%= TeachersCount %></div>
+                        <div>½ÌÊ¦×ÜÊý</div>
+                    </div>
+                </div>
+            </div>
+            <a href="TeacherList.aspx"><div class="panel-footer"><span class="pull-left">²é¿´ÏêÇé</span><span class="pull-right"><i class="glyphicon glyphicon-circle-arrow-right"></i></span><div class="clearfix"></div></div></a>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="panel panel-yellow">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3"><i class="glyphicon glyphicon-list-alt" style="font-size:50px;"></i></div>
+                    <div class="col-xs-9 text-right">
+                        <div style="font-size:40px;"><%= CoursesCount %></div>
+                        <div>¿Î³Ì×ÜÊý</div>
+                    </div>
+                </div>
+            </div>
+            <a href="CourseList.aspx"><div class="panel-footer"><span class="pull-left">²é¿´ÏêÇé</span><span class="pull-right"><i class="glyphicon glyphicon-circle-arrow-right"></i></span><div class="clearfix"></div></div></a>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="panel panel-red">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3"><i class="glyphicon glyphicon-check" style="font-size:50px;"></i></div>
+                    <div class="col-xs-9 text-right">
+                        <div style="font-size:40px;"><%= EnrollmentsCount %></div>
+                        <div>×ÜÑ¡¿ÎÈË´Î</div>
+                    </div>
+                </div>
+            </div>
+            <a href="EnrollmentList.aspx"><div class="panel-footer"><span class="pull-left">²é¿´ÏêÇé</span><span class="pull-right"><i class="glyphicon glyphicon-circle-arrow-right"></i></span><div class="clearfix"></div></div></a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="glyphicon glyphicon-hdd"></i> ·þÎñÆ÷×´Ì¬</h3>
+            </div>
+            <div class="panel-body">
+                <ul class="list-group">
+                    <li class="list-group-item"><strong>·þÎñÆ÷Ãû³Æ:</strong> <%= H(ServerName) %></li>
+                    <li class="list-group-item"><strong>Web ·þÎñÆ÷:</strong> <%= H(ServerSoftware) %></li>
+                    <li class="list-group-item"><strong>.NET Framework °æ±¾:</strong> <%= H(DotNetVersion) %></li>
+                    <li class="list-group-item"><strong>Ó¦ÓÃ³ÌÐòÄÚ´æÕ¼ÓÃ:</strong> <%= MemoryUsage %> MB</li>
+                    <li class="list-group-item"><strong>Æô¶¯Ê±¼ä:</strong> <%= StartTime.ToString("yyyy-MM-dd HH:mm:ss") %></li>
+                    <li class="list-group-item"><strong>ÒÑÔËÐÐÊ±³¤:</strong> <%= RunningTime.ToString(@"d\Ìì\ hh\:mm\:ss") %></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .panel-green { border-color: #5cb85c; }
+    .panel-green .panel-heading { border-color: #5cb85c; color: #fff; background-color: #5cb85c; }
+    .panel-yellow { border-color: #f0ad4e; }
+    .panel-yellow .panel-heading { border-color: #f0ad4e; color: #fff; background-color: #f0ad4e; }
+    .panel-red { border-color: #d9534f; }
+    .panel-red .panel-heading { border-color: #d9534f; color: #fff; background-color: #d9534f; }
+</style>
+
+<!--#include file="_AdminLayoutBottom.inc" -->
