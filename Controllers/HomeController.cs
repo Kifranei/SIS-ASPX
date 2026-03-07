@@ -11,7 +11,7 @@ namespace StudentInformationSystem.Controllers
         public ActionResult Index()
         {
             // 将其重定向到 AccountController 的 Login 方法
-            return RedirectToAction("Login", "Account");
+            return Redirect("~/WebForms/Login.aspx");
         }
 
         public ActionResult About()

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using System.Web.Routing;
 
 namespace StudentInformationSystem.Controllers
 {
@@ -17,15 +16,9 @@ namespace StudentInformationSystem.Controllers
             // 检查Session中是否存有用户信息
             if (Session["User"] == null)
             {
-                // 如果没有登录，就直接重定向到登录页面
-                filterContext.Result = new RedirectToRouteResult(
-                    new RouteValueDictionary
-                    {
-                        { "controller", "Account" },
-                        { "action", "Login" }
-                    });
+                // 如果没有登录，就统一重定向到 Web Forms 登录页
+                filterContext.Result = new RedirectResult("~/WebForms/Login.aspx");
             }
         }
     }
 }
-

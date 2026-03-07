@@ -249,9 +249,41 @@ namespace StudentInformationSystem.Controllers
 
                 System.Web.Security.FormsAuthentication.SetAuthCookie(user.Username, true);
 
-                string redirectUrl = "/Student/Index";
-                if (user.Role == 0) redirectUrl = "/Admin/Index";
-                else if (user.Role == 1) redirectUrl = "/Teacher/Index";
+                                var useWebForms = false;
+                var referer = Request?.UrlReferrer?.AbsolutePath ?? string.Empty;
+                if (referer.IndexOf("/WebForms/", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    useWebForms = true;
+                }
+
+                var useWebFormsSession = Session["UseWebForms"];
+                if (useWebFormsSession is bool b && b)
+                {
+                    useWebForms = true;
+                }
+                else if (useWebFormsSession is string s && (s == "1" || s.Equals("true", StringComparison.OrdinalIgnoreCase)))
+                {
+                    useWebForms = true;
+                }
+
+                string redirectUrl;
+                if (useWebForms)
+                {
+                    if (user.Role == 0) redirectUrl = "/WebForms/Admin/Index.aspx";
+                    else if (user.Role == 1) redirectUrl = "/WebForms/Teacher/Index.aspx";
+                    else redirectUrl = "/WebForms/Student/Index.aspx";
+                }
+                else
+                {
+                    redirectUrl = "/Student/Index";
+                    if (user.Role == 0) redirectUrl = "/Admin/Index";
+                    else if (user.Role == 1) redirectUrl = "/Teacher/Index";
+                }
+
+                if (useWebForms)
+                {
+                    Session["UseWebForms"] = true;
+                }
 
                 return Json(new { status = "ok", redirectUrl = redirectUrl });
             }

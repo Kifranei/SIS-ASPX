@@ -1,0 +1,229 @@
+﻿html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+body.webforms-student {
+    font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+    background-color: var(--bg-color, #f4f6fb);
+    color: var(--text-color-primary, #1f2937);
+    overflow-x: hidden;
+}
+
+body.webforms-student.transitions-enabled,
+body.webforms-student.transitions-enabled .sidebar,
+body.webforms-student.transitions-enabled .main-content,
+body.webforms-student.transitions-enabled .header-bar,
+body.webforms-student.transitions-enabled .sidebar-menu li a {
+    transition: background-color 0.3s, color 0.3s, left 0.3s ease, margin-left 0.3s ease;
+}
+
+.page-wrapper {
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 240px;
+    background-color: var(--sidebar-bg, #111827);
+    border-right: 1px solid var(--border-color, #374151);
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    height: 60px;
+    border-bottom: 1px solid var(--border-color, #374151);
+    box-sizing: border-box;
+}
+
+.sidebar-logo-img {
+    display: block;
+}
+
+body.webforms-student:not(.dark-mode) .sidebar-logo-img {
+    filter: invert(1);
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 10px 0;
+    margin: 0;
+    flex-grow: 1;
+}
+
+.sidebar-menu li a {
+    display: block;
+    color: var(--text-color-secondary, #d1d5db);
+    padding: 12px 25px;
+    text-decoration: none;
+    font-size: 15px;
+    border-radius: 5px;
+    margin: 5px 10px;
+    text-align: center;
+    position: relative;
+}
+
+.sidebar-menu li a:hover {
+    background-color: var(--menu-hover-bg, #1f2937);
+}
+
+.sidebar-menu li a.active {
+    background-color: var(--theme-primary, #2563eb);
+    color: var(--menu-active-text, #ffffff);
+}
+
+.main-content {
+    margin-left: 240px;
+    width: calc(100% - 240px);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header-bar {
+    height: 60px;
+    background: var(--header-bg, #ffffff);
+    border-bottom: 1px solid var(--border-color, #e5e7eb);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1000;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dark-toggle-btn {
+    background: #334155;
+    color: #ffffff;
+    border: none;
+    border-radius: 16px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.dark-toggle-btn:hover {
+    opacity: 0.92;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-info .username,
+.user-info a {
+    color: var(--text-color-secondary, #4b5563);
+    text-decoration: none;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.user-info .sep {
+    color: var(--text-color-secondary, #9ca3af);
+}
+
+.user-info a:hover,
+.logout-link:hover {
+    color: var(--theme-primary, #2563eb);
+}
+
+.logout-link {
+    text-decoration: none;
+    color: var(--text-color-secondary, #4b5563);
+    font-size: 14px;
+}
+
+.hamburger-menu {
+    display: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--text-color-primary, #1f2937);
+    border: none;
+    background: transparent;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    line-height: 1;
+}
+
+.content-body {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.sidebar-overlay {
+    display: none;
+}
+
+@media screen and (max-width: 768px) {
+    .sidebar {
+        left: -240px;
+    }
+
+    .sidebar.visible {
+        left: 0;
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .header-bar {
+        padding: 0 12px;
+    }
+
+    .hamburger-menu {
+        display: block !important;
+    }
+
+    .user-info .username {
+        display: none;
+    }
+
+    .dark-toggle-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .content-body {
+        padding: 14px;
+    }
+
+    .sidebar-overlay.visible {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+    }
+}

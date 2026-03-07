@@ -9,7 +9,55 @@ namespace StudentInformationSystem.Controllers
     // 继承 BaseController 确保只有登录学生才能访问
     public class StudentController : BaseController
     {
-        private StudentManagementDBEntities db = new StudentManagementDBEntities();
+                private StudentManagementDBEntities db = new StudentManagementDBEntities();
+
+        protected override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            base.OnActionExecuting(filterContext);
+            if (filterContext.Result != null)
+            {
+                return;
+            }
+
+            var useWebFormsObj = Session["UseWebForms"];
+            var useWebForms = false;
+            if (useWebFormsObj is bool b)
+            {
+                useWebForms = b;
+            }
+            else if (useWebFormsObj is string s)
+            {
+                useWebForms = s.Equals("true", StringComparison.OrdinalIgnoreCase) || s == "1";
+            }
+
+            if (!useWebForms)
+            {
+                return;
+            }
+
+            if (!string.Equals(Request.HttpMethod, "GET", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            var actionName = filterContext.ActionDescriptor.ActionName;
+            var supportedActions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "Index",
+                "Timetable",
+                "CourseSelection",
+                "MyExams",
+                "ChangePassword"
+            };
+
+            if (!supportedActions.Contains(actionName))
+            {
+                return;
+            }
+
+            var query = Request?.Url?.Query ?? string.Empty;
+            filterContext.Result = new RedirectResult($"~/WebForms/Student/{actionName}.aspx{query}");
+        }
 
         // GET: Student/Index
         // 学生登录后的主页，即“我的成绩”页面
@@ -279,7 +327,7 @@ namespace StudentInformationSystem.Controllers
             var currentUser = Session["User"] as Users;
             if (currentUser == null)
             {
-                return RedirectToAction("Login", "Account");
+                return Redirect("~/WebForms/Login.aspx");
             }
 
             // 2. 根据 Session 中的用户信息，找到对应的学生 (Student)
@@ -301,3 +349,4 @@ namespace StudentInformationSystem.Controllers
 
     }
 }
+

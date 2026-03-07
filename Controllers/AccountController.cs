@@ -17,7 +17,8 @@ namespace StudentInformationSystem.Controllers
         // 当用户直接访问 /Account/Login 时，执行此方法
         public ActionResult Login()
         {
-            return View();
+            // 统一走 Web Forms 登录页，避免回到旧 cshtml 登录页
+            return Redirect("~/WebForms/Login.aspx");
         }
 
         // 2. POST请求: 处理用户提交的登录表单
@@ -52,10 +53,8 @@ namespace StudentInformationSystem.Controllers
             }
             else // 如果没找到用户
             {
-                // 在页面上显示错误提示
-                ViewBag.ErrorMessage = "用户名或密码错误！";
-                // 返回登录页面，让用户重新输入
-                return View();
+                // 兼容旧 POST 入口：失败后也回到 Web Forms 登录页
+                return Redirect("~/WebForms/Login.aspx");
             }
         }
 
@@ -64,8 +63,8 @@ namespace StudentInformationSystem.Controllers
         {
             // 清空Session，实现用户退出
             Session.Clear();
-            // 跳转回登录页面
-            return RedirectToAction("Login", "Account");
+            // 统一走 Web Forms 退出页，确保最终回到 Web Forms 登录页
+            return Redirect("~/WebForms/Logout.aspx");
         }
     }
 }
