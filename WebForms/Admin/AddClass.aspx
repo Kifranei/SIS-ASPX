@@ -32,6 +32,13 @@
             return;
         }
 
+        // 要求学年必须为四位数字（例如 2021），并在合理范围内，避免 Substring 越界
+        if (FormAcademicYear.Length != 4 || year < 1000 || year > DateTime.Now.Year + 1)
+        {
+            MessageText = "请填写四位学年，例如 2021。";
+            return;
+        }
+
         var className = FormMajor + year.ToString().Substring(2, 2) + classNumber.ToString("D2") + "班";
         using (var db = new StudentManagementDBEntities())
         {
@@ -91,3 +98,4 @@
 </form>
 
 <!--#include file="_AdminLayoutBottom.inc" -->
+
