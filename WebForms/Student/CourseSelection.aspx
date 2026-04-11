@@ -311,7 +311,7 @@
                 <div class="header-right">
                     <button class='dark-toggle-btn' type='button'>暗色模式</button>
                     <div class="user-info">
-                        <span class="username">欢迎您, <%= ((Session["User"] as Users)?.Username ?? "学生") %></span>
+                        <span class="username">欢迎您, <%= (Session["DisplayName"] as string) ?? ((Session["User"] as Users)?.Username ?? "学生") %></span>
                         <span class="sep">|</span>
                         <a class="logout-link" href="../Logout.aspx">安全退出</a>
                     </div>

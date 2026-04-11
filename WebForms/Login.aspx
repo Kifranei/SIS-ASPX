@@ -64,6 +64,7 @@
                 Password = user.Password,
                 Role = user.Role
             };
+            Session["DisplayName"] = ResolveDisplayName(db, user);
             Session["UseWebForms"] = true;
 
             Response.Redirect(GetHomeUrlByRole(user.Role), true);
@@ -75,6 +76,33 @@
         if (role == 0) return "~/Admin/Index.aspx";
         if (role == 1) return "~/Teacher/Index.aspx";
         return "~/Student/Index.aspx";
+    }
+
+    private string ResolveDisplayName(StudentManagementDBEntities db, Users user)
+    {
+        if (user == null)
+        {
+            return string.Empty;
+        }
+
+        if (user.Role == 2)
+        {
+            var studentName = db.Students.Where(s => s.UserID == user.UserID).Select(s => s.StudentName).FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(studentName))
+            {
+                return studentName;
+            }
+        }
+        else if (user.Role == 1)
+        {
+            var teacherName = db.Teachers.Where(t => t.UserID == user.UserID).Select(t => t.TeacherName).FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(teacherName))
+            {
+                return teacherName;
+            }
+        }
+
+        return user.Username ?? "用户";
     }
 </script>
 

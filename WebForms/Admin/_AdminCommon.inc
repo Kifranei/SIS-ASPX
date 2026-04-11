@@ -18,7 +18,11 @@
             return false;
         }
 
-        CurrentUsername = currentUser.Username ?? "\u7BA1\u7406\u5458";
+        CurrentUsername = Session["DisplayName"] as string;
+        if (string.IsNullOrWhiteSpace(CurrentUsername))
+        {
+            CurrentUsername = currentUser.Username ?? "\u7BA1\u7406\u5458";
+        }
         return true;
     }
 

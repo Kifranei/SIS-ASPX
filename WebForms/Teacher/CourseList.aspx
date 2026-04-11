@@ -84,7 +84,7 @@
                 <div class="header-right">
                     <button class='dark-toggle-btn' type='button'>暗色模式</button>
                     <div class="user-info">
-                        <span class="username">欢迎您, <%= ((Session["User"] as Users)?.Username ?? "教师") %></span>
+                        <span class="username">欢迎您, <%= (Session["DisplayName"] as string) ?? ((Session["User"] as Users)?.Username ?? "教师") %></span>
                         <span class="sep">|</span>
                         <a class="logout-link" href="../Logout.aspx">安全退出</a>
                     </div>
@@ -113,7 +113,7 @@
                                             <td><%= item.Credits %></td>
                                             <td>
                                                 <a class="btn btn-primary btn-sm" href="GradeEntry.aspx?courseId=<%= item.CourseID %>">进入成绩录入</a>
-                                                <a class="btn btn-default btn-sm" target="_blank" href="ClassRoster.aspx?courseId=<%= item.CourseID %>">打印名单</a>
+                                                <a class="btn btn-info btn-sm" target="_blank" href="ClassRoster.aspx?courseId=<%= item.CourseID %>">打印名单</a>
                                             </td>
                                         </tr>
                                     <% } %>

@@ -170,7 +170,7 @@
                 <div class="header-right">
                     <button class='dark-toggle-btn' type='button'>暗色模式</button>
                     <div class="user-info">
-                        <span class="username">欢迎您, <%= ((Session["User"] as Users)?.Username ?? "教师") %></span>
+                        <span class="username">欢迎您, <%= (Session["DisplayName"] as string) ?? ((Session["User"] as Users)?.Username ?? "教师") %></span>
                         <span class="sep">|</span>
                         <a class="logout-link" href="../Logout.aspx">安全退出</a>
                     </div>
@@ -230,7 +230,7 @@
 
                             <% if (IsHolidayWeek(CurrentWeek)) { %>
                                 <div style="margin-bottom: 10px;">
-                                    <span class="label label-danger">第<%= CurrentWeek %>周为法定假日（无课）</span>
+                                    <span class="label label-danger">第<%= CurrentWeek %>周：<%= HolidayDescriptions.ContainsKey(CurrentWeek) ? HolidayDescriptions[CurrentWeek] : "法定假日" %>（无课）</span>
                                 </div>
                             <% } %>
 

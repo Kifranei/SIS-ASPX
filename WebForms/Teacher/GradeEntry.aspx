@@ -172,7 +172,7 @@
                 <div class="header-right">
                     <button class="dark-toggle-btn" type="button">&#x6697;&#x8272;&#x6A21;&#x5F0F;</button>
                     <div class="user-info">
-                        <span class="username">&#x6B22;&#x8FCE;&#x60A8;, <%= ((Session["User"] as Users)?.Username ?? "\u6559\u5E08") %></span>
+                        <span class="username">&#x6B22;&#x8FCE;&#x60A8;, <%= (Session["DisplayName"] as string) ?? ((Session["User"] as Users)?.Username ?? "\u6559\u5E08") %></span>
                         <span class="sep">|</span>
                         <a class="logout-link" href="../Logout.aspx">&#x5B89;&#x5168;&#x9000;&#x51FA;</a>
                     </div>
@@ -226,7 +226,7 @@
                             </div>
                             <div class="form-group" style="margin-top: 12px;">
                                 <button type="submit" class="btn btn-success">&#x4FDD;&#x5B58;&#x5168;&#x90E8;&#x6210;&#x7EE9;</button>
-                                <a class="btn btn-default" target="_blank" href="ClassRoster.aspx?courseId=<%= CourseId %>">&#x6253;&#x5370;&#x540D;&#x5355;</a>
+                                <a class="btn btn-info" target="_blank" href="ClassRoster.aspx?courseId=<%= CourseId %>">&#x6253;&#x5370;&#x540D;&#x5355;</a>
                                 <a class="btn btn-default" href="CourseList.aspx">&#x8FD4;&#x56DE;&#x5217;&#x8868;</a>
                             </div>
                         </form>
