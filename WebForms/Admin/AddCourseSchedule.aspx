@@ -99,18 +99,36 @@
 
         using (var db = new StudentManagementDBEntities())
         {
-            var conflictingSessions = db.ClassSessions.Include("Courses")
-                .Where(cs => cs.Courses.TeacherID == CurrentCourse.TeacherID &&
-                             cs.DayOfWeek == dayOfWeek &&
-                             !(endWeek < cs.StartWeek || startWeek > cs.EndWeek) &&
-                             !(endPeriod < cs.StartPeriod || startPeriod > cs.EndPeriod))
-                .ToList();
+            var conflictingSessions = ScheduleConflictHelper.GetTeacherSessionConflicts(
+                db,
+                CurrentCourse.TeacherID,
+                dayOfWeek,
+                startWeek,
+                endWeek,
+                startPeriod,
+                endPeriod);
 
             if (conflictingSessions.Any())
             {
-                var desc = string.Join("; ", conflictingSessions.Select(cs =>
-                    (cs.Courses == null ? "未知课程" : cs.Courses.CourseName) + "(第" + cs.StartWeek + "-" + cs.EndWeek + "周, 第" + cs.StartPeriod + "-" + cs.EndPeriod + "节)"));
-                MessageText = "时间冲突！该教师在此时间段已有以下课程安排：" + desc;
+                MessageText = ScheduleConflictHelper.BuildTeacherConflictMessage(
+                    conflictingSessions,
+                    "时间冲突！该教师在此时间段已有以下课程安排：");
+                return;
+            }
+
+            var studentConflicts = ScheduleConflictHelper.GetConflictsForEnrolledStudentsWhenScheduling(
+                db,
+                FormCourseID,
+                dayOfWeek,
+                startWeek,
+                endWeek,
+                startPeriod,
+                endPeriod);
+            if (studentConflicts.Any())
+            {
+                MessageText = ScheduleConflictHelper.BuildStudentConflictMessage(
+                    studentConflicts,
+                    "该安排会与已选学生的现有课表冲突：");
                 return;
             }
 

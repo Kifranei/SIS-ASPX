@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+ï»¿<%@ Page Language="C#" AutoEventWireup="true" %>
 <%@ Import Namespace="System" %>
 <%@ Import Namespace="System.Linq" %>
 <%@ Import Namespace="StudentInformationSystem.Models" %>
@@ -28,21 +28,21 @@
         if (string.IsNullOrEmpty(oldPassword) || string.IsNullOrEmpty(newPassword) || string.IsNullOrEmpty(confirmPassword))
         {
             MessageType = "danger";
-            MessageText = "ÇëÍêÕûÌîĞ´¾ÉÃÜÂë¡¢ĞÂÃÜÂëºÍÈ·ÈÏÃÜÂë¡£";
+            MessageText = "\u8BF7\u5B8C\u6574\u586B\u5199\u65E7\u5BC6\u7801\u3001\u65B0\u5BC6\u7801\u548C\u786E\u8BA4\u5BC6\u7801\u3002";
             return;
         }
 
         if (newPassword.Length < 6)
         {
             MessageType = "danger";
-            MessageText = "ĞÂÃÜÂë³¤¶ÈÖÁÉÙ 6 Î»¡£";
+            MessageText = "\u65B0\u5BC6\u7801\u957F\u5EA6\u81F3\u5C11 6 \u4F4D\u3002";
             return;
         }
 
         if (!newPassword.Equals(confirmPassword, StringComparison.Ordinal))
         {
             MessageType = "danger";
-            MessageText = "ĞÂÃÜÂëºÍÈ·ÈÏÃÜÂë²»Æ¥Åä¡£";
+            MessageText = "\u65B0\u5BC6\u7801\u548C\u786E\u8BA4\u5BC6\u7801\u4E0D\u5339\u914D\u3002";
             return;
         }
 
@@ -52,29 +52,29 @@
             if (userInDb == null)
             {
                 MessageType = "danger";
-                MessageText = "ÓÃ»§²»´æÔÚ£¬ÇëÖØĞÂµÇÂ¼¡£";
+                MessageText = "\u7528\u6237\u4E0D\u5B58\u5728\uFF0C\u8BF7\u91CD\u65B0\u767B\u5F55\u3002";
                 return;
             }
 
-            if (!string.Equals(userInDb.Password, oldPassword, StringComparison.Ordinal))
+            if (!StudentInformationSystem.Helpers.PasswordSecurity.VerifyPassword(oldPassword, userInDb.Password))
             {
                 MessageType = "danger";
-                MessageText = "¾ÉÃÜÂë²»ÕıÈ·£¬ÇëÖØĞÂÊäÈë¡£";
+                MessageText = "\u65E7\u5BC6\u7801\u4E0D\u6B63\u786E\uFF0C\u8BF7\u91CD\u65B0\u8F93\u5165\u3002";
                 return;
             }
 
-            userInDb.Password = newPassword;
+            userInDb.Password = StudentInformationSystem.Helpers.PasswordSecurity.HashPassword(newPassword);
             db.Entry(userInDb).State = System.Data.Entity.EntityState.Modified;
             db.SaveChanges();
 
             var sessionUser = Session["User"] as Users;
             if (sessionUser != null)
             {
-                sessionUser.Password = newPassword;
+                sessionUser.Password = userInDb.Password;
             }
 
             MessageType = "success";
-            MessageText = "ÃÜÂëĞŞ¸Ä³É¹¦£¡";
+            MessageText = "\u5BC6\u7801\u4FEE\u6539\u6210\u529F\uFF01";
         }
     }
 
@@ -101,7 +101,7 @@
             }
         })();
     </script>
-    <title>ĞŞ¸ÄÃÜÂë</title>
+    <title>ä¿®æ”¹å¯†ç </title>
     <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
     <link href="<%= ResolveUrl("~/Content/theme-system.css") %>" rel="stylesheet" />
     <link href="<%= ResolveUrl("~/Content/webforms-student-layout.css") %>" rel="stylesheet" />
@@ -111,34 +111,34 @@
         <div class="sidebar-overlay"></div>
         <aside class="sidebar">
             <div class="sidebar-header">
-                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="Ğ£»Õ" class="sidebar-logo-img" />
+                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="æ ¡å¾½" class="sidebar-logo-img" />
             </div>
             <ul class="sidebar-menu">
-                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">Ê×Ò³</a></li>
-                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">ÎÒµÄ¿Î±í</a></li>
-                <li><a class="<%= Active("CourseList.aspx") %>" href="CourseList.aspx">³É¼¨Â¼Èë</a></li>
-                <li><a class="<%= Active("ExamList.aspx") %>" href="ExamList.aspx">¿¼ÊÔ¹ÜÀí</a></li>
-                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">ĞŞ¸ÄÃÜÂë</a></li>
+                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">é¦–é¡µ</a></li>
+                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">æˆ‘çš„è¯¾è¡¨</a></li>
+                <li><a class="<%= Active("CourseList.aspx") %>" href="CourseList.aspx">æˆç»©å½•å…¥</a></li>
+                <li><a class="<%= Active("ExamList.aspx") %>" href="ExamList.aspx">è€ƒè¯•ç®¡ç†</a></li>
+                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">ä¿®æ”¹å¯†ç </a></li>
             </ul>
         </aside>
 
         <div class="main-content">
             <header class="header-bar">
                 <div class="header-left">
-                    <button class="hamburger-menu" type="button" aria-label="²Ëµ¥">&#9776;</button>
+                    <button class="hamburger-menu" type="button" aria-label="èœå•">&#9776;</button>
                 </div>
                 <div class="header-right">
-                    <button class='dark-toggle-btn' type='button'>°µÉ«Ä£Ê½</button>
+                    <button class='dark-toggle-btn' type='button'>æš—è‰²æ¨¡å¼</button>
                     <div class="user-info">
-                        <span class="username">»¶Ó­Äú, <%= ((Session["User"] as Users)?.Username ?? "½ÌÊ¦") %></span>
+                        <span class="username">æ¬¢è¿æ‚¨, <%= ((Session["User"] as Users)?.Username ?? "æ•™å¸ˆ") %></span>
                         <span class="sep">|</span>
-                        <a class="logout-link" href="../Logout.aspx">°²È«ÍË³ö</a>
+                        <a class="logout-link" href="../Logout.aspx">å®‰å…¨é€€å‡º</a>
                     </div>
                 </div>
             </header>
             <main class="content-body">
                 <div class="container-fluid">
-                    <h2>ĞŞ¸ÄÃÜÂë</h2>
+                    <h2>ä¿®æ”¹å¯†ç </h2>
                     <hr />
 
                     <% if (!string.IsNullOrEmpty(MessageText)) { %>
@@ -147,20 +147,20 @@
 
                     <form method="post" class="row g-3" style="max-width: 680px;">
                         <div class="col-12">
-                            <label class="form-label" for="OldPassword">¾ÉÃÜÂë</label>
+                            <label class="form-label" for="OldPassword">æ—§å¯†ç </label>
                             <input class="form-control" type="password" id="OldPassword" name="OldPassword" required />
                         </div>
                         <div class="col-12">
-                            <label class="form-label" for="NewPassword">ĞÂÃÜÂë</label>
+                            <label class="form-label" for="NewPassword">æ–°å¯†ç </label>
                             <input class="form-control" type="password" id="NewPassword" name="NewPassword" required minlength="6" />
                         </div>
                         <div class="col-12">
-                            <label class="form-label" for="ConfirmPassword">È·ÈÏĞÂÃÜÂë</label>
+                            <label class="form-label" for="ConfirmPassword">ç¡®è®¤æ–°å¯†ç </label>
                             <input class="form-control" type="password" id="ConfirmPassword" name="ConfirmPassword" required minlength="6" />
                         </div>
                         <div class="col-12 d-flex gap-2">
-                            <button class="btn btn-success" type="submit">È·ÈÏĞŞ¸Ä</button>
-                            <a class="btn btn-outline-secondary" href="Index.aspx">·µ»ØÊ×Ò³</a>
+                            <button class="btn btn-success" type="submit">ç¡®è®¤ä¿®æ”¹</button>
+                            <a class="btn btn-outline-secondary" href="Index.aspx">è¿”å›é¦–é¡µ</a>
                         </div>
                     </form>
 
@@ -168,21 +168,21 @@
 
                     <div class="card mt-4">
                         <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                            <h4 class="mb-0">Í¨ĞĞÃÜÔ¿ (Passkey) ¹ÜÀí</h4>
-                            <button type="button" id="btnRegisterPasskey" class="btn btn-success btn-sm">Ìí¼ÓĞÂÉè±¸</button>
+                            <h4 class="mb-0">é€šè¡Œå¯†é’¥ (Passkey) ç®¡ç†</h4>
+                            <button type="button" id="btnRegisterPasskey" class="btn btn-success btn-sm">æ·»åŠ æ–°è®¾å¤‡</button>
                         </div>
                         <div class="card-body">
-                            <p class="text-muted small">Ìí¼ÓÍ¨ĞĞÃÜÔ¿ºó£¬¿ÉÊ¹ÓÃÉè±¸Ö¸ÎÆ/ÃæÈİ/PIN Ö±½ÓµÇÂ¼¡£</p>
+                            <p class="text-muted small">æ·»åŠ é€šè¡Œå¯†é’¥åï¼Œå¯ä½¿ç”¨è®¾å¤‡æŒ‡çº¹/é¢å®¹/PIN ç›´æ¥ç™»å½•ã€‚</p>
                             <table class="table table-bordered table-hover">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Éè±¸Ãû³Æ</th>
-                                        <th>°ó¶¨Ê±¼ä</th>
-                                        <th style="width: 100px;">²Ù×÷</th>
+                                        <th>è®¾å¤‡åç§°</th>
+                                        <th>ç»‘å®šæ—¶é—´</th>
+                                        <th style="width: 100px;">æ“ä½œ</th>
                                     </tr>
                                 </thead>
                                 <tbody id="passkeyTableBody">
-                                    <tr><td colspan="3" class="text-center text-muted">ÕıÔÚ¼ÓÔØ...</td></tr>
+                                    <tr><td colspan="3" class="text-center text-muted">æ­£åœ¨åŠ è½½...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -221,22 +221,22 @@
                         html += `<tr>
                                     <td><strong>${p.Name}</strong></td>
                                     <td>${p.RegDate}</td>
-                                    <td><button class="btn btn-sm btn-outline-danger" onclick="deletePasskey(${p.Id})">É¾³ı</button></td>
+                                    <td><button class="btn btn-sm btn-outline-danger" onclick="deletePasskey(${p.Id})">åˆ é™¤</button></td>
                                  </tr>`;
                     });
-                    if (html === '') html = '<tr><td colspan="3" class="text-center text-muted">Äú»¹Î´°ó¶¨ÈÎºÎÍ¨ĞĞÃÜÔ¿¡£</td></tr>';
+                    if (html === '') html = '<tr><td colspan="3" class="text-center text-muted">æ‚¨è¿˜æœªç»‘å®šä»»ä½•é€šè¡Œå¯†é’¥ã€‚</td></tr>';
                     $('#passkeyTableBody').html(html);
                 }
             });
         }
 
         window.deletePasskey = function (id) {
-            if (confirm('È·¶¨ÒªÉ¾³ıÕâ¸öÍ¨ĞĞÃÜÔ¿Âğ£¿É¾³ıºó½«ÎŞ·¨Ê¹ÓÃ¸ÃÉè±¸µÇÂ¼¡£')) {
+            if (confirm('ç¡®å®šè¦åˆ é™¤è¿™ä¸ªé€šè¡Œå¯†é’¥å—ï¼Ÿåˆ é™¤åå°†æ— æ³•ä½¿ç”¨è¯¥è®¾å¤‡ç™»å½•ã€‚')) {
                 $.post('/Passkey/DeletePasskey', { id: id }, function (res) {
                     if (res.status === 'ok') {
                         loadPasskeys();
                     } else {
-                        alert(res.errorMessage || 'É¾³ıÊ§°Ü');
+                        alert(res.errorMessage || 'åˆ é™¤å¤±è´¥');
                     }
                 });
             }
@@ -244,11 +244,11 @@
 
         $('#btnRegisterPasskey').click(async function () {
             if (!window.PublicKeyCredential) {
-                alert('ÄúµÄä¯ÀÀÆ÷»òÉè±¸²»Ö§³ÖÍ¨ĞĞÃÜÔ¿£¡');
+                alert('æ‚¨çš„æµè§ˆå™¨æˆ–è®¾å¤‡ä¸æ”¯æŒé€šè¡Œå¯†é’¥ï¼');
                 return;
             }
 
-            let passkeyName = prompt('ÇëÎª¸ÃÍ¨ĞĞÃÜÔ¿ÃüÃû£¨ÀıÈç£ºÎÒµÄiPhone¡¢°ì¹«µçÄÔ£©£º', 'ÎÒµÄÉè±¸');
+            let passkeyName = prompt('è¯·ä¸ºè¯¥é€šè¡Œå¯†é’¥å‘½åï¼ˆä¾‹å¦‚ï¼šæˆ‘çš„iPhoneã€åŠå…¬ç”µè„‘ï¼‰ï¼š', 'æˆ‘çš„è®¾å¤‡');
             if (!passkeyName) {
                 return;
             }
@@ -285,14 +285,14 @@
                 });
 
                 if (verifyResp.status === 'ok') {
-                    alert('Í¨ĞĞÃÜÔ¿°ó¶¨³É¹¦£¡');
+                    alert('é€šè¡Œå¯†é’¥ç»‘å®šæˆåŠŸï¼');
                     loadPasskeys();
                 } else {
-                    alert('°ó¶¨Ê§°Ü: ' + verifyResp.errorMessage);
+                    alert('ç»‘å®šå¤±è´¥: ' + verifyResp.errorMessage);
                 }
             } catch (err) {
                 console.error(err);
-                alert('×¢²áÒÑÈ¡Ïû»ò·¢Éú´íÎó¡£');
+                alert('æ³¨å†Œå·²å–æ¶ˆæˆ–å‘ç”Ÿé”™è¯¯ã€‚');
             }
         });
 

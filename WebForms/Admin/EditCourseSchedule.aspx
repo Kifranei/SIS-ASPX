@@ -134,19 +134,38 @@
 
             if (course.TeacherID != null)
             {
-                var conflicts = db.ClassSessions.Include("Courses")
-                    .Where(cs => cs.SessionID != FormSessionID &&
-                                 cs.Courses.TeacherID == course.TeacherID &&
-                                 cs.DayOfWeek == dayOfWeek &&
-                                 !(endWeek < cs.StartWeek || startWeek > cs.EndWeek) &&
-                                 !(endPeriod < cs.StartPeriod || startPeriod > cs.EndPeriod))
-                    .ToList();
+                var conflicts = ScheduleConflictHelper.GetTeacherSessionConflicts(
+                    db,
+                    course.TeacherID,
+                    dayOfWeek,
+                    startWeek,
+                    endWeek,
+                    startPeriod,
+                    endPeriod,
+                    FormSessionID);
 
                 if (conflicts.Any())
                 {
-                    var desc = string.Join("; ", conflicts.Select(cs =>
-                        (cs.Courses == null ? "未知课程" : cs.Courses.CourseName) + "(第" + cs.StartWeek + "-" + cs.EndWeek + "周, 第" + cs.StartPeriod + "-" + cs.EndPeriod + "节)"));
-                    MessageText = "时间冲突！该教师在此时间段已有以下课程安排：" + desc;
+                    MessageText = ScheduleConflictHelper.BuildTeacherConflictMessage(
+                        conflicts,
+                        "时间冲突！该教师在此时间段已有以下课程安排：");
+                    return;
+                }
+
+                var studentConflicts = ScheduleConflictHelper.GetConflictsForEnrolledStudentsWhenScheduling(
+                    db,
+                    FormCourseID,
+                    dayOfWeek,
+                    startWeek,
+                    endWeek,
+                    startPeriod,
+                    endPeriod,
+                    FormSessionID);
+                if (studentConflicts.Any())
+                {
+                    MessageText = ScheduleConflictHelper.BuildStudentConflictMessage(
+                        studentConflicts,
+                        "该调整会与已选学生的现有课表冲突：");
                     return;
                 }
             }

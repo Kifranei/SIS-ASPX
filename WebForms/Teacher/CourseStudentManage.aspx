@@ -113,6 +113,16 @@
             return;
         }
 
+        var conflicts = StudentInformationSystem.Helpers.ScheduleConflictHelper.GetStudentConflictsForCourseAssignment(db, SelectedStudentID, courseId);
+        if (conflicts.Any())
+        {
+            MessageType = "danger";
+            MessageText = StudentInformationSystem.Helpers.ScheduleConflictHelper.BuildStudentConflictMessage(
+                conflicts,
+                "无法加入课程名单，学生课表存在冲突：");
+            return;
+        }
+
         db.StudentCourses.Add(new StudentCourses
         {
             StudentID = SelectedStudentID,
@@ -248,6 +258,9 @@
 
             <main class="content-body">
                 <div class="container-fluid">
+                    <div class="text-right" style="margin-bottom: 15px;">
+                        <a class="btn btn-default" href="Timetable.aspx">返回上一页</a>
+                    </div>
                     <h2>课程学生管理（必修课）</h2>
                     <p class="text-muted">仅显示当前教师所授的专业必修/公共必修课程，可在此直接添加学生到课程名单。</p>
 

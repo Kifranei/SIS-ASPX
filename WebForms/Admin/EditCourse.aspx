@@ -160,9 +160,42 @@
                 return;
             }
 
+            var newTeacherId = string.IsNullOrWhiteSpace(FormTeacherID) ? null : FormTeacherID;
+            if (!string.Equals(course.TeacherID, newTeacherId, StringComparison.OrdinalIgnoreCase)
+                && !string.IsNullOrWhiteSpace(newTeacherId))
+            {
+                var courseSessions = db.ClassSessions.Where(cs => cs.CourseID == FormCourseID).ToList();
+                var teacherConflicts = new List<ClassSessions>();
+
+                foreach (var session in courseSessions)
+                {
+                    teacherConflicts.AddRange(ScheduleConflictHelper.GetTeacherSessionConflicts(
+                        db,
+                        newTeacherId,
+                        session.DayOfWeek,
+                        session.StartWeek,
+                        session.EndWeek,
+                        session.StartPeriod,
+                        session.EndPeriod));
+                }
+
+                teacherConflicts = teacherConflicts
+                    .GroupBy(cs => cs.SessionID)
+                    .Select(g => g.First())
+                    .ToList();
+
+                if (teacherConflicts.Any())
+                {
+                    MessageText = ScheduleConflictHelper.BuildTeacherConflictMessage(
+                        teacherConflicts,
+                        "无法分配该教师，当前课程既有安排与该教师已有课表冲突：");
+                    return;
+                }
+            }
+
             course.CourseName = FormCourseName;
             course.Credits = credits;
-            course.TeacherID = string.IsNullOrWhiteSpace(FormTeacherID) ? null : FormTeacherID;
+            course.TeacherID = newTeacherId;
             course.CourseType = courseType;
             db.Entry(course).State = EntityState.Modified;
             db.SaveChanges();
@@ -211,6 +244,16 @@
             {
                 EnrollmentMessageType = "info";
                 EnrollmentMessageText = "该学生已在本课程名单中，无需重复添加。";
+                return;
+            }
+
+            var conflicts = ScheduleConflictHelper.GetStudentConflictsForCourseAssignment(db, SelectedStudentID, FormCourseID);
+            if (conflicts.Any())
+            {
+                EnrollmentMessageType = "danger";
+                EnrollmentMessageText = ScheduleConflictHelper.BuildStudentConflictMessage(
+                    conflicts,
+                    "无法加入课程名单，学生课表存在冲突：");
                 return;
             }
 

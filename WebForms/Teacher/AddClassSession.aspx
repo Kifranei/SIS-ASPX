@@ -94,20 +94,39 @@
                 return;
             }
 
-            var taughtCourseIds = TeacherCourses.Select(c => c.CourseID).ToList();
-            var conflictingSessions = db.ClassSessions.Include("Courses")
-                .Where(cs => taughtCourseIds.Contains(cs.CourseID)
-                           && cs.DayOfWeek == FormDayOfWeek
-                           && !(FormEndWeek < cs.StartWeek || FormStartWeek > cs.EndWeek)
-                           && !(FormEndPeriod < cs.StartPeriod || FormStartPeriod > cs.EndPeriod))
-                .ToList();
+            var selectedCourse = TeacherCourses.FirstOrDefault(c => c.CourseID == FormCourseId);
+            var conflictingSessions = ScheduleConflictHelper.GetTeacherSessionConflicts(
+                db,
+                selectedCourse == null ? null : selectedCourse.TeacherID,
+                FormDayOfWeek,
+                FormStartWeek,
+                FormEndWeek,
+                FormStartPeriod,
+                FormEndPeriod);
 
             if (conflictingSessions.Any())
             {
-                var conflictDescription = string.Join("；", conflictingSessions.Select(cs =>
-                    (cs.Courses == null ? "课程" : cs.Courses.CourseName) + "(第" + cs.StartWeek + "-" + cs.EndWeek + "周, 第" + cs.StartPeriod + "-" + cs.EndPeriod + "节)"));
                 MessageType = "danger";
-                MessageText = "时间冲突！您在该时间段已有以下课程安排：" + conflictDescription;
+                MessageText = ScheduleConflictHelper.BuildTeacherConflictMessage(
+                    conflictingSessions,
+                    "时间冲突！您在该时间段已有以下课程安排：");
+                return;
+            }
+
+            var studentConflicts = ScheduleConflictHelper.GetConflictsForEnrolledStudentsWhenScheduling(
+                db,
+                FormCourseId,
+                FormDayOfWeek,
+                FormStartWeek,
+                FormEndWeek,
+                FormStartPeriod,
+                FormEndPeriod);
+            if (studentConflicts.Any())
+            {
+                MessageType = "danger";
+                MessageText = ScheduleConflictHelper.BuildStudentConflictMessage(
+                    studentConflicts,
+                    "该安排会与已选学生的现有课表冲突：");
                 return;
             }
 
@@ -125,7 +144,7 @@
             db.ClassSessions.Add(session);
             db.SaveChanges();
 
-            var courseName = TeacherCourses.First(c => c.CourseID == FormCourseId).CourseName;
+            var courseName = selectedCourse == null ? "课程" : selectedCourse.CourseName;
             var msg = "课程安排添加成功！" + courseName + " - 第" + FormStartWeek + "-" + FormEndWeek + "周，星期" + DayName(FormDayOfWeek) + "第" + FormStartPeriod + "-" + FormEndPeriod + "节，" + FormClassroom + "教室。";
             Response.Redirect("Timetable.aspx?msg=" + Server.UrlEncode(msg), true);
         }

@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+ï»¿<%@ Page Language="C#" AutoEventWireup="true" CodePage="65001" %>
 <!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
@@ -9,105 +9,38 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "Ìí¼ÓĞÂ½ÌÊ¦";
-        if (!EnsureAdminRole())
-        {
-            return;
-        }
-
-        if (!Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase))
-        {
-            return;
-        }
+        PageTitle = "æ·»åŠ æ–°æ•™å¸ˆ";
+        if (!EnsureAdminRole()) return;
+        if (!Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase)) return;
 
         FormTeacherID = (Request.Form["TeacherID"] ?? string.Empty).Trim();
         FormTeacherName = (Request.Form["TeacherName"] ?? string.Empty).Trim();
         FormTitle = (Request.Form["Title"] ?? string.Empty).Trim();
 
-        if (string.IsNullOrWhiteSpace(FormTeacherID) || string.IsNullOrWhiteSpace(FormTeacherName))
-        {
-            MessageText = "½ÌÊ¦¹¤ºÅºÍĞÕÃû²»ÄÜÎª¿Õ¡£";
-            return;
-        }
+        if (string.IsNullOrWhiteSpace(FormTeacherID) || string.IsNullOrWhiteSpace(FormTeacherName)) { MessageText = "\u6559\u5E08\u5DE5\u53F7\u548C\u59D3\u540D\u4E0D\u80FD\u4E3A\u7A7A\u3002"; return; }
 
         using (var db = new StudentManagementDBEntities())
         {
-            if (db.Teachers.Any(t => t.TeacherID == FormTeacherID))
-            {
-                MessageText = "¸Ã½ÌÊ¦¹¤ºÅÒÑ´æÔÚ¡£";
-                return;
-            }
+            if (db.Teachers.Any(t => t.TeacherID == FormTeacherID)) { MessageText = "\u8BE5\u6559\u5E08\u5DE5\u53F7\u5DF2\u5B58\u5728\u3002"; return; }
+            if (db.Users.Any(u => u.Username == FormTeacherID)) { MessageText = "\u8BE5\u5DE5\u53F7\u5DF2\u5360\u7528\u767B\u5F55\u8D26\u53F7\u3002"; return; }
 
-            if (db.Users.Any(u => u.Username == FormTeacherID))
-            {
-                MessageText = "¸Ã¹¤ºÅÒÑÕ¼ÓÃµÇÂ¼ÕËºÅ¡£";
-                return;
-            }
-
-            var newUser = new Users
-            {
-                Username = FormTeacherID,
-                Password = "Hzd@123456",
-                Role = 1
-            };
-
-            var teacher = new Teachers
-            {
-                TeacherID = FormTeacherID,
-                TeacherName = FormTeacherName,
-                Title = FormTitle,
-                Users = newUser
-            };
-
-            db.Users.Add(newUser);
-            db.Teachers.Add(teacher);
-            db.SaveChanges();
-
-            Session["AdminFlashMessage"] = "½ÌÊ¦ " + FormTeacherName + " Ìí¼Ó³É¹¦£¡Ä¬ÈÏÃÜÂëÎª£ºHzd@123456";
+            var newUser = new Users { Username = FormTeacherID, Password = StudentInformationSystem.Helpers.PasswordSecurity.HashPassword("Hzd@123456"), Role = 1 };
+            var teacher = new Teachers { TeacherID = FormTeacherID, TeacherName = FormTeacherName, Title = FormTitle, Users = newUser };
+            db.Users.Add(newUser); db.Teachers.Add(teacher); db.SaveChanges();
+            Session["AdminFlashMessage"] = "\u6559\u5E08 " + FormTeacherName + " \u6DFB\u52A0\u6210\u529F\uFF0C\u9ED8\u8BA4\u5BC6\u7801\u4E3A Hzd@123456\u3002";
             Response.Redirect("TeacherList.aspx", true);
         }
     }
 </script>
 
 <!--#include file="_AdminLayoutTop.inc" -->
-
-<h2>Ìí¼ÓĞÂ½ÌÊ¦</h2>
-
-<% if (!string.IsNullOrEmpty(MessageText)) { %>
-    <div class="alert alert-danger"><%= H(MessageText) %></div>
-<% } %>
-
+<h2>æ·»åŠ æ–°æ•™å¸ˆ</h2>
+<% if (!string.IsNullOrEmpty(MessageText)) { %><div class="alert alert-danger"><%= H(MessageText) %></div><% } %>
 <form method="post" class="form-horizontal" style="max-width:900px;">
-    <h4>½ÌÊ¦ĞÅÏ¢</h4>
-    <hr />
-
-    <div class="form-group">
-        <label class="control-label col-md-2">½ÌÊ¦¹¤ºÅ</label>
-        <div class="col-md-10">
-            <input class="form-control" name="TeacherID" value="<%= H(FormTeacherID) %>" required />
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label class="control-label col-md-2">ĞÕÃû</label>
-        <div class="col-md-10">
-            <input class="form-control" name="TeacherName" value="<%= H(FormTeacherName) %>" required />
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label class="control-label col-md-2">Ö°³Æ</label>
-        <div class="col-md-10">
-            <input class="form-control" name="Title" value="<%= H(FormTitle) %>" />
-        </div>
-    </div>
-
-    <div class="form-group">
-        <div class="col-md-offset-2 col-md-10">
-            <button type="submit" class="btn btn-success">´´½¨</button>
-            <a class="btn btn-default" href="TeacherList.aspx">·µ»ØÁĞ±í</a>
-        </div>
-    </div>
+    <h4>æ•™å¸ˆä¿¡æ¯</h4><hr />
+    <div class="form-group"><label class="control-label col-md-2">æ•™å¸ˆå·¥å·</label><div class="col-md-10"><input class="form-control" name="TeacherID" value="<%= H(FormTeacherID) %>" required /></div></div>
+    <div class="form-group"><label class="control-label col-md-2">å§“å</label><div class="col-md-10"><input class="form-control" name="TeacherName" value="<%= H(FormTeacherName) %>" required /></div></div>
+    <div class="form-group"><label class="control-label col-md-2">èŒç§°</label><div class="col-md-10"><input class="form-control" name="Title" value="<%= H(FormTitle) %>" /></div></div>
+    <div class="form-group"><div class="col-md-offset-2 col-md-10"><button type="submit" class="btn btn-success">åˆ›å»º</button> <a class="btn btn-default" href="TeacherList.aspx">è¿”å›åˆ—è¡¨</a></div></div>
 </form>
-
 <!--#include file="_AdminLayoutBottom.inc" -->

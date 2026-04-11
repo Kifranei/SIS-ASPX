@@ -99,6 +99,35 @@
                 return;
             }
 
+            var selectedCourse = TeacherCourses.FirstOrDefault(c => c.CourseID == FormCourseId);
+            var teacherConflicts = GetTeacherExamConflicts(
+                db,
+                selectedCourse == null ? null : selectedCourse.TeacherID,
+                examTime,
+                FormExamId);
+            if (teacherConflicts.Any())
+            {
+                MessageType = "danger";
+                MessageText = BuildTeacherExamConflictMessage(
+                    teacherConflicts,
+                    "考试时间冲突！您在该时段已有以下考试安排：");
+                return;
+            }
+
+            var studentConflicts = GetStudentExamConflictsForCourse(
+                db,
+                FormCourseId,
+                examTime,
+                FormExamId);
+            if (studentConflicts.Any())
+            {
+                MessageType = "danger";
+                MessageText = BuildStudentExamConflictMessage(
+                    studentConflicts,
+                    "考试时间冲突！以下学生在该时段已有其他考试：");
+                return;
+            }
+
             CurrentExam.CourseID = FormCourseId;
             CurrentExam.ExamTime = examTime;
             CurrentExam.Location = FormLocation;
@@ -114,6 +143,59 @@
     {
         var current = VirtualPathUtility.GetFileName(Request.AppRelativeCurrentExecutionFilePath) ?? string.Empty;
         return current.Equals(page, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty;
+    }
+
+    private List<Exams> GetTeacherExamConflicts(StudentManagementDBEntities db, string teacherId, DateTime examTime, int? excludeExamId = null)
+    {
+        if (string.IsNullOrWhiteSpace(teacherId))
+        {
+            return new List<Exams>();
+        }
+
+        var query = db.Exams
+            .Include("Courses")
+            .Where(e => e.ExamTime == examTime && e.Courses != null && e.Courses.TeacherID == teacherId);
+
+        if (excludeExamId.HasValue)
+        {
+            int examId = excludeExamId.Value;
+            query = query.Where(e => e.ExamID != examId);
+        }
+
+        return query.OrderBy(e => e.Courses.CourseName).ToList();
+    }
+
+    private List<string> GetStudentExamConflictsForCourse(StudentManagementDBEntities db, int courseId, DateTime examTime, int? excludeExamId = null)
+    {
+        var studentIds = db.StudentCourses
+            .Where(sc => sc.CourseID == courseId)
+            .Select(sc => sc.StudentID)
+            .Distinct()
+            .ToList();
+
+        if (!studentIds.Any())
+        {
+            return new List<string>();
+        }
+
+        var query = db.StudentCourses
+            .Where(sc => studentIds.Contains(sc.StudentID)
+                && sc.CourseID != courseId
+                && sc.Courses.Exams.Any(e => e.ExamTime == examTime && (!excludeExamId.HasValue || e.ExamID != excludeExamId.Value)))
+            .Select(sc => sc.StudentID + " " + sc.Students.StudentName + " -> " + sc.Courses.CourseName)
+            .Distinct();
+
+        return query.OrderBy(x => x).ToList();
+    }
+
+    private string BuildTeacherExamConflictMessage(IEnumerable<Exams> conflicts, string prefix)
+    {
+        return prefix + " " + string.Join("；", conflicts.Select(e => (e.Courses == null ? "未知课程" : e.Courses.CourseName) + "（" + e.ExamTime.ToString("yyyy-MM-dd HH:mm") + "）"));
+    }
+
+    private string BuildStudentExamConflictMessage(IEnumerable<string> conflicts, string prefix)
+    {
+        return prefix + " " + string.Join("；", conflicts);
     }
 </script>
 
@@ -132,7 +214,8 @@
                 document.documentElement.classList.remove('dark-mode');
             }
         })();
-    </script>
+    
+</script>
     <title>编辑考试信息</title>
     <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
     <link href="<%= ResolveUrl("~/Content/theme-system.css") %>" rel="stylesheet" />
@@ -227,7 +310,8 @@
             </main>
         </div>
     </div>
-    <script src="<%= ResolveUrl("~/Scripts/webforms-student-layout.js") %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/webforms-student-layout.js") %>">
+</script>
 </body>
 </html>
 

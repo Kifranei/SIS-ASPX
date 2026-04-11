@@ -24,7 +24,7 @@
 <div class="timetable-tabs" style="margin-top: 15px;">
     <button class="btn btn-primary active" data-target="#my-selected">我的已选课程 <span class="badge bg-light text-dark">@Model.EnrolledCourses.Count</span></button>
     <button class="btn btn-light" data-target="#sports-market">体育选修区</button>
-    <button class="btn btn-light" data-target="#other-market">其他选修区</button>
+    <button class="btn btn-light" data-target="#other-market">专业/公共选修区</button>
 </div>
 <hr />
 
@@ -141,7 +141,7 @@
 
     <div class="tab-pane" id="other-market">
         <div class="alert alert-info">
-            <strong>📌 选课要求:</strong> 大学三年期间需选够 4 门，您当前已选 @ViewBag.OtherCoursesTaken 门。
+            <strong>📌 选课要求:</strong> 专业选修与公共选修统一在此选择，您当前已选 @ViewBag.OtherCoursesTaken 门。
         </div>
         @Html.Partial("_CourseListPartial", Model.OtherElectives)
     </div>

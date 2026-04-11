@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+ï»¿<%@ Page Language="C#" AutoEventWireup="true" CodePage="65001" %>
 <!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
@@ -8,11 +8,8 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "Ñ§ÉúÁĞ±í";
-        if (!EnsureAdminRole())
-        {
-            return;
-        }
+        PageTitle = "å­¦ç”Ÿåˆ—è¡¨";
+        if (!EnsureAdminRole()) return;
 
         if (Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(Request.Form["ResetUserID"]))
         {
@@ -28,11 +25,7 @@
         using (var db = new StudentManagementDBEntities())
         {
             var query = db.Students.Include("Classes").Include("Users").AsQueryable();
-            if (!string.IsNullOrWhiteSpace(SearchString))
-            {
-                query = query.Where(s => s.StudentName.Contains(SearchString) || s.StudentID.Contains(SearchString));
-            }
-
+            if (!string.IsNullOrWhiteSpace(SearchString)) query = query.Where(s => s.StudentName.Contains(SearchString) || s.StudentID.Contains(SearchString));
             StudentsList = query.OrderBy(s => s.StudentID).ToList();
         }
     }
@@ -41,24 +34,16 @@
     {
         var userIdValue = Request.Form["ResetUserID"];
         int userId;
-        if (!int.TryParse(userIdValue, out userId) || userId <= 0)
-        {
-            return;
-        }
+        if (!int.TryParse(userIdValue, out userId) || userId <= 0) return;
 
         using (var db = new StudentManagementDBEntities())
         {
             var userToReset = db.Users.Find(userId);
-            if (userToReset == null)
-            {
-                return;
-            }
-
-            userToReset.Password = "Hzd@123456";
+            if (userToReset == null) return;
+            userToReset.Password = StudentInformationSystem.Helpers.PasswordSecurity.HashPassword("Hzd@123456");
             db.Entry(userToReset).State = EntityState.Modified;
             db.SaveChanges();
-
-            Session["AdminFlashMessage"] = "ÓÃ»§ " + (userToReset.Username ?? "") + " µÄÃÜÂëÒÑ³É¹¦ÖØÖÃÎª \"Hzd@123456\"¡£";
+            Session["AdminFlashMessage"] = "\u7528\u6237 " + (userToReset.Username ?? "") + " \u7684\u5BC6\u7801\u5DF2\u6210\u529F\u91CD\u7F6E\u4E3A \"Hzd@123456\"\u3002";
         }
 
         var target = "StudentList.aspx" + BuildQueryString(new KeyValuePair<string, string>("searchString", SearchString));
@@ -67,59 +52,34 @@
 </script>
 
 <!--#include file="_AdminLayoutTop.inc" -->
-
-<h2>Ñ§ÉúÁĞ±í</h2>
-
-<% if (!string.IsNullOrEmpty(FlashMessage)) { %>
-    <div class="alert alert-success"><%= H(FlashMessage) %></div>
-<% } %>
-
-<form method="get" class="form-inline">
-    <div class="form-group">
-        <label>²éÕÒÑ§Éú:</label>
-        <input type="text" name="searchString" value="<%= H(SearchString) %>" class="form-control" placeholder="ÊäÈëĞÕÃû»òÑ§ºÅ" />
-    </div>
-    <button type="submit" class="btn btn-default">ËÑ Ë÷</button>
-</form>
+<h2>å­¦ç”Ÿåˆ—è¡¨</h2>
+<% if (!string.IsNullOrEmpty(FlashMessage)) { %><div class="alert alert-success"><%= H(FlashMessage) %></div><% } %>
+<form method="get" class="form-inline"><div class="form-group"><label>æŸ¥æ‰¾å­¦ç”Ÿï¼š</label><input type="text" name="searchString" value="<%= H(SearchString) %>" class="form-control" placeholder="è¾“å…¥å§“åæˆ–å­¦å·" /></div> <button type="submit" class="btn btn-default">æœ ç´¢</button></form>
 <br />
-<p><a class="btn btn-primary" href="AddStudent.aspx">Ìí¼ÓĞÂÑ§Éú</a></p>
-
+<p><a class="btn btn-primary" href="AddStudent.aspx">æ·»åŠ æ–°å­¦ç”Ÿ</a></p>
 <div class="table-responsive">
     <table class="table table-striped table-bordered">
-        <thead>
-            <tr>
-                <th>Ñ§ÉúĞÕÃû</th>
-                <th>ĞÔ±ğ</th>
-                <th>°à¼¶</th>
-                <th>µÇÂ¼ÕËºÅ</th>
-                <th>²Ù×÷</th>
-            </tr>
-        </thead>
+        <thead><tr><th>å­¦ç”Ÿå§“å</th><th>æ€§åˆ«</th><th>ç­çº§</th><th>ç™»å½•è´¦å·</th><th>æ“ä½œ</th></tr></thead>
         <tbody>
-            <% if (StudentsList.Any()) { %>
-                <% foreach (var item in StudentsList) { %>
-                    <tr>
-                        <td><%= H(item.StudentName) %></td>
-                        <td><%= H(item.Gender) %></td>
-                        <td><%= item.Classes == null ? "-" : H(item.Classes.ClassName) %></td>
-                        <td><%= item.Users == null ? "-" : H(item.Users.Username) %></td>
-                        <td>
-                            <a href='Edit.aspx?id=<%= Server.UrlEncode(item.StudentID) %>'>±à¼­</a> |
-                            <a href='Details.aspx?id=<%= Server.UrlEncode(item.StudentID) %>'>ÏêÇé</a> |
-                            <a href='Delete.aspx?id=<%= Server.UrlEncode(item.StudentID) %>'>É¾³ı</a> |
-                            <form method="post" style="display:inline;" onsubmit='return confirm("ÄúÈ·¶¨Òª½«ÓÃ»§ <%= H(item.Users == null ? item.StudentID : item.Users.Username) %> µÄÃÜÂëÖØÖÃÎª Hzd@123456 Âğ£¿");'>
-                                <input type="hidden" name="ResetUserID" value="<%= item.UserID %>" />
-                                <input type="hidden" name="searchString" value="<%= H(SearchString) %>" />
-                                <button type="submit" class="btn btn-link" style="padding:0;border:0;vertical-align:baseline;">ÖØÖÃÃÜÂë</button>
-                            </form>
-                        </td>
-                    </tr>
-                <% } %>
-            <% } else { %>
-                <tr><td colspan="5" class="text-center text-muted">ÔİÎŞÑ§Éú¼ÇÂ¼¡£</td></tr>
-            <% } %>
+            <% if (StudentsList.Any()) { foreach (var item in StudentsList) { %>
+            <tr>
+                <td><%= H(item.StudentName) %></td>
+                <td><%= H(item.Gender) %></td>
+                <td><%= item.Classes == null ? "-" : H(item.Classes.ClassName) %></td>
+                <td><%= item.Users == null ? "-" : H(item.Users.Username) %></td>
+                <td>
+                    <a href='Edit.aspx?id=<%= Server.UrlEncode(item.StudentID) %>'>ç¼–è¾‘</a> |
+                    <a href='Details.aspx?id=<%= Server.UrlEncode(item.StudentID) %>'>è¯¦æƒ…</a> |
+                    <a href='Delete.aspx?id=<%= Server.UrlEncode(item.StudentID) %>'>åˆ é™¤</a> |
+                    <form method="post" style="display:inline;" onsubmit='return confirm("æ‚¨ç¡®å®šè¦å°†ç”¨æˆ· <%= H(item.Users == null ? item.StudentID : item.Users.Username) %> çš„å¯†ç é‡ç½®ä¸º Hzd@123456 å—ï¼Ÿ");'>
+                        <input type="hidden" name="ResetUserID" value="<%= item.UserID %>" />
+                        <input type="hidden" name="searchString" value="<%= H(SearchString) %>" />
+                        <button type="submit" class="btn btn-link" style="padding:0;border:0;vertical-align:baseline;">é‡ç½®å¯†ç </button>
+                    </form>
+                </td>
+            </tr>
+            <% } } else { %><tr><td colspan="5" class="text-center text-muted">æš‚æ— å­¦ç”Ÿè®°å½•ã€‚</td></tr><% } %>
         </tbody>
     </table>
 </div>
-
 <!--#include file="_AdminLayoutBottom.inc" -->

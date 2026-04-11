@@ -194,6 +194,9 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Helpers\HolidayHelper.cs" />
+    <Compile Include="Helpers\ExamConflictHelper.cs" />
+    <Compile Include="Helpers\PasswordSecurity.cs" />
+    <Compile Include="Helpers\ScheduleConflictHelper.cs" />
     <Compile Include="Helpers\ViewHolidayHelper.cs" />
     <Compile Include="Models\ChangePasswordViewModel.cs" />
     <Compile Include="Models\ClassDetailsViewModel.cs" />
@@ -208,6 +211,7 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Courses.Metadata.cs" />
+    <Compile Include="Models\CourseStudentManagementViewModel.cs" />
     <Compile Include="Models\CourseSelectionViewModel.cs" />
     <Compile Include="Models\Exams.cs">
       <DependentUpon>Model1.tt</DependentUpon>

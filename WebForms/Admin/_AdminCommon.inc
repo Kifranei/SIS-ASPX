@@ -1,4 +1,4 @@
-<%@ Import Namespace="System" %>
+ï»¿<%@ Import Namespace="System" %>
 <%@ Import Namespace="System.Linq" %>
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="System.Data.Entity" %>
@@ -6,8 +6,8 @@
 <%@ Import Namespace="StudentInformationSystem.Helpers" %>
 
 <script runat="server">
-    protected string PageTitle = "¹ÜÀíÔ±";
-    protected string CurrentUsername = "¹ÜÀíÔ±";
+    protected string PageTitle = "\u7BA1\u7406\u5458";
+    protected string CurrentUsername = "\u7BA1\u7406\u5458";
 
     protected bool EnsureAdminRole()
     {
@@ -18,7 +18,7 @@
             return false;
         }
 
-        CurrentUsername = currentUser.Username ?? "¹ÜÀíÔ±";
+        CurrentUsername = currentUser.Username ?? "\u7BA1\u7406\u5458";
         return true;
     }
 
@@ -49,14 +49,14 @@
     protected string NormalizeGender(string gender)
     {
         var value = (gender ?? string.Empty).Trim();
-        if (value == "ÄÐ" || value.Equals("male", StringComparison.OrdinalIgnoreCase))
+        if (value == "\u7537" || value.Equals("male", StringComparison.OrdinalIgnoreCase))
         {
-            return "ÄÐ";
+            return "\u7537";
         }
 
-        if (value == "Å®" || value.Equals("female", StringComparison.OrdinalIgnoreCase))
+        if (value == "\u5973" || value.Equals("female", StringComparison.OrdinalIgnoreCase))
         {
-            return "Å®";
+            return "\u5973";
         }
 
         return string.Empty;
@@ -65,31 +65,43 @@
     protected bool IsValidGender(string gender)
     {
         var normalized = NormalizeGender(gender);
-        return normalized == "ÄÐ" || normalized == "Å®";
+        return normalized == "\u7537" || normalized == "\u5973";
     }
 
     protected string CourseTypeText(int courseType)
     {
         switch (courseType)
         {
-            case 1: return "×¨Òµ±ØÐÞ";
-            case 2: return "¹«¹²±ØÐÞ";
-            case 3: return "×¨ÒµÑ¡ÐÞ";
-            case 4: return "¹«¹²Ñ¡ÐÞ";
-            case 5: return "ÌåÓýÑ¡ÐÞ";
-            default: return "Î´ÖªÀàÐÍ";
+            case 1: return "\u4E13\u4E1A\u5FC5\u4FEE";
+            case 2: return "\u516C\u5171\u5FC5\u4FEE";
+            case 3: return "\u4E13\u4E1A\u9009\u4FEE";
+            case 4: return "\u516C\u5171\u9009\u4FEE";
+            case 5: return "\u4F53\u80B2\u9009\u4FEE";
+            default: return "\u672A\u77E5\u7C7B\u578B";
         }
     }
 
     protected string DayName(int dayOfWeek)
     {
-        var days = new[] { "", "ÐÇÆÚÒ»", "ÐÇÆÚ¶þ", "ÐÇÆÚÈý", "ÐÇÆÚËÄ", "ÐÇÆÚÎå", "ÐÇÆÚÁù", "ÐÇÆÚÈÕ" };
-        return dayOfWeek >= 1 && dayOfWeek <= 7 ? days[dayOfWeek] : "Î´Öª";
+        var days = new[]
+        {
+            string.Empty,
+            "\u5468\u4E00",
+            "\u5468\u4E8C",
+            "\u5468\u4E09",
+            "\u5468\u56DB",
+            "\u5468\u4E94",
+            "\u5468\u516D",
+            "\u5468\u65E5"
+        };
+
+        return dayOfWeek >= 1 && dayOfWeek <= 7 ? days[dayOfWeek] : "\u672A\u77E5";
     }
 
     protected string GetPeriodTime(int period)
     {
-        var periodTimes = new[] {
+        var periodTimes = new[]
+        {
             "08:40-09:25", "09:30-10:15", "10:35-11:20", "11:25-12:10",
             "13:20-14:05", "14:10-14:55", "15:15-16:00", "16:05-16:50",
             "17:30-18:15", "18:20-19:05", "19:10-19:55", "20:00-20:45"
@@ -117,4 +129,3 @@
         return parts.Count == 0 ? string.Empty : "?" + string.Join("&", parts);
     }
 </script>
-

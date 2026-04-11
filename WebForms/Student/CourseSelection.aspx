@@ -67,6 +67,13 @@
 
         if (op == "select")
         {
+            if (course.CourseType != 3 && course.CourseType != 4 && course.CourseType != 5)
+            {
+                SetFlash("danger", "该课程不允许学生自主选课。");
+                Response.Redirect("CourseSelection.aspx", true);
+                return;
+            }
+
             var isEnrolled = db.StudentCourses.Any(sc => sc.StudentID == studentId && sc.CourseID == courseId);
             if (isEnrolled)
             {
@@ -84,6 +91,16 @@
                     Response.Redirect("CourseSelection.aspx", true);
                     return;
                 }
+            }
+
+            var conflicts = StudentInformationSystem.Helpers.ScheduleConflictHelper.GetStudentConflictsForCourseSelection(db, studentId, courseId);
+            if (conflicts.Any())
+            {
+                SetFlash("danger", StudentInformationSystem.Helpers.ScheduleConflictHelper.BuildStudentConflictMessage(
+                    conflicts,
+                    "选课失败，当前课程与已选课程时间冲突："));
+                Response.Redirect("CourseSelection.aspx", true);
+                return;
             }
 
             db.StudentCourses.Add(new StudentCourses
@@ -139,7 +156,7 @@
         var retakeCourseIds = allEnrollments.Where(sc => sc.Grade < 60).Select(sc => sc.CourseID).Distinct().ToList();
 
         SportsCoursesTaken = allEnrollments.Count(sc => sc.Courses.CourseType == 5);
-        OtherCoursesTaken = allEnrollments.Count(sc => sc.Courses.CourseType == 4);
+        OtherCoursesTaken = allEnrollments.Count(sc => sc.Courses.CourseType == 3 || sc.Courses.CourseType == 4);
 
         var allAvailableCourses = db.Courses
             .Include("Teachers")
@@ -147,7 +164,7 @@
             .ToList();
 
         SportsElectives = allAvailableCourses.Where(c => c.CourseType == 5).ToList();
-        OtherElectives = allAvailableCourses.Where(c => c.CourseType == 4).ToList();
+        OtherElectives = allAvailableCourses.Where(c => c.CourseType == 3 || c.CourseType == 4).ToList();
 
         var allCourseIds = allAvailableCourses.Select(c => c.CourseID)
             .Union(enrolledCourseIds)
@@ -312,7 +329,7 @@
         <div class="mb-3">
             <button class="btn btn-primary tab-btn active" data-target="my-selected">我的已选课程 <span class="badge bg-light text-dark"><%= EnrolledCourses.Count %></span></button>
             <button class="btn btn-light tab-btn" data-target="sports-market">体育选修区</button>
-            <button class="btn btn-light tab-btn" data-target="other-market">其他选修区</button>
+            <button class="btn btn-light tab-btn" data-target="other-market">专业/公共选修区</button>
         </div>
 
         <div id="my-selected" class="tab-pane active">
@@ -386,7 +403,7 @@
         </div>
 
         <div id="other-market" class="tab-pane">
-            <div class="alert alert-info">公共选修课程当前已选 <strong><%= OtherCoursesTaken %></strong> 门。</div>
+            <div class="alert alert-info">专业选修与公共选修统一在此选择，您当前已选 <strong><%= OtherCoursesTaken %></strong> 门。</div>
             <div class="table-responsive">
                 <table class="table table-hover bg-white">
                     <thead><tr><th>课程名称</th><th>教师</th><th>学分</th><th>时间</th><th class="text-center" style="width:100px;">操作</th></tr></thead>

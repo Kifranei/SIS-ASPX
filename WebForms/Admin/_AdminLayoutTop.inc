@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="zh-CN">
 <head runat="server">
     <meta charset="utf-8" />
@@ -23,31 +23,31 @@
         <div class="sidebar-overlay"></div>
         <aside class="sidebar">
             <div class="sidebar-header">
-                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="Ð£»Õ" class="sidebar-logo-img" />
+                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="&#x6821;&#x5FBD;" class="sidebar-logo-img" />
             </div>
             <ul class="sidebar-menu">
-                <li><a class="<%= MenuActive("Index.aspx") %>" href="Index.aspx">¿ØÖÆÌ¨</a></li>
-                <li><a class="<%= MenuActive("StudentList.aspx|AddStudent.aspx|Edit.aspx|Details.aspx|Delete.aspx") %>" href="StudentList.aspx">Ñ§Éú¹ÜÀí</a></li>
-                <li><a class="<%= MenuActive("TeacherList.aspx|AddTeacher.aspx|EditTeacher.aspx|DetailsTeacher.aspx|DeleteTeacher.aspx") %>" href="TeacherList.aspx">½ÌÊ¦¹ÜÀí</a></li>
-                <li><a class="<%= MenuActive("ClassList.aspx|AddClass.aspx|EditClass.aspx|DeleteClass.aspx|ClassDetails.aspx") %>" href="ClassList.aspx">°à¼¶¹ÜÀí</a></li>
-                <li><a class="<%= MenuActive("CourseList.aspx|AddCourse.aspx|EditCourse.aspx|DetailsCourse.aspx|DeleteCourse.aspx|CourseSchedule.aspx|AddCourseSchedule.aspx|EditCourseSchedule.aspx|DeleteCourseSchedule.aspx") %>" href="CourseList.aspx">¿Î³Ì¹ÜÀí</a></li>
-                <li><a class="<%= MenuActive("EnrollmentList.aspx") %>" href="EnrollmentList.aspx">Ñ¡¿Î¼ÇÂ¼</a></li>
-                <li><a class="<%= MenuActive("ExamList.aspx|AddExam.aspx|EditExam.aspx|DetailsExam.aspx|DeleteExam.aspx") %>" href="ExamList.aspx">¿¼ÊÔ¹ÜÀí</a></li>
-                <li><a class="<%= MenuActive("ChangePassword.aspx") %>" href="ChangePassword.aspx">ÐÞ¸ÄÃÜÂë</a></li>
+                <li><a class="<%= MenuActive("Index.aspx") %>" href="Index.aspx">&#x63A7;&#x5236;&#x53F0;</a></li>
+                <li><a class="<%= MenuActive("StudentList.aspx|AddStudent.aspx|Edit.aspx|Details.aspx|Delete.aspx") %>" href="StudentList.aspx">&#x5B66;&#x751F;&#x7BA1;&#x7406;</a></li>
+                <li><a class="<%= MenuActive("TeacherList.aspx|AddTeacher.aspx|EditTeacher.aspx|DetailsTeacher.aspx|DeleteTeacher.aspx") %>" href="TeacherList.aspx">&#x6559;&#x5E08;&#x7BA1;&#x7406;</a></li>
+                <li><a class="<%= MenuActive("ClassList.aspx|AddClass.aspx|EditClass.aspx|DeleteClass.aspx|ClassDetails.aspx") %>" href="ClassList.aspx">&#x73ED;&#x7EA7;&#x7BA1;&#x7406;</a></li>
+                <li><a class="<%= MenuActive("CourseList.aspx|AddCourse.aspx|EditCourse.aspx|DetailsCourse.aspx|DeleteCourse.aspx|CourseSchedule.aspx|AddCourseSchedule.aspx|EditCourseSchedule.aspx|DeleteCourseSchedule.aspx") %>" href="CourseList.aspx">&#x8BFE;&#x7A0B;&#x7BA1;&#x7406;</a></li>
+                <li><a class="<%= MenuActive("EnrollmentList.aspx") %>" href="EnrollmentList.aspx">&#x9009;&#x8BFE;&#x8BB0;&#x5F55;</a></li>
+                <li><a class="<%= MenuActive("ExamList.aspx|AddExam.aspx|EditExam.aspx|DetailsExam.aspx|DeleteExam.aspx") %>" href="ExamList.aspx">&#x8003;&#x8BD5;&#x7BA1;&#x7406;</a></li>
+                <li><a class="<%= MenuActive("ChangePassword.aspx") %>" href="ChangePassword.aspx">&#x4FEE;&#x6539;&#x5BC6;&#x7801;</a></li>
             </ul>
         </aside>
 
         <div class="main-content">
             <header class="header-bar">
                 <div class="header-left">
-                    <button class="hamburger-menu" type="button" aria-label="²Ëµ¥">&#9776;</button>
+                    <button class="hamburger-menu" type="button" aria-label="menu">&#9776;</button>
                 </div>
                 <div class="header-right">
-                    <button class='dark-toggle-btn' type='button'>°µÉ«Ä£Ê½</button>
+                    <button class='dark-toggle-btn' type='button'>&#x6697;&#x8272;&#x6A21;&#x5F0F;</button>
                     <div class="user-info">
-                        <span class="username">»¶Ó­Äú, <%= Server.HtmlEncode(CurrentUsername) %></span>
+                        <span class="username">&#x6B22;&#x8FCE;&#x60A8;, <%= Server.HtmlEncode(CurrentUsername) %></span>
                         <span class="sep">|</span>
-                        <a class="logout-link" href="../Logout.aspx">°²È«ÍË³ö</a>
+                        <a class="logout-link" href="../Logout.aspx">&#x5B89;&#x5168;&#x9000;&#x51FA;</a>
                     </div>
                 </div>
             </header>

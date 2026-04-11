@@ -1,10 +1,9 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+ï»¿<%@ Page Language="C#" AutoEventWireup="true" CodePage="65001" %>
 <!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
     protected List<Classes> ClassOptions = new List<Classes>();
     protected string MessageText = string.Empty;
-
     protected string FormStudentID = string.Empty;
     protected string FormStudentName = string.Empty;
     protected string FormGender = string.Empty;
@@ -12,17 +11,11 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "Ìí¼ÓĞÂÑ§Éú";
-        if (!EnsureAdminRole())
-        {
-            return;
-        }
+        PageTitle = "æ·»åŠ æ–°å­¦ç”Ÿ";
+        if (!EnsureAdminRole()) return;
 
         int classIdFromQuery;
-        if (int.TryParse(Request.QueryString["classId"], out classIdFromQuery))
-        {
-            FormClassID = classIdFromQuery;
-        }
+        if (int.TryParse(Request.QueryString["classId"], out classIdFromQuery)) FormClassID = classIdFromQuery;
 
         if (Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase))
         {
@@ -30,11 +23,7 @@
             FormStudentName = (Request.Form["StudentName"] ?? string.Empty).Trim();
             FormGender = NormalizeGender(Request.Form["Gender"]);
             int classId;
-            if (int.TryParse(Request.Form["ClassID"], out classId))
-            {
-                FormClassID = classId;
-            }
-
+            if (int.TryParse(Request.Form["ClassID"], out classId)) FormClassID = classId;
             SaveStudent();
         }
 
@@ -46,115 +35,32 @@
 
     private void SaveStudent()
     {
-        if (string.IsNullOrWhiteSpace(FormStudentID) || string.IsNullOrWhiteSpace(FormStudentName))
-        {
-            MessageText = "Ñ§ºÅºÍĞÕÃû²»ÄÜÎª¿Õ¡£";
-            return;
-        }
-
-        if (!IsValidGender(FormGender))
-        {
-            MessageText = "ĞÔ±ğÖ»ÄÜÑ¡Ôñ¡°ÄĞ¡±»ò¡°Å®¡±¡£";
-            return;
-        }
+        if (string.IsNullOrWhiteSpace(FormStudentID) || string.IsNullOrWhiteSpace(FormStudentName)) { MessageText = "\u5B66\u53F7\u548C\u59D3\u540D\u4E0D\u80FD\u4E3A\u7A7A\u3002"; return; }
+        if (!IsValidGender(FormGender)) { MessageText = "\u6027\u522B\u53EA\u80FD\u9009\u62E9\u201C\u7537\u201D\u6216\u201C\u5973\u201D\u3002"; return; }
 
         using (var db = new StudentManagementDBEntities())
         {
-            if (db.Students.Any(s => s.StudentID == FormStudentID))
-            {
-                MessageText = "¸ÃÑ§ºÅÒÑ´æÔÚ¡£";
-                return;
-            }
+            if (db.Students.Any(s => s.StudentID == FormStudentID)) { MessageText = "\u8BE5\u5B66\u53F7\u5DF2\u5B58\u5728\u3002"; return; }
+            if (db.Users.Any(u => u.Username == FormStudentID)) { MessageText = "\u8BE5\u5B66\u53F7\u5DF2\u5360\u7528\u767B\u5F55\u8D26\u53F7\u3002"; return; }
 
-            if (db.Users.Any(u => u.Username == FormStudentID))
-            {
-                MessageText = "¸ÃÑ§ºÅÒÑÕ¼ÓÃµÇÂ¼ÕËºÅ¡£";
-                return;
-            }
-
-            var newUser = new Users
-            {
-                Username = FormStudentID,
-                Password = "Hzd@123456",
-                Role = 2
-            };
-
-            var student = new Students
-            {
-                StudentID = FormStudentID,
-                StudentName = FormStudentName,
-                Gender = FormGender,
-                ClassID = FormClassID,
-                Users = newUser
-            };
-
-            db.Users.Add(newUser);
-            db.Students.Add(student);
-            db.SaveChanges();
-
-            Session["AdminFlashMessage"] = "Ñ§Éú " + FormStudentName + " Ìí¼Ó³É¹¦£¡Ä¬ÈÏÃÜÂëÎª£ºHzd@123456";
+            var newUser = new Users { Username = FormStudentID, Password = StudentInformationSystem.Helpers.PasswordSecurity.HashPassword("Hzd@123456"), Role = 2 };
+            var student = new Students { StudentID = FormStudentID, StudentName = FormStudentName, Gender = FormGender, ClassID = FormClassID, Users = newUser };
+            db.Users.Add(newUser); db.Students.Add(student); db.SaveChanges();
+            Session["AdminFlashMessage"] = "\u5B66\u751F " + FormStudentName + " \u6DFB\u52A0\u6210\u529F\uFF0C\u9ED8\u8BA4\u5BC6\u7801\u4E3A Hzd@123456\u3002";
             Response.Redirect("StudentList.aspx", true);
         }
     }
 </script>
 
 <!--#include file="_AdminLayoutTop.inc" -->
-
-<h2>Ìí¼ÓĞÂÑ§Éú</h2>
-
-<% if (!string.IsNullOrEmpty(MessageText)) { %>
-    <div class="alert alert-danger"><%= H(MessageText) %></div>
-<% } %>
-
+<h2>æ·»åŠ æ–°å­¦ç”Ÿ</h2>
+<% if (!string.IsNullOrEmpty(MessageText)) { %><div class="alert alert-danger"><%= H(MessageText) %></div><% } %>
 <form method="post" class="form-horizontal" style="max-width:900px;">
-    <h4>Ñ§ÉúĞÅÏ¢</h4>
-    <hr />
-
-    <div class="form-group">
-        <label class="control-label col-md-2">Ñ§ÉúÑ§ºÅ</label>
-        <div class="col-md-10">
-            <input class="form-control" name="StudentID" value="<%= H(FormStudentID) %>" required />
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label class="control-label col-md-2">ĞÕÃû</label>
-        <div class="col-md-10">
-            <input class="form-control" name="StudentName" value="<%= H(FormStudentName) %>" required />
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label class="control-label col-md-2">ĞÔ±ğ</label>
-        <div class="col-md-10">
-            <select class="form-control" name="Gender" required>
-                <option value="">--ÇëÑ¡ÔñĞÔ±ğ--</option>
-                <option value="ÄĞ" <%= FormGender == "ÄĞ" ? "selected" : "" %>>ÄĞ</option>
-                <option value="Å®" <%= FormGender == "Å®" ? "selected" : "" %>>Å®</option>
-            </select>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label class="control-label col-md-2">°à¼¶</label>
-        <div class="col-md-10">
-            <select class="form-control" name="ClassID">
-                <option value="">--ÇëÑ¡Ôñ°à¼¶--</option>
-                <% foreach (var cls in ClassOptions) { %>
-                    <option value="<%= cls.ClassID %>" <%= FormClassID.HasValue && FormClassID.Value == cls.ClassID ? "selected" : "" %>><%= H(cls.ClassName) %></option>
-                <% } %>
-            </select>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <div class="col-md-offset-2 col-md-10">
-            <button type="submit" class="btn btn-success">´´½¨</button>
-            <a class="btn btn-default" href="StudentList.aspx">·µ»ØÁĞ±í</a>
-        </div>
-    </div>
+    <h4>å­¦ç”Ÿä¿¡æ¯</h4><hr />
+    <div class="form-group"><label class="control-label col-md-2">å­¦ç”Ÿå­¦å·</label><div class="col-md-10"><input class="form-control" name="StudentID" value="<%= H(FormStudentID) %>" required /></div></div>
+    <div class="form-group"><label class="control-label col-md-2">å§“å</label><div class="col-md-10"><input class="form-control" name="StudentName" value="<%= H(FormStudentName) %>" required /></div></div>
+    <div class="form-group"><label class="control-label col-md-2">æ€§åˆ«</label><div class="col-md-10"><select class="form-control" name="Gender" required><option value="">--è¯·é€‰æ‹©æ€§åˆ«--</option><option value="ç”·" <%= FormGender == "ç”·" ? "selected" : "" %>>ç”·</option><option value="å¥³" <%= FormGender == "å¥³" ? "selected" : "" %>>å¥³</option></select></div></div>
+    <div class="form-group"><label class="control-label col-md-2">ç­çº§</label><div class="col-md-10"><select class="form-control" name="ClassID"><option value="">--è¯·é€‰æ‹©ç­çº§--</option><% foreach (var cls in ClassOptions) { %><option value="<%= cls.ClassID %>" <%= FormClassID.HasValue && FormClassID.Value == cls.ClassID ? "selected" : "" %>><%= H(cls.ClassName) %></option><% } %></select></div></div>
+    <div class="form-group"><div class="col-md-offset-2 col-md-10"><button type="submit" class="btn btn-success">åˆ›å»º</button> <a class="btn btn-default" href="StudentList.aspx">è¿”å›åˆ—è¡¨</a></div></div>
 </form>
-
 <!--#include file="_AdminLayoutBottom.inc" -->
-
-
