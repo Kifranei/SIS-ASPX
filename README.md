@@ -74,6 +74,7 @@
 - 小程序学生端补齐了在线选课相关接口，支持查询可选课程、已选课程与数量统计，并在选课/退课后自动刷新课表数据。
 - 小程序教师端新增“课程/成绩”入口，支持按课程查看学生名单并批量录入、修改成绩。
 - 小程序登录页与主要业务页已接入统一的本地登录态判断逻辑，已登录用户可自动跳过登录页，登录状态缺失时会自动回到登录页。
+- 新增 `Scripts/Run-MiniProgramApiRegression.ps1` 回归脚本，用于自动验证选课时间冲突、教师成绩录入权限与无效用户访问这三条关键链路。
 
 ### 暗色模式
 
@@ -93,12 +94,12 @@
     * `GET /api/miniprogram/grades`: 查询学生的选课及成绩信息。
     * `GET /api/miniprogram/course-selection`: 查询在线选课列表、已选课程与数量统计。
     * `GET /api/miniprogram/course-selection/enrolled`: 查询已选课程明细与数量统计。
-    * `POST /api/miniprogram/course-selection/select`: 学生提交选课。
+    * `POST /api/miniprogram/course-selection/select`: 学生提交选课，包含重复选课、课程类别限制与时间冲突检测。
     * `POST /api/miniprogram/course-selection/withdraw`: 学生提交退课。
 * **教师端功能 (Teacher Features)**
     * `GET /api/miniprogram/mycourses`: 查询教师教授的课程列表、课程类别与选课人数。
-    * `GET /api/miniprogram/teacher-grade-entry`: 查询指定课程的学生名单与已有成绩。
-    * `POST /api/miniprogram/teacher-grade-entry/save`: 教师批量保存课程成绩。
+    * `GET /api/miniprogram/teacher-grade-entry`: 查询指定课程的学生名单与已有成绩，并校验教师身份和授课归属。
+    * `POST /api/miniprogram/teacher-grade-entry/save`: 教师批量保存课程成绩，并校验教师身份和授课归属。
 * **管理员功能 (Admin Features)**
     * `GET /api/miniprogram/stats`: 获取系统运行状态统计（包括用户、学生、教师、课程、班级总数）。
 
@@ -183,6 +184,10 @@
 1. 用 Visual Studio 打开 `.sln` 项目文件。
 2. 为避免出现 bug，请先清理并重建解决方案（菜单栏选择 "生成" -> "重新生成解决方案"）。
 3. 按 `F5` 或点击 "IIS Express" 按钮运行项目。首次访问建议直接打开 `~/Login.aspx`（访问根路径 `~/` 也会自动跳转）。
+4. 若需联调微信小程序，当前 IIS Express 默认会同时提供：
+   - 浏览器访问入口：`https://localhost:44332/Login.aspx`
+   - 小程序本地调试接口：`http://localhost:53798/api/miniprogram/...`
+   之所以本地小程序默认走 HTTP 绑定，是为了绕过 IIS Express 自签名 HTTPS 证书在微信开发者工具中的信任问题。
 
 #### 5\. 默认登录信息
 
@@ -192,6 +197,20 @@
 - **教师**: 使用工号作为用户名，例如 `T001`
 
 测试账号密码请以当前 `db/sql.sql` 初始化脚本中的配置为准。该脚本已改为哈希密码种子，不再展示明文密码。
+
+#### 6\. 自动化回归脚本
+
+项目根目录提供了小程序接口回归脚本 `Scripts/Run-MiniProgramApiRegression.ps1`，可用于快速验证以下链路：
+
+- 选课时间冲突拦截
+- 教师成绩录入权限校验
+- 无效用户访问接口的处理结果
+
+示例命令：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File ".\Scripts\Run-MiniProgramApiRegression.ps1"
+```
 
 
 
