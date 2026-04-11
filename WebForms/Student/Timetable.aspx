@@ -2,6 +2,7 @@
 <%@ Import Namespace="System" %>
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="System.Linq" %>
+<%@ Import Namespace="System.Web" %>
 <%@ Import Namespace="System.Data.Entity" %>
 <%@ Import Namespace="StudentInformationSystem.Models" %>
 
@@ -23,6 +24,10 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
+        Response.Cache.SetCacheability(HttpCacheability.NoCache);
+        Response.Cache.SetNoStore();
+        Response.Cache.SetExpires(DateTime.UtcNow.AddMinutes(-1));
+        Response.Cache.SetRevalidation(HttpCacheRevalidation.AllCaches);
         var currentUser = Session["User"] as Users;
         if (currentUser == null || currentUser.Role != 2)
         {
