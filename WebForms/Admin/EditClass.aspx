@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
@@ -11,7 +11,7 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "±à¼­°à¼¶ĞÅÏ¢";
+        PageTitle = "ç¼–è¾‘ç­çº§ä¿¡æ¯";
         if (!EnsureAdminRole())
         {
             return;
@@ -30,7 +30,7 @@
             int id;
             if (!int.TryParse(Request.QueryString["id"], out id) || id <= 0)
             {
-                MessageText = "°à¼¶²ÎÊıÎŞĞ§¡£";
+                MessageText = "ç­çº§å‚æ•°æ— æ•ˆã€‚";
             }
             else
             {
@@ -41,7 +41,7 @@
 
                 if (CurrentClass == null)
                 {
-                    MessageText = "°à¼¶²»´æÔÚ¡£";
+                    MessageText = "ç­çº§ä¸å­˜åœ¨ã€‚";
                 }
                 else
                 {
@@ -60,18 +60,18 @@
         int classNumber;
         if (FormClassID <= 0 || string.IsNullOrWhiteSpace(FormMajor) || !int.TryParse(FormAcademicYear, out year) || !int.TryParse(FormClassNumber, out classNumber))
         {
-            MessageText = "ÇëÕıÈ·ÌîĞ´×¨Òµ¡¢Ñ§ÄêºÍ°àºÅ¡£";
+            MessageText = "è¯·æ­£ç¡®å¡«å†™ä¸“ä¸šã€å­¦å¹´å’Œç­å·ã€‚";
             return;
         }
 
-        var className = FormMajor + year.ToString().Substring(2, 2) + classNumber.ToString("D2") + "°à";
+        var className = FormMajor + year.ToString().Substring(2, 2) + classNumber.ToString("D2") + "ç­";
 
         using (var db = new StudentManagementDBEntities())
         {
             var classModel = db.Classes.Find(FormClassID);
             if (classModel == null)
             {
-                MessageText = "°à¼¶²»´æÔÚ¡£";
+                MessageText = "ç­çº§ä¸å­˜åœ¨ã€‚";
                 return;
             }
 
@@ -89,7 +89,7 @@
 
 <!--#include file="_AdminLayoutTop.inc" -->
 
-<h2>±à¼­°à¼¶ĞÅÏ¢</h2>
+<h2>ç¼–è¾‘ç­çº§ä¿¡æ¯</h2>
 <% if (FormClassID > 0) { %><h4><%= H(FormMajor) %></h4><% } %>
 
 <% if (!string.IsNullOrEmpty(MessageText)) { %>
@@ -99,21 +99,21 @@
         <input type="hidden" name="ClassID" value="<%= FormClassID %>" />
 
         <div class="form-group">
-            <label class="control-label col-md-2">×¨Òµ</label>
+            <label class="control-label col-md-2">ä¸“ä¸š</label>
             <div class="col-md-10">
                 <input class="form-control" name="Major" value="<%= H(FormMajor) %>" required />
             </div>
         </div>
 
         <div class="form-group">
-            <label class="control-label col-md-2">Ñ§Äê</label>
+            <label class="control-label col-md-2">å­¦å¹´</label>
             <div class="col-md-10">
                 <input class="form-control" name="AcademicYear" value="<%= H(FormAcademicYear) %>" required />
             </div>
         </div>
 
         <div class="form-group">
-            <label class="control-label col-md-2">°àºÅ</label>
+            <label class="control-label col-md-2">ç­å·</label>
             <div class="col-md-10">
                 <input class="form-control" name="ClassNumber" value="<%= H(FormClassNumber) %>" required />
             </div>
@@ -121,8 +121,8 @@
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <button type="submit" class="btn btn-success">±£ ´æ</button>
-                <a class="btn btn-default" href="ClassList.aspx">·µ»ØÁĞ±í</a>
+                <button type="submit" class="btn btn-success">ä¿ å­˜</button>
+                <a class="btn btn-default" href="ClassList.aspx">è¿”å›åˆ—è¡¨</a>
             </div>
         </div>
     </form>

@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
@@ -8,7 +8,7 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "°à¼¶ÏêÇé";
+        PageTitle = "ç­çº§è¯¦æƒ…";
         if (!EnsureAdminRole())
         {
             return;
@@ -17,7 +17,7 @@
         int id;
         if (!int.TryParse(Request.QueryString["id"], out id) || id <= 0)
         {
-            MessageText = "°à¼¶²ÎÊıÎŞĞ§¡£";
+            MessageText = "ç­çº§å‚æ•°æ— æ•ˆã€‚";
             return;
         }
 
@@ -26,7 +26,7 @@
             CurrentClass = db.Classes.Find(id);
             if (CurrentClass == null)
             {
-                MessageText = "°à¼¶²»´æÔÚ¡£";
+                MessageText = "ç­çº§ä¸å­˜åœ¨ã€‚";
                 return;
             }
 
@@ -37,7 +37,7 @@
 
 <!--#include file="_AdminLayoutTop.inc" -->
 
-<h2>°à¼¶ÏêÇé</h2>
+<h2>ç­çº§è¯¦æƒ…</h2>
 
 <% if (!string.IsNullOrEmpty(MessageText)) { %>
     <div class="alert alert-danger"><%= H(MessageText) %></div>
@@ -45,29 +45,29 @@
     <h4><%= H(CurrentClass.ClassName) %></h4>
     <hr />
     <dl class="dl-horizontal">
-        <dt>×¨Òµ</dt>
+        <dt>ä¸“ä¸š</dt>
         <dd><%= H(CurrentClass.Major) %></dd>
 
-        <dt>Ñ§Äê</dt>
+        <dt>å­¦å¹´</dt>
         <dd><%= CurrentClass.AcademicYear.HasValue ? CurrentClass.AcademicYear.Value.ToString() : "-" %></dd>
 
-        <dt>°àºÅ</dt>
+        <dt>ç­å·</dt>
         <dd><%= CurrentClass.ClassNumber.HasValue ? CurrentClass.ClassNumber.Value.ToString() : "-" %></dd>
 
-        <dt>°à¼¶ÈËÊı</dt>
-        <dd><%= StudentsInClass.Count %> ÈË</dd>
+        <dt>ç­çº§äººæ•°</dt>
+        <dd><%= StudentsInClass.Count %> äºº</dd>
     </dl>
     <hr />
 
-    <h4>°à¼¶Ñ§ÉúÃûµ¥</h4>
+    <h4>ç­çº§å­¦ç”Ÿåå•</h4>
     <div class="table-responsive">
         <table class="table table-striped table-bordered">
             <thead>
                 <tr>
-                    <th>Ñ§ºÅ</th>
-                    <th>ĞÕÃû</th>
-                    <th>ĞÔ±ğ</th>
-                    <th>²Ù×÷</th>
+                    <th>å­¦å·</th>
+                    <th>å§“å</th>
+                    <th>æ€§åˆ«</th>
+                    <th>æ“ä½œ</th>
                 </tr>
             </thead>
             <tbody>
@@ -77,19 +77,19 @@
                             <td><%= H(student.StudentID) %></td>
                             <td><%= H(student.StudentName) %></td>
                             <td><%= H(student.Gender) %></td>
-                            <td><a href='Edit.aspx?id=<%= Server.UrlEncode(student.StudentID) %>'>±à¼­¸ÃÑ§Éú</a></td>
+                            <td><a href='Edit.aspx?id=<%= Server.UrlEncode(student.StudentID) %>'>ç¼–è¾‘è¯¥å­¦ç”Ÿ</a></td>
                         </tr>
                     <% } %>
                 <% } else { %>
-                    <tr><td colspan="4" class="text-center text-muted">¸Ã°à¼¶ÔİÎŞÑ§Éú¡£</td></tr>
+                    <tr><td colspan="4" class="text-center text-muted">è¯¥ç­çº§æš‚æ— å­¦ç”Ÿã€‚</td></tr>
                 <% } %>
             </tbody>
         </table>
     </div>
 
     <p>
-        <a class="btn btn-primary" href='AddStudent.aspx?classId=<%= CurrentClass.ClassID %>'>Ìí¼ÓĞÂÑ§Éú</a>
-        <a class="btn btn-default" href="ClassList.aspx">·µ»Ø°à¼¶ÁĞ±í</a>
+        <a class="btn btn-primary" href='AddStudent.aspx?classId=<%= CurrentClass.ClassID %>'>æ·»åŠ æ–°å­¦ç”Ÿ</a>
+        <a class="btn btn-default" href="ClassList.aspx">è¿”å›ç­çº§åˆ—è¡¨</a>
     </p>
 <% } %>
 

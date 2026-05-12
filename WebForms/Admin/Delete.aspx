@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
@@ -7,7 +7,7 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "É¾³ıÑ§Éú";
+        PageTitle = "åˆ é™¤å­¦ç”Ÿ";
         if (!EnsureAdminRole())
         {
             return;
@@ -16,7 +16,7 @@
         var id = (Request.QueryString["id"] ?? Request.Form["StudentID"] ?? string.Empty).Trim();
         if (string.IsNullOrWhiteSpace(id))
         {
-            MessageText = "È±ÉÙÑ§ÉúID²ÎÊı¡£";
+            MessageText = "ç¼ºå°‘å­¦ç”ŸIDå‚æ•°ã€‚";
             return;
         }
 
@@ -25,7 +25,7 @@
             CurrentStudent = db.Students.Include("Classes").FirstOrDefault(s => s.StudentID == id);
             if (CurrentStudent == null)
             {
-                MessageText = "Ñ§Éú²»´æÔÚ¡£";
+                MessageText = "å­¦ç”Ÿä¸å­˜åœ¨ã€‚";
                 return;
             }
 
@@ -60,30 +60,30 @@
 
 <!--#include file="_AdminLayoutTop.inc" -->
 
-<h2>É¾³ıÑ§Éú</h2>
+<h2>åˆ é™¤å­¦ç”Ÿ</h2>
 
 <% if (!string.IsNullOrEmpty(MessageText)) { %>
     <div class="alert alert-danger"><%= H(MessageText) %></div>
 <% } else { %>
-    <h3 class="text-danger">ÄúÈ·¶¨ÒªÉ¾³ıÕâÎ»Ñ§ÉúÂğ£¿´Ë²Ù×÷²»¿É»Ö¸´¡£</h3>
+    <h3 class="text-danger">æ‚¨ç¡®å®šè¦åˆ é™¤è¿™ä½å­¦ç”Ÿå—ï¼Ÿæ­¤æ“ä½œä¸å¯æ¢å¤ã€‚</h3>
     <div>
         <h4><%= H(CurrentStudent.StudentName) %></h4>
         <hr />
         <dl class="dl-horizontal">
-            <dt>Ñ§ºÅ</dt>
+            <dt>å­¦å·</dt>
             <dd><%= H(CurrentStudent.StudentID) %></dd>
 
-            <dt>ĞÕÃû</dt>
+            <dt>å§“å</dt>
             <dd><%= H(CurrentStudent.StudentName) %></dd>
 
-            <dt>°à¼¶</dt>
+            <dt>ç­çº§</dt>
             <dd><%= CurrentStudent.Classes == null ? "-" : H(CurrentStudent.Classes.ClassName) %></dd>
         </dl>
 
         <form method="post" class="form-actions no-color">
             <input type="hidden" name="StudentID" value="<%= H(CurrentStudent.StudentID) %>" />
-            <button type="submit" class="btn btn-danger">È·ÈÏÉ¾³ı</button>
-            <a class="btn btn-default" href="StudentList.aspx">·µ»ØÁĞ±í</a>
+            <button type="submit" class="btn btn-danger">ç¡®è®¤åˆ é™¤</button>
+            <a class="btn btn-default" href="StudentList.aspx">è¿”å›åˆ—è¡¨</a>
         </form>
     </div>
 <% } %>

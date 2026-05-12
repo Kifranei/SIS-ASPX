@@ -511,6 +511,7 @@ namespace StudentInformationSystem.Controllers
             // 准备教师下拉列表，并选中当前课程的教师
             ViewBag.TeacherID = new SelectList(db.Teachers, "TeacherID", "TeacherName", course.TeacherID);
             ViewBag.CourseTypeList = GetCourseTypes(course.CourseType);
+            PopulateCourseStudentManagementViewData(course);
             return View(course);
         }
 
@@ -561,13 +562,101 @@ namespace StudentInformationSystem.Controllers
 
             if (ModelState.IsValid)
             {
-                db.Entry(course).State = System.Data.Entity.EntityState.Modified;
+                var existingCourse = db.Courses.Find(course.CourseID);
+                if (existingCourse == null)
+                {
+                    return HttpNotFound();
+                }
+
+                existingCourse.CourseName = course.CourseName;
+                existingCourse.Credits = course.Credits;
+                existingCourse.TeacherID = course.TeacherID;
+                existingCourse.CourseType = course.CourseType;
+
                 db.SaveChanges();
                 return RedirectToAction("CourseList");
             }
             ViewBag.TeacherID = new SelectList(db.Teachers, "TeacherID", "TeacherName", course.TeacherID);
             ViewBag.CourseTypeList = GetCourseTypes(course.CourseType);
+            PopulateCourseStudentManagementViewData(course);
             return View(course);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AddStudentToCourse(int courseId, string studentId)
+        {
+            var course = db.Courses.Find(courseId);
+            if (!IsRequiredCourse(course))
+            {
+                TempData["ErrorMessage"] = "只有专业必修和公共必修课程可以手动管理学生名单。";
+                return RedirectToAction("EditCourse", new { id = courseId });
+            }
+
+            if (string.IsNullOrWhiteSpace(studentId))
+            {
+                TempData["ErrorMessage"] = "请选择要添加的学生。";
+                return RedirectToAction("EditCourse", new { id = courseId });
+            }
+
+            var student = db.Students.Find(studentId);
+            if (student == null)
+            {
+                TempData["ErrorMessage"] = "学生不存在。";
+                return RedirectToAction("EditCourse", new { id = courseId });
+            }
+
+            bool alreadyExists = db.StudentCourses.Any(sc => sc.CourseID == courseId && sc.StudentID == studentId);
+            if (alreadyExists)
+            {
+                TempData["ErrorMessage"] = "该学生已经在课程名单中。";
+                return RedirectToAction("EditCourse", new { id = courseId });
+            }
+
+            var assignmentConflicts = ScheduleConflictHelper.GetStudentConflictsForCourseAssignment(db, studentId, courseId);
+            if (assignmentConflicts.Any())
+            {
+                TempData["ErrorMessage"] = ScheduleConflictHelper.BuildStudentConflictMessage(
+                    assignmentConflicts,
+                    "无法加入课程名单，学生课表存在冲突：");
+                return RedirectToAction("EditCourse", new { id = courseId });
+            }
+
+            db.StudentCourses.Add(new StudentCourses
+            {
+                CourseID = courseId,
+                StudentID = studentId,
+                Grade = null
+            });
+            db.SaveChanges();
+
+            TempData["SuccessMessage"] = $"已将学生 {student.StudentName}（{student.StudentID}）加入课程名单。";
+            return RedirectToAction("EditCourse", new { id = courseId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult RemoveStudentFromCourse(int courseId, string studentId)
+        {
+            var course = db.Courses.Find(courseId);
+            if (!IsRequiredCourse(course))
+            {
+                TempData["ErrorMessage"] = "只有专业必修和公共必修课程可以手动管理学生名单。";
+                return RedirectToAction("EditCourse", new { id = courseId });
+            }
+
+            var enrollment = db.StudentCourses.FirstOrDefault(sc => sc.CourseID == courseId && sc.StudentID == studentId);
+            if (enrollment == null)
+            {
+                TempData["ErrorMessage"] = "该学生不在当前课程名单中。";
+                return RedirectToAction("EditCourse", new { id = courseId });
+            }
+
+            db.StudentCourses.Remove(enrollment);
+            db.SaveChanges();
+
+            TempData["SuccessMessage"] = "已从课程名单移除该学生。";
+            return RedirectToAction("EditCourse", new { id = courseId });
         }
 
         // GET: Admin/DetailsCourse/5
@@ -762,6 +851,18 @@ namespace StudentInformationSystem.Controllers
                         "考试时间冲突！该教师在该时段已有以下考试安排："));
                 }
 
+                var locationConflicts = ExamConflictHelper.GetLocationExamConflicts(
+                    db,
+                    exam.Location,
+                    exam.StartTime,
+                    exam.EndTime);
+                if (locationConflicts.Any())
+                {
+                    ModelState.AddModelError("Location", ExamConflictHelper.BuildLocationExamConflictMessage(
+                        locationConflicts,
+                        "考场占用冲突！该考场在该时段已有以下考试安排："));
+                }
+
                 var studentConflicts = ExamConflictHelper.GetStudentExamConflictsForCourse(
                     db,
                     exam.CourseID,
@@ -822,6 +923,19 @@ namespace StudentInformationSystem.Controllers
                     ModelState.AddModelError("", ExamConflictHelper.BuildTeacherExamConflictMessage(
                         teacherConflicts,
                         "考试时间冲突！该教师在该时段已有以下考试安排："));
+                }
+
+                var locationConflicts = ExamConflictHelper.GetLocationExamConflicts(
+                    db,
+                    exam.Location,
+                    exam.StartTime,
+                    exam.EndTime,
+                    exam.ExamID);
+                if (locationConflicts.Any())
+                {
+                    ModelState.AddModelError("Location", ExamConflictHelper.BuildLocationExamConflictMessage(
+                        locationConflicts,
+                        "考场占用冲突！该考场在该时段已有以下考试安排："));
                 }
 
                 var studentConflicts = ExamConflictHelper.GetStudentExamConflictsForCourse(
@@ -1035,6 +1149,50 @@ namespace StudentInformationSystem.Controllers
                 new SelectListItem { Value = "5", Text = "体育选修" }
             };
             return new SelectList(courseTypes, "Value", "Text", selectedValue);
+        }
+
+        private static bool IsRequiredCourse(Courses course)
+        {
+            return course != null && (course.CourseType == 1 || course.CourseType == 2);
+        }
+
+        private void PopulateCourseStudentManagementViewData(Courses course)
+        {
+            bool isRequiredCourse = IsRequiredCourse(course);
+            ViewBag.IsRequiredCourse = isRequiredCourse;
+            ViewBag.EnrolledStudentsForCourse = new List<StudentCourses>();
+            ViewBag.AvailableStudentsForCourse = new SelectList(new List<SelectListItem>(), "Value", "Text");
+
+            if (!isRequiredCourse || course.CourseID <= 0)
+            {
+                return;
+            }
+
+            var enrolledStudents = db.StudentCourses
+                .Include("Students.Classes")
+                .Where(sc => sc.CourseID == course.CourseID)
+                .OrderBy(sc => sc.Students.StudentID)
+                .ToList();
+
+            var enrolledStudentIds = enrolledStudents
+                .Where(sc => sc.StudentID != null)
+                .Select(sc => sc.StudentID)
+                .ToList();
+
+            var availableStudents = db.Students
+                .Include("Classes")
+                .Where(s => !enrolledStudentIds.Contains(s.StudentID))
+                .OrderBy(s => s.StudentID)
+                .ToList()
+                .Select(s => new SelectListItem
+                {
+                    Value = s.StudentID,
+                    Text = $"{s.StudentID} - {s.StudentName}" + (s.Classes != null ? $"（{s.Classes.ClassName}）" : string.Empty)
+                })
+                .ToList();
+
+            ViewBag.EnrolledStudentsForCourse = enrolledStudents;
+            ViewBag.AvailableStudentsForCourse = new SelectList(availableStudents, "Value", "Text");
         }
 
         // --- 课程安排管理 (Class Sessions Management) ---

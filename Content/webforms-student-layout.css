@@ -259,3 +259,76 @@ body.dark-mode.webforms-student .btn-default:focus {
     border-color: #7a879d !important;
 }
 
+/* 课表始终按浅色打印/导出，避免暗色模式把表格内文字反色到看不清 */
+body.webforms-student .timetable-export-surface {
+    background: #ffffff !important;
+    color: #111827 !important;
+}
+
+body.webforms-student .timetable {
+    background: #ffffff !important;
+    color: #111827 !important;
+}
+
+body.webforms-student .timetable th,
+body.webforms-student .timetable td {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border-color: #d9dee7 !important;
+}
+
+body.webforms-student .timetable .has-class {
+    background-color: #d9edf7 !important;
+    color: #111827 !important;
+    border-color: #bce8f1 !important;
+}
+
+body.webforms-student .timetable small,
+body.webforms-student .timetable .text-muted {
+    color: #374151 !important;
+}
+
+body.webforms-student .timetable strong {
+    color: #000000 !important;
+}
+
+body.webforms-student .timetable .holiday-week {
+    background-color: #f2dede !important;
+    color: #7f1d1d !important;
+    border-color: #d9534f !important;
+}
+
+body.webforms-student .timetable .btn {
+    color: #111827;
+}
+
+html.dark-mode body.webforms-student .timetable,
+body.dark-mode.webforms-student .timetable,
+html.dark-mode body.webforms-student .timetable th,
+html.dark-mode body.webforms-student .timetable td,
+body.dark-mode.webforms-student .timetable th,
+body.dark-mode.webforms-student .timetable td {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border-color: #d9dee7 !important;
+}
+
+html.dark-mode body.webforms-student .timetable .has-class,
+body.dark-mode.webforms-student .timetable .has-class {
+    background-color: #d9edf7 !important;
+    color: #111827 !important;
+    border-color: #bce8f1 !important;
+}
+
+html.dark-mode body.webforms-student .timetable small,
+html.dark-mode body.webforms-student .timetable .text-muted,
+body.dark-mode.webforms-student .timetable small,
+body.dark-mode.webforms-student .timetable .text-muted {
+    color: #374151 !important;
+}
+
+html.dark-mode body.webforms-student .timetable strong,
+body.dark-mode.webforms-student .timetable strong {
+    color: #000000 !important;
+}
+

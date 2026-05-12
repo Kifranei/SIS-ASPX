@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
@@ -7,7 +7,7 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "½ÌÊ¦ÏêÇé";
+        PageTitle = "æ•™å¸ˆè¯¦æƒ…";
         if (!EnsureAdminRole())
         {
             return;
@@ -16,7 +16,7 @@
         var id = (Request.QueryString["id"] ?? string.Empty).Trim();
         if (string.IsNullOrWhiteSpace(id))
         {
-            MessageText = "È±ÉÙ½ÌÊ¦ID²ÎÊı¡£";
+            MessageText = "ç¼ºå°‘æ•™å¸ˆIDå‚æ•°ã€‚";
             return;
         }
 
@@ -27,14 +27,14 @@
 
         if (CurrentTeacher == null)
         {
-            MessageText = "½ÌÊ¦²»´æÔÚ¡£";
+            MessageText = "æ•™å¸ˆä¸å­˜åœ¨ã€‚";
         }
     }
 </script>
 
 <!--#include file="_AdminLayoutTop.inc" -->
 
-<h2>½ÌÊ¦ÏêÇé</h2>
+<h2>æ•™å¸ˆè¯¦æƒ…</h2>
 
 <% if (!string.IsNullOrEmpty(MessageText)) { %>
     <div class="alert alert-danger"><%= H(MessageText) %></div>
@@ -42,18 +42,18 @@
     <h4><%= H(CurrentTeacher.TeacherName) %></h4>
     <hr />
     <dl class="dl-horizontal">
-        <dt>½ÌÊ¦¹¤ºÅ</dt>
+        <dt>æ•™å¸ˆå·¥å·</dt>
         <dd><%= H(CurrentTeacher.TeacherID) %></dd>
 
-        <dt>ĞÕÃû</dt>
+        <dt>å§“å</dt>
         <dd><%= H(CurrentTeacher.TeacherName) %></dd>
 
-        <dt>Ö°³Æ</dt>
+        <dt>èŒç§°</dt>
         <dd><%= H(CurrentTeacher.Title) %></dd>
     </dl>
     <p>
-        <a class="btn btn-primary" href='EditTeacher.aspx?id=<%= Server.UrlEncode(CurrentTeacher.TeacherID) %>'>±à¼­</a>
-        <a class="btn btn-default" href="TeacherList.aspx">·µ»ØÁĞ±í</a>
+        <a class="btn btn-primary" href='EditTeacher.aspx?id=<%= Server.UrlEncode(CurrentTeacher.TeacherID) %>'>ç¼–è¾‘</a>
+        <a class="btn btn-default" href="TeacherList.aspx">è¿”å›åˆ—è¡¨</a>
     </p>
 <% } %>
 

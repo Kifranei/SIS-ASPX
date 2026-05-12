@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <%@ Import Namespace="System" %>
 <%@ Import Namespace="System.IO" %>
 <%@ Import Namespace="StudentInformationSystem.Models" %>
@@ -78,7 +78,7 @@
 <body class="bg-light">
     <div class="container py-4">
         <div class="alert alert-info">
-            ������ת��ԭҳ�棺<code><%= SourceView %></code>
+            正在跳转到原页面：<code><%= SourceView %></code>
         </div>
     </div>
 </body>

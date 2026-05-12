@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
@@ -12,7 +12,7 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "Ìí¼ÓĞÂ¿Î³Ì";
+        PageTitle = "æ·»åŠ æ–°è¯¾ç¨‹";
         if (!EnsureAdminRole())
         {
             return;
@@ -37,21 +37,21 @@
     {
         if (string.IsNullOrWhiteSpace(FormCourseName))
         {
-            MessageText = "¿Î³ÌÃû³Æ²»ÄÜÎª¿Õ¡£";
+            MessageText = "è¯¾ç¨‹åç§°ä¸èƒ½ä¸ºç©ºã€‚";
             return;
         }
 
         double credits;
         if (!double.TryParse(FormCredits, out credits))
         {
-            MessageText = "Ñ§·Ö¸ñÊ½²»ÕıÈ·¡£";
+            MessageText = "å­¦åˆ†æ ¼å¼ä¸æ­£ç¡®ã€‚";
             return;
         }
 
         int courseType;
         if (!int.TryParse(FormCourseType, out courseType))
         {
-            MessageText = "ÇëÑ¡Ôñ¿Î³ÌÀà±ğ¡£";
+            MessageText = "è¯·é€‰æ‹©è¯¾ç¨‹ç±»åˆ«ã€‚";
             return;
         }
 
@@ -74,35 +74,35 @@
 
 <!--#include file="_AdminLayoutTop.inc" -->
 
-<h2>Ìí¼ÓĞÂ¿Î³Ì</h2>
+<h2>æ·»åŠ æ–°è¯¾ç¨‹</h2>
 
 <% if (!string.IsNullOrEmpty(MessageText)) { %>
     <div class="alert alert-danger"><%= H(MessageText) %></div>
 <% } %>
 
 <form method="post" class="form-horizontal" style="max-width:900px;">
-    <h4>¿Î³ÌĞÅÏ¢</h4>
+    <h4>è¯¾ç¨‹ä¿¡æ¯</h4>
     <hr />
 
     <div class="form-group">
-        <label class="control-label col-md-2">¿Î³ÌÃû³Æ</label>
+        <label class="control-label col-md-2">è¯¾ç¨‹åç§°</label>
         <div class="col-md-10">
             <input class="form-control" name="CourseName" value="<%= H(FormCourseName) %>" required />
         </div>
     </div>
 
     <div class="form-group">
-        <label class="control-label col-md-2">Ñ§·Ö</label>
+        <label class="control-label col-md-2">å­¦åˆ†</label>
         <div class="col-md-10">
             <input class="form-control" name="Credits" value="<%= H(FormCredits) %>" required />
         </div>
     </div>
 
     <div class="form-group">
-        <label class="control-label col-md-2">ÊÚ¿Î½ÌÊ¦</label>
+        <label class="control-label col-md-2">æˆè¯¾æ•™å¸ˆ</label>
         <div class="col-md-10">
             <select class="form-control" name="TeacherID">
-                <option value="">--ÇëÑ¡Ôñ½ÌÊ¦--</option>
+                <option value="">--è¯·é€‰æ‹©æ•™å¸ˆ--</option>
                 <% foreach (var t in TeacherOptions) { %>
                     <option value="<%= H(t.TeacherID) %>" <%= string.Equals(FormTeacherID, t.TeacherID, StringComparison.OrdinalIgnoreCase) ? "selected" : "" %>><%= H(t.TeacherName) %></option>
                 <% } %>
@@ -111,23 +111,23 @@
     </div>
 
     <div class="form-group">
-        <label class="control-label col-md-2">¿Î³ÌÀà±ğ</label>
+        <label class="control-label col-md-2">è¯¾ç¨‹ç±»åˆ«</label>
         <div class="col-md-10">
             <select class="form-control" name="CourseType" required>
-                <option value="">--ÇëÑ¡ÔñÀà±ğ--</option>
-                <option value="1" <%= FormCourseType == "1" ? "selected" : "" %>>×¨Òµ±ØĞŞ</option>
-                <option value="2" <%= FormCourseType == "2" ? "selected" : "" %>>¹«¹²±ØĞŞ</option>
-                <option value="3" <%= FormCourseType == "3" ? "selected" : "" %>>×¨ÒµÑ¡ĞŞ</option>
-                <option value="4" <%= FormCourseType == "4" ? "selected" : "" %>>¹«¹²Ñ¡ĞŞ</option>
-                <option value="5" <%= FormCourseType == "5" ? "selected" : "" %>>ÌåÓıÑ¡ĞŞ</option>
+                <option value="">--è¯·é€‰æ‹©ç±»åˆ«--</option>
+                <option value="1" <%= FormCourseType == "1" ? "selected" : "" %>>ä¸“ä¸šå¿…ä¿®</option>
+                <option value="2" <%= FormCourseType == "2" ? "selected" : "" %>>å…¬å…±å¿…ä¿®</option>
+                <option value="3" <%= FormCourseType == "3" ? "selected" : "" %>>ä¸“ä¸šé€‰ä¿®</option>
+                <option value="4" <%= FormCourseType == "4" ? "selected" : "" %>>å…¬å…±é€‰ä¿®</option>
+                <option value="5" <%= FormCourseType == "5" ? "selected" : "" %>>ä½“è‚²é€‰ä¿®</option>
             </select>
         </div>
     </div>
 
     <div class="form-group">
         <div class="col-md-offset-2 col-md-10">
-            <button type="submit" class="btn btn-success">´´½¨</button>
-            <a class="btn btn-default" href="CourseList.aspx">·µ»ØÁĞ±í</a>
+            <button type="submit" class="btn btn-success">åˆ›å»º</button>
+            <a class="btn btn-default" href="CourseList.aspx">è¿”å›åˆ—è¡¨</a>
         </div>
     </div>
 </form>

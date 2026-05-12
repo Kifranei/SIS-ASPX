@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <%@ Import Namespace="System" %>
 <%@ Import Namespace="System.Linq" %>
 <%@ Import Namespace="StudentInformationSystem.Models" %>

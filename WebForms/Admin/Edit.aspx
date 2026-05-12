@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
@@ -14,7 +14,7 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "±à¼­Ñ§ÉúĞÅÏ¢";
+        PageTitle = "ç¼–è¾‘å­¦ç”Ÿä¿¡æ¯";
         if (!EnsureAdminRole())
         {
             return;
@@ -43,7 +43,7 @@
             var id = (Request.QueryString["id"] ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(id))
             {
-                MessageText = "È±ÉÙÑ§ÉúID²ÎÊı¡£";
+                MessageText = "ç¼ºå°‘å­¦ç”ŸIDå‚æ•°ã€‚";
             }
             else
             {
@@ -54,7 +54,7 @@
 
                 if (CurrentStudent == null)
                 {
-                    MessageText = "Ñ§Éú²»´æÔÚ¡£";
+                    MessageText = "å­¦ç”Ÿä¸å­˜åœ¨ã€‚";
                 }
                 else
                 {
@@ -81,13 +81,13 @@
     {
         if (string.IsNullOrWhiteSpace(FormStudentID) || string.IsNullOrWhiteSpace(FormStudentName))
         {
-            MessageText = "Ñ§ºÅºÍĞÕÃû²»ÄÜÎª¿Õ¡£";
+            MessageText = "å­¦å·å’Œå§“åä¸èƒ½ä¸ºç©ºã€‚";
             return;
         }
 
         if (!IsValidGender(FormGender))
         {
-            MessageText = "ĞÔ±ğÖ»ÄÜÑ¡Ôñ¡°ÄĞ¡±»ò¡°Å®¡±¡£";
+            MessageText = "æ€§åˆ«åªèƒ½é€‰æ‹©â€œç”·â€æˆ–â€œå¥³â€ã€‚";
             return;
         }
 
@@ -96,7 +96,7 @@
             var student = db.Students.Find(FormStudentID);
             if (student == null)
             {
-                MessageText = "Ñ§Éú²»´æÔÚ¡£";
+                MessageText = "å­¦ç”Ÿä¸å­˜åœ¨ã€‚";
                 return;
             }
 
@@ -118,7 +118,7 @@
 
 <!--#include file="_AdminLayoutTop.inc" -->
 
-<h2>±à¼­Ñ§ÉúĞÅÏ¢</h2>
+<h2>ç¼–è¾‘å­¦ç”Ÿä¿¡æ¯</h2>
 <% if (!string.IsNullOrWhiteSpace(FormStudentName)) { %>
     <h4><%= H(FormStudentName) %></h4>
 <% } %>
@@ -132,35 +132,35 @@
         <input type="hidden" name="UserID" value="<%= FormUserID %>" />
 
         <div class="form-group">
-            <label class="control-label col-md-2">Ñ§ºÅ (²»¿ÉĞŞ¸Ä)</label>
+            <label class="control-label col-md-2">å­¦å· (ä¸å¯ä¿®æ”¹)</label>
             <div class="col-md-10">
                 <input class="form-control" value="<%= H(FormStudentID) %>" readonly />
             </div>
         </div>
 
         <div class="form-group">
-            <label class="control-label col-md-2">ĞÕÃû</label>
+            <label class="control-label col-md-2">å§“å</label>
             <div class="col-md-10">
                 <input class="form-control" name="StudentName" value="<%= H(FormStudentName) %>" required />
             </div>
         </div>
 
         <div class="form-group">
-            <label class="control-label col-md-2">ĞÔ±ğ</label>
+            <label class="control-label col-md-2">æ€§åˆ«</label>
             <div class="col-md-10">
                 <select class="form-control" name="Gender" required>
-                    <option value="">--ÇëÑ¡ÔñĞÔ±ğ--</option>
-                    <option value="ÄĞ" <%= FormGender == "ÄĞ" ? "selected" : "" %>>ÄĞ</option>
-                    <option value="Å®" <%= FormGender == "Å®" ? "selected" : "" %>>Å®</option>
+                    <option value="">--è¯·é€‰æ‹©æ€§åˆ«--</option>
+                    <option value="ç”·" <%= FormGender == "ç”·" ? "selected" : "" %>>ç”·</option>
+                    <option value="å¥³" <%= FormGender == "å¥³" ? "selected" : "" %>>å¥³</option>
                 </select>
             </div>
         </div>
 
         <div class="form-group">
-            <label class="control-label col-md-2">°à¼¶</label>
+            <label class="control-label col-md-2">ç­çº§</label>
             <div class="col-md-10">
                 <select class="form-control" name="ClassID">
-                    <option value="">--ÇëÑ¡Ôñ°à¼¶--</option>
+                    <option value="">--è¯·é€‰æ‹©ç­çº§--</option>
                     <% foreach (var cls in ClassOptions) { %>
                         <option value="<%= cls.ClassID %>" <%= FormClassID.HasValue && FormClassID.Value == cls.ClassID ? "selected" : "" %>><%= H(cls.ClassName) %></option>
                     <% } %>
@@ -170,8 +170,8 @@
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <button type="submit" class="btn btn-success">±£ ´æ</button>
-                <a class="btn btn-default" href="StudentList.aspx">·µ»ØÁĞ±í</a>
+                <button type="submit" class="btn btn-success">ä¿ å­˜</button>
+                <a class="btn btn-default" href="StudentList.aspx">è¿”å›åˆ—è¡¨</a>
             </div>
         </div>
     </form>

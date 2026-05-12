@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
@@ -7,7 +7,7 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "ɾ������";
+        PageTitle = "删除考试";
         if (!EnsureAdminRole())
         {
             return;
@@ -16,7 +16,7 @@
         int id;
         if (!int.TryParse(Request.QueryString["id"] ?? Request.Form["ExamID"], out id) || id <= 0)
         {
-            MessageText = "���Բ�����Ч��";
+            MessageText = "考试参数无效。";
             return;
         }
 
@@ -25,7 +25,7 @@
             CurrentExam = db.Exams.Include("Courses").FirstOrDefault(ei => ei.ExamID == id);
             if (CurrentExam == null)
             {
-                MessageText = "���Լ�¼�����ڡ�";
+                MessageText = "考试记录不存在。";
                 return;
             }
 
@@ -41,30 +41,30 @@
 
 <!--#include file="_AdminLayoutTop.inc" -->
 
-<h2>ɾ������</h2>
+<h2>删除考试</h2>
 
 <% if (!string.IsNullOrEmpty(MessageText)) { %>
     <div class="alert alert-danger"><%= H(MessageText) %></div>
 <% } else { %>
-    <h3>��ȷ��Ҫɾ���������԰�����</h3>
+    <h3>您确定要删除这条考试安排吗？</h3>
     <div>
         <h4><%= CurrentExam.Courses == null ? "-" : H(CurrentExam.Courses.CourseName) %></h4>
         <hr />
         <dl class="dl-horizontal">
-            <dt>�γ�����</dt>
+            <dt>课程名称</dt>
             <dd><%= CurrentExam.Courses == null ? "-" : H(CurrentExam.Courses.CourseName) %></dd>
 
-            <dt>����ʱ��</dt>
+            <dt>考试时间</dt>
             <dd><%= CurrentExam.StartTime.ToString("yyyy-MM-dd HH:mm") + " - " + CurrentExam.EndTime.ToString("HH:mm") %></dd>
 
-            <dt>���Եص�</dt>
+            <dt>考试地点</dt>
             <dd><%= H(CurrentExam.Location) %></dd>
         </dl>
 
         <form method="post" class="form-actions no-color">
             <input type="hidden" name="ExamID" value="<%= CurrentExam.ExamID %>" />
-            <button type="submit" class="btn btn-danger">ȷ��ɾ��</button>
-            <a class="btn btn-default" href="ExamList.aspx">�����б�</a>
+            <button type="submit" class="btn btn-danger">确认删除</button>
+            <a class="btn btn-default" href="ExamList.aspx">返回列表</a>
         </form>
     </div>
 <% } %>

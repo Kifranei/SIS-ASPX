@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
@@ -7,7 +7,7 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "���԰����б�";
+        PageTitle = "考试安排列表";
         if (!EnsureAdminRole())
         {
             return;
@@ -30,27 +30,27 @@
 
 <!--#include file="_AdminLayoutTop.inc" -->
 
-<h2>���԰����б�</h2>
+<h2>考试安排列表</h2>
 
 <form method="get" class="form-inline">
     <div class="form-group">
-        <label>���ҿ���:</label>
-        <input type="text" name="searchString" value="<%= H(SearchString) %>" class="form-control" placeholder="����γ������Եص�" />
+        <label>查找考试:</label>
+        <input type="text" name="searchString" value="<%= H(SearchString) %>" class="form-control" placeholder="输入课程名或考试地点" />
     </div>
-    <button type="submit" class="btn btn-default">�� ��</button>
+    <button type="submit" class="btn btn-default">搜 索</button>
 </form>
 <br />
 
-<p><a class="btn btn-primary" href="AddExam.aspx">�����¿���</a></p>
+<p><a class="btn btn-primary" href="AddExam.aspx">添加新考试</a></p>
 
 <div class="table-responsive">
     <table class="table table-striped table-bordered">
         <thead>
             <tr>
-                <th>�γ�����</th>
-                <th>����ʱ��</th>
-                <th>���Եص�</th>
-                <th>����</th>
+                <th>课程名称</th>
+                <th>考试时间</th>
+                <th>考试地点</th>
+                <th>操作</th>
             </tr>
         </thead>
         <tbody>
@@ -61,14 +61,14 @@
                         <td><%= item.StartTime.ToString("yyyy-MM-dd HH:mm") + " - " + item.EndTime.ToString("HH:mm") %></td>
                         <td><%= H(item.Location) %></td>
                         <td>
-                            <a href='EditExam.aspx?id=<%= item.ExamID %>'>�༭</a> |
-                            <a href='DetailsExam.aspx?id=<%= item.ExamID %>'>����</a> |
-                            <a href='DeleteExam.aspx?id=<%= item.ExamID %>'>ɾ��</a>
+                            <a href='EditExam.aspx?id=<%= item.ExamID %>'>编辑</a> |
+                            <a href='DetailsExam.aspx?id=<%= item.ExamID %>'>详情</a> |
+                            <a href='DeleteExam.aspx?id=<%= item.ExamID %>'>删除</a>
                         </td>
                     </tr>
                 <% } %>
             <% } else { %>
-                <tr><td colspan="4" class="text-center text-muted">���޿��԰��š�</td></tr>
+                <tr><td colspan="4" class="text-center text-muted">暂无考试安排。</td></tr>
             <% } %>
         </tbody>
     </table>

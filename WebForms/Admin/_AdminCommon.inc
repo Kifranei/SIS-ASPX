@@ -1,4 +1,4 @@
-﻿<%@ Import Namespace="System" %>
+<%@ Import Namespace="System" %>
 <%@ Import Namespace="System.Linq" %>
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="System.Data.Entity" %>

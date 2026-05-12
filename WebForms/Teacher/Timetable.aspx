@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <%@ Import Namespace="System" %>
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="System.Linq" %>
@@ -144,6 +144,32 @@
         .holiday-week { background-color: #f2dede !important; border: 2px solid #d9534f !important; color: #a94442; }
         .holiday-notice { padding: 20px 10px; text-align: center; }
         .view-card { background: #fff; border: 1px solid #d9d9d9; border-radius: 6px; padding: 10px; }
+        html.dark-mode body.webforms-student .timetable,
+        html.dark-mode body.webforms-student .timetable th,
+        html.dark-mode body.webforms-student .timetable td,
+        body.dark-mode.webforms-student .timetable,
+        body.dark-mode.webforms-student .timetable th,
+        body.dark-mode.webforms-student .timetable td {
+            background-color: #ffffff !important;
+            color: #111827 !important;
+            border-color: #d9dee7 !important;
+        }
+        html.dark-mode body.webforms-student .timetable .has-class,
+        body.dark-mode.webforms-student .timetable .has-class {
+            background-color: #d9edf7 !important;
+            color: #111827 !important;
+            border-color: #bce8f1 !important;
+        }
+        html.dark-mode body.webforms-student .timetable small,
+        html.dark-mode body.webforms-student .timetable .text-muted,
+        body.dark-mode.webforms-student .timetable small,
+        body.dark-mode.webforms-student .timetable .text-muted {
+            color: #374151 !important;
+        }
+        html.dark-mode body.webforms-student .timetable strong,
+        body.dark-mode.webforms-student .timetable strong {
+            color: #000000 !important;
+        }
     </style>
 </head>
 <body class="webforms-student">
@@ -385,11 +411,23 @@
                 var wereVisible = adjustElements.is(':visible');
 
                 button.text('正在生成...').prop('disabled', true);
+                timetableElement.classList.add('timetable-export-surface');
                 if (wereVisible) {
                     adjustElements.hide();
                 }
 
-                html2canvas(timetableElement).then(function (canvas) {
+                html2canvas(timetableElement, {
+                    backgroundColor: '#ffffff',
+                    onclone: function (clonedDocument) {
+                        var clonedTable = clonedDocument.getElementById(activeTableId);
+                        if (clonedTable) {
+                            clonedTable.classList.add('timetable-export-surface');
+                            clonedTable.querySelectorAll('th, td, strong, small').forEach(function (element) {
+                                element.style.color = element.tagName.toLowerCase() === 'small' ? '#374151' : '#111827';
+                            });
+                        }
+                    }
+                }).then(function (canvas) {
                     var link = document.createElement('a');
                     link.download = '我的课表.png';
                     link.href = canvas.toDataURL('image/png');
@@ -398,6 +436,7 @@
                     alert('导出失败，请重试。');
                 }).finally(function () {
                     button.text('导出为图片').prop('disabled', false);
+                    timetableElement.classList.remove('timetable-export-surface');
                     if (wereVisible) {
                         adjustElements.show();
                     }

@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <%@ Import Namespace="System.Data.Entity" %>
 <!--#include file="_AdminCommon.inc" -->
 
@@ -14,7 +14,7 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "�����¿���";
+        PageTitle = "添加新考试";
         if (!EnsureAdminRole())
         {
             return;
@@ -43,7 +43,7 @@
         DateTime endTime;
         if (!int.TryParse(FormCourseID, out courseId) || !DateTime.TryParse(FormStartTime, out startTime) || !DateTime.TryParse(FormEndTime, out endTime) || endTime <= startTime || string.IsNullOrWhiteSpace(FormLocation))
         {
-            MessageText = "����ȷ��д�γ̡�����ʱ��Ϳ��Եص㡣";
+            MessageText = "请正确填写课程、考试时间和考试地点。";
             return;
         }
 
@@ -52,7 +52,7 @@
             var course = db.Courses.Find(courseId);
             if (course == null)
             {
-                MessageText = "�γ̲����ڡ�";
+                MessageText = "课程不存在。";
                 return;
             }
 
@@ -65,7 +65,7 @@
             {
                 MessageText = BuildTeacherExamConflictMessage(
                     examTeacherConflicts,
-                    "����ʱ���ͻ���ý�ʦ�ڸ�ʱ���������¿��԰��ţ�");
+                    "考试时间冲突！该教师在该时段已有以下考试安排：");
                 return;
             }
 
@@ -78,7 +78,7 @@
             {
                 MessageText = BuildStudentExamConflictMessage(
                     studentConflicts,
-                    "����ʱ���ͻ������ѧ���ڸ�ʱ�������������ԣ�");
+                    "考试时间冲突！以下学生在该时段已有其他考试：");
                 return;
             }
 
@@ -141,32 +141,32 @@
 
     private string BuildTeacherExamConflictMessage(IEnumerable<Exams> conflicts, string prefix)
     {
-        return prefix + " " + string.Join("��", conflicts.Select(e => (e.Courses == null ? "δ֪�γ�" : e.Courses.CourseName) + "��" + e.StartTime.ToString("yyyy-MM-dd HH:mm") + " - " + e.EndTime.ToString("HH:mm") + "��"));
+        return prefix + " " + string.Join("；", conflicts.Select(e => (e.Courses == null ? "未知课程" : e.Courses.CourseName) + "（" + e.StartTime.ToString("yyyy-MM-dd HH:mm") + " - " + e.EndTime.ToString("HH:mm") + "）"));
     }
 
     private string BuildStudentExamConflictMessage(IEnumerable<string> conflicts, string prefix)
     {
-        return prefix + " " + string.Join("��", conflicts);
+        return prefix + " " + string.Join("；", conflicts);
     }
 </script>
 
 <!--#include file="_AdminLayoutTop.inc" -->
 
-<h2>�����¿���</h2>
+<h2>添加新考试</h2>
 
 <% if (!string.IsNullOrEmpty(MessageText)) { %>
     <div class="alert alert-danger"><%= H(MessageText) %></div>
 <% } %>
 
 <form method="post" class="form-horizontal" style="max-width:900px;">
-    <h4>������Ϣ</h4>
+    <h4>考试信息</h4>
     <hr />
 
     <div class="form-group">
-        <label class="control-label col-md-2">�γ�����</label>
+        <label class="control-label col-md-2">课程名称</label>
         <div class="col-md-10">
             <select class="form-control" name="CourseID" required>
-                <option value="">--��ѡ��γ�--</option>
+                <option value="">--请选择课程--</option>
                 <% foreach (var c in CourseOptions) { %>
                     <option value="<%= c.CourseID %>" <%= FormCourseID == c.CourseID.ToString() ? "selected" : "" %>><%= H(c.CourseName) %></option>
                 <% } %>
@@ -175,7 +175,7 @@
     </div>
 
     <div class="form-group">
-        <label class="control-label col-md-2">����ʱ��</label>
+        <label class="control-label col-md-2">考试时间</label>
         <div class="col-md-10">
             <input class="form-control" type="datetime-local" name="StartTime" value="<%= H(FormStartTime) %>" required />
         </div>
@@ -189,14 +189,14 @@
     </div>
 
     <div class="form-group">
-        <label class="control-label col-md-2">���Եص�</label>
+        <label class="control-label col-md-2">考试地点</label>
         <div class="col-md-10">
             <input class="form-control" name="Location" value="<%= H(FormLocation) %>" required />
         </div>
     </div>
 
     <div class="form-group">
-        <label class="control-label col-md-2">��ע</label>
+        <label class="control-label col-md-2">备注</label>
         <div class="col-md-10">
             <input class="form-control" name="Details" value="<%= H(FormDetails) %>" />
         </div>
@@ -204,8 +204,8 @@
 
     <div class="form-group">
         <div class="col-md-offset-2 col-md-10">
-            <button type="submit" class="btn btn-success">����</button>
-            <a class="btn btn-default" href="ExamList.aspx">�����б�</a>
+            <button type="submit" class="btn btn-success">创建</button>
+            <a class="btn btn-default" href="ExamList.aspx">返回列表</a>
         </div>
     </div>
 </form>

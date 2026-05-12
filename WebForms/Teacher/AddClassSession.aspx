@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <%@ Import Namespace="System" %>
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="System.Linq" %>
@@ -62,35 +62,35 @@
             if (!TeacherCourses.Any(c => c.CourseID == FormCourseId))
             {
                 MessageType = "danger";
-                MessageText = "ÄúÖ»ÄÜÎª×Ô¼º½ÌÊÚµÄ¿Î³ÌÌí¼Ó°²ÅÅ¡£";
+                MessageText = "æ‚¨åªèƒ½ä¸ºè‡ªå·±æ•™æˆçš„è¯¾ç¨‹æ·»åŠ å®‰æ’ã€‚";
                 return;
             }
 
             if (FormStartWeek < 1 || FormEndWeek > 21 || FormStartWeek > FormEndWeek)
             {
                 MessageType = "danger";
-                MessageText = "ÖÜ´Î·¶Î§²»ºÏ·¨¡£";
+                MessageText = "å‘¨æ¬¡èŒƒå›´ä¸åˆæ³•ã€‚";
                 return;
             }
 
             if (FormDayOfWeek < 1 || FormDayOfWeek > 7)
             {
                 MessageType = "danger";
-                MessageText = "ĞÇÆÚ²ÎÊı²»ºÏ·¨¡£";
+                MessageText = "æ˜ŸæœŸå‚æ•°ä¸åˆæ³•ã€‚";
                 return;
             }
 
             if (FormStartPeriod < 1 || FormEndPeriod > 12 || FormStartPeriod > FormEndPeriod)
             {
                 MessageType = "danger";
-                MessageText = "½Ú´Î·¶Î§²»ºÏ·¨¡£";
+                MessageText = "èŠ‚æ¬¡èŒƒå›´ä¸åˆæ³•ã€‚";
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(FormClassroom))
             {
                 MessageType = "danger";
-                MessageText = "ÇëÌîĞ´½ÌÊÒ¡£";
+                MessageText = "è¯·å¡«å†™æ•™å®¤ã€‚";
                 return;
             }
 
@@ -109,7 +109,7 @@
                 MessageType = "danger";
                 MessageText = ScheduleConflictHelper.BuildTeacherConflictMessage(
                     conflictingSessions,
-                    "Ê±¼ä³åÍ»£¡ÄúÔÚ¸ÃÊ±¼ä¶ÎÒÑÓĞÒÔÏÂ¿Î³Ì°²ÅÅ£º");
+                    "æ—¶é—´å†²çªï¼æ‚¨åœ¨è¯¥æ—¶é—´æ®µå·²æœ‰ä»¥ä¸‹è¯¾ç¨‹å®‰æ’ï¼š");
                 return;
             }
 
@@ -126,7 +126,7 @@
                 MessageType = "danger";
                 MessageText = ScheduleConflictHelper.BuildStudentConflictMessage(
                     studentConflicts,
-                    "¸Ã°²ÅÅ»áÓëÒÑÑ¡Ñ§ÉúµÄÏÖÓĞ¿Î±í³åÍ»£º");
+                    "è¯¥å®‰æ’ä¼šä¸å·²é€‰å­¦ç”Ÿçš„ç°æœ‰è¯¾è¡¨å†²çªï¼š");
                 return;
             }
 
@@ -144,15 +144,15 @@
             db.ClassSessions.Add(session);
             db.SaveChanges();
 
-            var courseName = selectedCourse == null ? "¿Î³Ì" : selectedCourse.CourseName;
-            var msg = "¿Î³Ì°²ÅÅÌí¼Ó³É¹¦£¡" + courseName + " - µÚ" + FormStartWeek + "-" + FormEndWeek + "ÖÜ£¬ĞÇÆÚ" + DayName(FormDayOfWeek) + "µÚ" + FormStartPeriod + "-" + FormEndPeriod + "½Ú£¬" + FormClassroom + "½ÌÊÒ¡£";
+            var courseName = selectedCourse == null ? "è¯¾ç¨‹" : selectedCourse.CourseName;
+            var msg = "è¯¾ç¨‹å®‰æ’æ·»åŠ æˆåŠŸï¼" + courseName + " - ç¬¬" + FormStartWeek + "-" + FormEndWeek + "å‘¨ï¼Œæ˜ŸæœŸ" + DayName(FormDayOfWeek) + "ç¬¬" + FormStartPeriod + "-" + FormEndPeriod + "èŠ‚ï¼Œ" + FormClassroom + "æ•™å®¤ã€‚";
             Response.Redirect("Timetable.aspx?msg=" + Server.UrlEncode(msg), true);
         }
     }
 
     protected string DayName(int day)
     {
-        string[] days = { "", "Ò»", "¶ş", "Èı", "ËÄ", "Îå", "Áù", "ÈÕ" };
+        string[] days = { "", "ä¸€", "äºŒ", "ä¸‰", "å››", "äº”", "å…­", "æ—¥" };
         return day >= 1 && day <= 7 ? days[day] : "?";
     }
 
@@ -179,7 +179,7 @@
             }
         })();
     </script>
-    <title>Ìí¼Ó¿Î³Ì°²ÅÅ</title>
+    <title>æ·»åŠ è¯¾ç¨‹å®‰æ’</title>
     <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
     <link href="<%= ResolveUrl("~/Content/theme-system.css") %>" rel="stylesheet" />
     <link href="<%= ResolveUrl("~/Content/webforms-student-layout.css") %>" rel="stylesheet" />
@@ -189,35 +189,35 @@
         <div class="sidebar-overlay"></div>
         <aside class="sidebar">
             <div class="sidebar-header">
-                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="Ğ£»Õ" class="sidebar-logo-img" />
+                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="æ ¡å¾½" class="sidebar-logo-img" />
             </div>
             <ul class="sidebar-menu">
-                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">Ê×Ò³</a></li>
-                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">ÎÒµÄ¿Î±í</a></li>
-                <li><a class="<%= Active("CourseList.aspx") %>" href="CourseList.aspx">³É¼¨Â¼Èë</a></li>
-                <li><a class="<%= Active("ExamList.aspx") %>" href="ExamList.aspx">¿¼ÊÔ¹ÜÀí</a></li>
-                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">ĞŞ¸ÄÃÜÂë</a></li>
+                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">é¦–é¡µ</a></li>
+                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">æˆ‘çš„è¯¾è¡¨</a></li>
+                <li><a class="<%= Active("CourseList.aspx") %>" href="CourseList.aspx">æˆç»©å½•å…¥</a></li>
+                <li><a class="<%= Active("ExamList.aspx") %>" href="ExamList.aspx">è€ƒè¯•ç®¡ç†</a></li>
+                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">ä¿®æ”¹å¯†ç </a></li>
             </ul>
         </aside>
 
         <div class="main-content">
             <header class="header-bar">
                 <div class="header-left">
-                    <button class="hamburger-menu" type="button" aria-label="²Ëµ¥">&#9776;</button>
+                    <button class="hamburger-menu" type="button" aria-label="èœå•">&#9776;</button>
                 </div>
                 <div class="header-right">
-                    <button class='dark-toggle-btn' type='button'>°µÉ«Ä£Ê½</button>
+                    <button class='dark-toggle-btn' type='button'>æš—è‰²æ¨¡å¼</button>
                     <div class="user-info">
-                        <span class="username">»¶Ó­Äú, <%= (Session["DisplayName"] as string) ?? ((Session["User"] as Users)?.Username ?? "½ÌÊ¦") %></span>
+                        <span class="username">æ¬¢è¿æ‚¨, <%= (Session["DisplayName"] as string) ?? ((Session["User"] as Users)?.Username ?? "æ•™å¸ˆ") %></span>
                         <span class="sep">|</span>
-                        <a class="logout-link" href="../Logout.aspx">°²È«ÍË³ö</a>
+                        <a class="logout-link" href="../Logout.aspx">å®‰å…¨é€€å‡º</a>
                     </div>
                 </div>
             </header>
 
             <main class="content-body">
                 <div class="container-fluid">
-                    <h2>Ìí¼Ó¿Î³Ì°²ÅÅ</h2>
+                    <h2>æ·»åŠ è¯¾ç¨‹å®‰æ’</h2>
                     <hr />
 
                     <% if (!string.IsNullOrEmpty(MessageText)) { %>
@@ -226,10 +226,10 @@
 
                     <% if (HolidayDescriptions.Any()) { %>
                         <div class="alert alert-warning">
-                            <h5>±¾Ñ§ÆÚ·¨¶¨¼ÙÈÕÌáĞÑ</h5>
+                            <h5>æœ¬å­¦æœŸæ³•å®šå‡æ—¥æé†’</h5>
                             <p>
                                 <% foreach (var holiday in HolidayDescriptions) { %>
-                                    <span class="label label-warning" style="margin-right:8px;">µÚ<%= holiday.Key %>ÖÜ£º<%= holiday.Value %></span>
+                                    <span class="label label-warning" style="margin-right:8px;">ç¬¬<%= holiday.Key %>å‘¨ï¼š<%= holiday.Value %></span>
                                 <% } %>
                             </p>
                         </div>
@@ -237,10 +237,10 @@
 
                     <form method="post" class="form-horizontal" style="max-width: 880px;">
                         <div class="form-group">
-                            <label class="control-label col-md-2">Ñ¡Ôñ¿Î³Ì</label>
+                            <label class="control-label col-md-2">é€‰æ‹©è¯¾ç¨‹</label>
                             <div class="col-md-10">
                                 <select class="form-control" name="CourseID" id="CourseID" required>
-                                    <option value="">-- ÇëÑ¡Ôñ¿Î³Ì --</option>
+                                    <option value="">-- è¯·é€‰æ‹©è¯¾ç¨‹ --</option>
                                     <% foreach (var course in TeacherCourses) { %>
                                         <option value="<%= course.CourseID %>" <%= course.CourseID == FormCourseId ? "selected" : "" %>><%= course.CourseName %></option>
                                     <% } %>
@@ -249,39 +249,39 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="control-label col-md-2">¿ªÊ¼ÖÜÊı</label>
+                            <label class="control-label col-md-2">å¼€å§‹å‘¨æ•°</label>
                             <div class="col-md-4"><input class="form-control" type="number" min="1" max="21" name="StartWeek" id="StartWeek" value="<%= FormStartWeek %>" required /></div>
-                            <label class="control-label col-md-2">½áÊøÖÜÊı</label>
+                            <label class="control-label col-md-2">ç»“æŸå‘¨æ•°</label>
                             <div class="col-md-4"><input class="form-control" type="number" min="1" max="21" name="EndWeek" id="EndWeek" value="<%= FormEndWeek %>" required /></div>
                         </div>
 
                         <div class="form-group">
-                            <label class="control-label col-md-2">ĞÇÆÚ¼¸</label>
+                            <label class="control-label col-md-2">æ˜ŸæœŸå‡ </label>
                             <div class="col-md-4">
                                 <select class="form-control" name="DayOfWeek" id="DayOfWeek" required>
                                     <% for (int d = 1; d <= 7; d++) { %>
-                                        <option value="<%= d %>" <%= d == FormDayOfWeek ? "selected" : "" %>>ĞÇÆÚ<%= DayName(d) %></option>
+                                        <option value="<%= d %>" <%= d == FormDayOfWeek ? "selected" : "" %>>æ˜ŸæœŸ<%= DayName(d) %></option>
                                     <% } %>
                                 </select>
                             </div>
-                            <label class="control-label col-md-2">½ÌÊÒ</label>
+                            <label class="control-label col-md-2">æ•™å®¤</label>
                             <div class="col-md-4"><input class="form-control" name="Classroom" id="Classroom" value="<%= FormClassroom %>" required /></div>
                         </div>
 
                         <div class="form-group">
-                            <label class="control-label col-md-2">¿ªÊ¼½Ú´Î</label>
+                            <label class="control-label col-md-2">å¼€å§‹èŠ‚æ¬¡</label>
                             <div class="col-md-4">
                                 <select class="form-control" name="StartPeriod" id="StartPeriod" required>
                                     <% for (int p = 1; p <= 12; p++) { %>
-                                        <option value="<%= p %>" <%= p == FormStartPeriod ? "selected" : "" %>>µÚ <%= p %> ½Ú</option>
+                                        <option value="<%= p %>" <%= p == FormStartPeriod ? "selected" : "" %>>ç¬¬ <%= p %> èŠ‚</option>
                                     <% } %>
                                 </select>
                             </div>
-                            <label class="control-label col-md-2">½áÊø½Ú´Î</label>
+                            <label class="control-label col-md-2">ç»“æŸèŠ‚æ¬¡</label>
                             <div class="col-md-4">
                                 <select class="form-control" name="EndPeriod" id="EndPeriod" required>
                                     <% for (int p = 1; p <= 12; p++) { %>
-                                        <option value="<%= p %>" <%= p == FormEndPeriod ? "selected" : "" %>>µÚ <%= p %> ½Ú</option>
+                                        <option value="<%= p %>" <%= p == FormEndPeriod ? "selected" : "" %>>ç¬¬ <%= p %> èŠ‚</option>
                                     <% } %>
                                 </select>
                             </div>
@@ -289,8 +289,8 @@
 
                         <div class="form-group">
                             <div class="col-md-offset-2 col-md-10">
-                                <button type="submit" class="btn btn-primary">Ìí¼Ó¿Î³Ì°²ÅÅ</button>
-                                <a class="btn btn-default" href="Timetable.aspx">·µ»Ø¿Î±í</a>
+                                <button type="submit" class="btn btn-primary">æ·»åŠ è¯¾ç¨‹å®‰æ’</button>
+                                <a class="btn btn-default" href="Timetable.aspx">è¿”å›è¯¾è¡¨</a>
                             </div>
                         </div>
                     </form>

@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
@@ -7,7 +7,7 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "ɾ����ʦ";
+        PageTitle = "删除教师";
         if (!EnsureAdminRole())
         {
             return;
@@ -16,7 +16,7 @@
         var id = (Request.QueryString["id"] ?? Request.Form["TeacherID"] ?? string.Empty).Trim();
         if (string.IsNullOrWhiteSpace(id))
         {
-            MessageText = "ȱ�ٽ�ʦID������";
+            MessageText = "缺少教师ID参数。";
             return;
         }
 
@@ -25,7 +25,7 @@
             CurrentTeacher = db.Teachers.Include("Courses").FirstOrDefault(t => t.TeacherID == id);
             if (CurrentTeacher == null)
             {
-                MessageText = "��ʦ�����ڡ�";
+                MessageText = "教师不存在。";
                 return;
             }
 
@@ -52,30 +52,30 @@
 
 <!--#include file="_AdminLayoutTop.inc" -->
 
-<h2>ɾ����ʦ</h2>
+<h2>删除教师</h2>
 
 <% if (!string.IsNullOrEmpty(MessageText)) { %>
     <div class="alert alert-danger"><%= H(MessageText) %></div>
 <% } else { %>
-    <h3 class="text-danger">��ȷ��Ҫɾ����λ��ʦ�����¼�˺�Ҳ��һ���Ƴ���</h3>
+    <h3 class="text-danger">您确定要删除这位教师吗？其登录账号也将一并移除。</h3>
     <div>
         <h4><%= H(CurrentTeacher.TeacherName) %></h4>
         <hr />
         <dl class="dl-horizontal">
-            <dt>��ʦ����</dt>
+            <dt>教师工号</dt>
             <dd><%= H(CurrentTeacher.TeacherID) %></dd>
 
-            <dt>����</dt>
+            <dt>姓名</dt>
             <dd><%= H(CurrentTeacher.TeacherName) %></dd>
 
-            <dt>ְ��</dt>
+            <dt>职称</dt>
             <dd><%= H(CurrentTeacher.Title) %></dd>
         </dl>
 
         <form method="post" class="form-actions no-color">
             <input type="hidden" name="TeacherID" value="<%= H(CurrentTeacher.TeacherID) %>" />
-            <button type="submit" class="btn btn-danger">ȷ��ɾ��</button>
-            <a class="btn btn-default" href="TeacherList.aspx">�����б�</a>
+            <button type="submit" class="btn btn-danger">确认删除</button>
+            <a class="btn btn-default" href="TeacherList.aspx">返回列表</a>
         </form>
     </div>
 <% } %>

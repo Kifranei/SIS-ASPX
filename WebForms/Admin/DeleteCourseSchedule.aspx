@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
@@ -8,7 +8,7 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "É¾³ı¿Î³Ì°²ÅÅ";
+        PageTitle = "åˆ é™¤è¯¾ç¨‹å®‰æ’";
         if (!EnsureAdminRole())
         {
             return;
@@ -17,7 +17,7 @@
         int sessionId;
         if (!int.TryParse(Request.QueryString["sessionId"] ?? Request.Form["SessionID"], out sessionId) || sessionId <= 0)
         {
-            MessageText = "¿Î³Ì°²ÅÅ²ÎÊıÎŞĞ§¡£";
+            MessageText = "è¯¾ç¨‹å®‰æ’å‚æ•°æ— æ•ˆã€‚";
             return;
         }
 
@@ -26,20 +26,20 @@
             CurrentSession = db.ClassSessions.Include("Courses.Teachers").FirstOrDefault(cs => cs.SessionID == sessionId);
             if (CurrentSession == null)
             {
-                MessageText = "¿Î³Ì°²ÅÅ²»´æÔÚ¡£";
+                MessageText = "è¯¾ç¨‹å®‰æ’ä¸å­˜åœ¨ã€‚";
                 return;
             }
 
             if (Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase))
             {
                 var courseId = CurrentSession.CourseID;
-                var courseName = CurrentSession.Courses == null ? "¿Î³Ì" : CurrentSession.Courses.CourseName;
-                var info = "µÚ" + CurrentSession.StartWeek + "-" + CurrentSession.EndWeek + "ÖÜ£¬" + DayName(CurrentSession.DayOfWeek) + "µÚ" + CurrentSession.StartPeriod + "-" + CurrentSession.EndPeriod + "½Ú£¬" + CurrentSession.Classroom + "½ÌÊÒ";
+                var courseName = CurrentSession.Courses == null ? "è¯¾ç¨‹" : CurrentSession.Courses.CourseName;
+                var info = "ç¬¬" + CurrentSession.StartWeek + "-" + CurrentSession.EndWeek + "å‘¨ï¼Œ" + DayName(CurrentSession.DayOfWeek) + "ç¬¬" + CurrentSession.StartPeriod + "-" + CurrentSession.EndPeriod + "èŠ‚ï¼Œ" + CurrentSession.Classroom + "æ•™å®¤";
 
                 db.ClassSessions.Remove(CurrentSession);
                 db.SaveChanges();
 
-                Session["AdminFlashMessage"] = "¿Î³Ì°²ÅÅÉ¾³ı³É¹¦£¡ÒÑÉ¾³ı " + courseName + " µÄ°²ÅÅ£º" + info;
+                Session["AdminFlashMessage"] = "è¯¾ç¨‹å®‰æ’åˆ é™¤æˆåŠŸï¼å·²åˆ é™¤ " + courseName + " çš„å®‰æ’ï¼š" + info;
                 Response.Redirect("CourseSchedule.aspx?courseId=" + courseId, true);
             }
         }
@@ -68,45 +68,45 @@
 
 <!--#include file="_AdminLayoutTop.inc" -->
 
-<h2>É¾³ı¿Î³Ì°²ÅÅ</h2>
+<h2>åˆ é™¤è¯¾ç¨‹å®‰æ’</h2>
 <hr />
 
 <% if (!string.IsNullOrEmpty(MessageText)) { %>
     <div class="alert alert-danger"><%= H(MessageText) %></div>
 <% } else { %>
     <div class="alert alert-danger">
-        <h4><span class="glyphicon glyphicon-warning-sign"></span> È·ÈÏÉ¾³ı</h4>
-        <p>ÄúÈ·¶¨ÒªÉ¾³ıÒÔÏÂ¿Î³Ì°²ÅÅÂğ£¿´Ë²Ù×÷ÎŞ·¨³·Ïú£¬ÇÒ»áÓ°ÏìÏà¹Ø½ÌÊ¦ºÍÑ§ÉúµÄ¿Î±í¡£</p>
+        <h4><span class="glyphicon glyphicon-warning-sign"></span> ç¡®è®¤åˆ é™¤</h4>
+        <p>æ‚¨ç¡®å®šè¦åˆ é™¤ä»¥ä¸‹è¯¾ç¨‹å®‰æ’å—ï¼Ÿæ­¤æ“ä½œæ— æ³•æ’¤é”€ï¼Œä¸”ä¼šå½±å“ç›¸å…³æ•™å¸ˆå’Œå­¦ç”Ÿçš„è¯¾è¡¨ã€‚</p>
     </div>
 
     <div class="panel panel-default">
-        <div class="panel-heading"><h3 class="panel-title">¿Î³Ì°²ÅÅÏêÇé</h3></div>
+        <div class="panel-heading"><h3 class="panel-title">è¯¾ç¨‹å®‰æ’è¯¦æƒ…</h3></div>
         <div class="panel-body">
             <dl class="dl-horizontal">
-                <dt>¿Î³ÌÃû³Æ£º</dt>
+                <dt>è¯¾ç¨‹åç§°ï¼š</dt>
                 <dd><strong><%= CurrentSession.Courses == null ? "-" : H(CurrentSession.Courses.CourseName) %></strong></dd>
 
-                <dt>ÈÎ¿Î½ÌÊ¦£º</dt>
-                <dd><%= (CurrentSession.Courses != null && CurrentSession.Courses.Teachers != null) ? H(CurrentSession.Courses.Teachers.TeacherName) : "Î´·ÖÅä½ÌÊ¦" %></dd>
+                <dt>ä»»è¯¾æ•™å¸ˆï¼š</dt>
+                <dd><%= (CurrentSession.Courses != null && CurrentSession.Courses.Teachers != null) ? H(CurrentSession.Courses.Teachers.TeacherName) : "æœªåˆ†é…æ•™å¸ˆ" %></dd>
 
-                <dt>¿Î³ÌÀàĞÍ£º</dt>
+                <dt>è¯¾ç¨‹ç±»å‹ï¼š</dt>
                 <dd><span class="label label-info"><%= CurrentSession.Courses == null ? "-" : H(CourseTypeText(CurrentSession.Courses.CourseType)) %></span></dd>
 
-                <dt>ÖÜ´Î·¶Î§£º</dt>
-                <dd>µÚ <%= CurrentSession.StartWeek %> - <%= CurrentSession.EndWeek %> ÖÜ</dd>
+                <dt>å‘¨æ¬¡èŒƒå›´ï¼š</dt>
+                <dd>ç¬¬ <%= CurrentSession.StartWeek %> - <%= CurrentSession.EndWeek %> å‘¨</dd>
 
-                <dt>ÉÏ¿ÎÊ±¼ä£º</dt>
-                <dd><%= H(DayName(CurrentSession.DayOfWeek)) %> µÚ <%= CurrentSession.StartPeriod %> - <%= CurrentSession.EndPeriod %> ½Ú</dd>
+                <dt>ä¸Šè¯¾æ—¶é—´ï¼š</dt>
+                <dd><%= H(DayName(CurrentSession.DayOfWeek)) %> ç¬¬ <%= CurrentSession.StartPeriod %> - <%= CurrentSession.EndPeriod %> èŠ‚</dd>
 
-                <dt>½ÌÊÒ£º</dt>
+                <dt>æ•™å®¤ï¼š</dt>
                 <dd><%= H(CurrentSession.Classroom) %></dd>
 
-                <dt>¼ÙÈÕ×´Ì¬£º</dt>
+                <dt>å‡æ—¥çŠ¶æ€ï¼š</dt>
                 <dd>
                     <% if (HasHolidayConflict()) { %>
-                        <span class="label label-warning">°üº¬¼ÙÈÕÖÜ´Î</span>
+                        <span class="label label-warning">åŒ…å«å‡æ—¥å‘¨æ¬¡</span>
                     <% } else { %>
-                        <span class="label label-success">ÎŞ¼ÙÈÕ³åÍ»</span>
+                        <span class="label label-success">æ— å‡æ—¥å†²çª</span>
                     <% } %>
                 </dd>
             </dl>
@@ -115,8 +115,8 @@
 
     <form method="post" class="form-actions">
         <input type="hidden" name="SessionID" value="<%= CurrentSession.SessionID %>" />
-        <button type="submit" class="btn btn-danger" onclick="return confirm('ÄúÈ·¶¨ÒªÉ¾³ıÕâ¸ö¿Î³Ì°²ÅÅÂğ£¿´Ë²Ù×÷ÎŞ·¨³·Ïú£¡');">È·ÈÏÉ¾³ı</button>
-        <a class="btn btn-default" href='CourseSchedule.aspx?courseId=<%= CurrentSession.CourseID %>'>È¡Ïû</a>
+        <button type="submit" class="btn btn-danger" onclick="return confirm('æ‚¨ç¡®å®šè¦åˆ é™¤è¿™ä¸ªè¯¾ç¨‹å®‰æ’å—ï¼Ÿæ­¤æ“ä½œæ— æ³•æ’¤é”€ï¼');">ç¡®è®¤åˆ é™¤</button>
+        <a class="btn btn-default" href='CourseSchedule.aspx?courseId=<%= CurrentSession.CourseID %>'>å–æ¶ˆ</a>
     </form>
 <% } %>
 

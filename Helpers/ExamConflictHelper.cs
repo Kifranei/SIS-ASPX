@@ -116,6 +116,36 @@ namespace StudentInformationSystem.Helpers
                 .ToList();
         }
 
+        public static List<Exams> GetLocationExamConflicts(
+            StudentManagementDBEntities db,
+            string location,
+            DateTime startTime,
+            DateTime endTime,
+            int? excludeExamId = null)
+        {
+            if (db == null || string.IsNullOrWhiteSpace(location))
+            {
+                return new List<Exams>();
+            }
+
+            string normalizedLocation = location.Trim();
+            var query = db.Exams
+                .Include("Courses")
+                .Where(e =>
+                    e.Location != null &&
+                    e.Location.Trim() == normalizedLocation &&
+                    e.StartTime < endTime &&
+                    e.EndTime > startTime);
+
+            if (excludeExamId.HasValue)
+            {
+                int examId = excludeExamId.Value;
+                query = query.Where(e => e.ExamID != examId);
+            }
+
+            return query.ToList();
+        }
+
         public static string BuildTeacherExamConflictMessage(IEnumerable<Exams> conflicts, string prefix)
         {
             var conflictList = conflicts == null ? new List<Exams>() : conflicts.ToList();
@@ -146,6 +176,19 @@ namespace StudentInformationSystem.Helpers
                 description += $"；另有 {conflictList.Count - 5} 条冲突未展开";
             }
 
+            return prefix + description;
+        }
+
+        public static string BuildLocationExamConflictMessage(IEnumerable<Exams> conflicts, string prefix)
+        {
+            var conflictList = conflicts == null ? new List<Exams>() : conflicts.ToList();
+            if (!conflictList.Any())
+            {
+                return string.Empty;
+            }
+
+            string description = string.Join("；", conflictList.Select(e =>
+                $"{(e.Courses == null ? "课程" : e.Courses.CourseName)}({e.StartTime:yyyy-MM-dd HH:mm} - {e.EndTime:HH:mm})"));
             return prefix + description;
         }
     }

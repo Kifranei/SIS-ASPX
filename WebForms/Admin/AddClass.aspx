@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
@@ -9,7 +9,7 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "Ìí¼Ó°à¼¶";
+        PageTitle = "æ·»åŠ ç­çº§";
         if (!EnsureAdminRole())
         {
             return;
@@ -28,18 +28,18 @@
         int classNumber;
         if (string.IsNullOrWhiteSpace(FormMajor) || !int.TryParse(FormAcademicYear, out year) || !int.TryParse(FormClassNumber, out classNumber))
         {
-            MessageText = "ÇëÕıÈ·ÌîĞ´×¨Òµ¡¢Ñ§ÄêºÍ°àºÅ¡£";
+            MessageText = "è¯·æ­£ç¡®å¡«å†™ä¸“ä¸šã€å­¦å¹´å’Œç­å·ã€‚";
             return;
         }
 
-        // ÒªÇóÑ§Äê±ØĞëÎªËÄÎ»Êı×Ö£¨ÀıÈç 2021£©£¬²¢ÔÚºÏÀí·¶Î§ÄÚ£¬±ÜÃâ Substring Ô½½ç
+        // è¦æ±‚å­¦å¹´å¿…é¡»ä¸ºå››ä½æ•°å­—ï¼ˆä¾‹å¦‚ 2021ï¼‰ï¼Œå¹¶åœ¨åˆç†èŒƒå›´å†…ï¼Œé¿å… Substring è¶Šç•Œ
         if (FormAcademicYear.Length != 4 || year < 1000 || year > DateTime.Now.Year + 1)
         {
-            MessageText = "ÇëÌîĞ´ËÄÎ»Ñ§Äê£¬ÀıÈç 2021¡£";
+            MessageText = "è¯·å¡«å†™å››ä½å­¦å¹´ï¼Œä¾‹å¦‚ 2021ã€‚";
             return;
         }
 
-        var className = FormMajor + year.ToString().Substring(2, 2) + classNumber.ToString("D2") + "°à";
+        var className = FormMajor + year.ToString().Substring(2, 2) + classNumber.ToString("D2") + "ç­";
         using (var db = new StudentManagementDBEntities())
         {
             var classModel = new Classes
@@ -58,32 +58,32 @@
 
 <!--#include file="_AdminLayoutTop.inc" -->
 
-<h2>Ìí¼Ó°à¼¶</h2>
+<h2>æ·»åŠ ç­çº§</h2>
 
 <% if (!string.IsNullOrEmpty(MessageText)) { %>
     <div class="alert alert-danger"><%= H(MessageText) %></div>
 <% } %>
 
 <form method="post" class="form-horizontal" style="max-width:900px;">
-    <h4>°à¼¶ĞÅÏ¢</h4>
+    <h4>ç­çº§ä¿¡æ¯</h4>
     <hr />
 
     <div class="form-group">
-        <label class="control-label col-md-2">×¨Òµ</label>
+        <label class="control-label col-md-2">ä¸“ä¸š</label>
         <div class="col-md-10">
             <input class="form-control" name="Major" value="<%= H(FormMajor) %>" required />
         </div>
     </div>
 
     <div class="form-group">
-        <label class="control-label col-md-2">Ñ§Äê</label>
+        <label class="control-label col-md-2">å­¦å¹´</label>
         <div class="col-md-10">
             <input class="form-control" name="AcademicYear" value="<%= H(FormAcademicYear) %>" required />
         </div>
     </div>
 
     <div class="form-group">
-        <label class="control-label col-md-2">°àºÅ</label>
+        <label class="control-label col-md-2">ç­å·</label>
         <div class="col-md-10">
             <input class="form-control" name="ClassNumber" value="<%= H(FormClassNumber) %>" required />
         </div>
@@ -91,8 +91,8 @@
 
     <div class="form-group">
         <div class="col-md-offset-2 col-md-10">
-            <button type="submit" class="btn btn-success">´´½¨</button>
-            <a class="btn btn-default" href="ClassList.aspx">·µ»ØÁĞ±í</a>
+            <button type="submit" class="btn btn-success">åˆ›å»º</button>
+            <a class="btn btn-default" href="ClassList.aspx">è¿”å›åˆ—è¡¨</a>
         </div>
     </div>
 </form>

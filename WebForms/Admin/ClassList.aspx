@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
@@ -9,7 +9,7 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "°à¼¶ÁĞ±í";
+        PageTitle = "ç­çº§åˆ—è¡¨";
         if (!EnsureAdminRole())
         {
             return;
@@ -43,27 +43,27 @@
     <div class="alert alert-success"><%= H(FlashMessage) %></div>
 <% } %>
 
-<h2>°à¼¶ÁĞ±í</h2>
+<h2>ç­çº§åˆ—è¡¨</h2>
 
 <form method="get" class="form-inline">
     <div class="form-group">
-        <label>²éÕÒ°à¼¶:</label>
-        <input type="text" name="searchString" value="<%= H(SearchString) %>" class="form-control" placeholder="ÊäÈë×¨Òµ/Ñ§Äê/°à¼¶Ãû" />
+        <label>æŸ¥æ‰¾ç­çº§:</label>
+        <input type="text" name="searchString" value="<%= H(SearchString) %>" class="form-control" placeholder="è¾“å…¥ä¸“ä¸š/å­¦å¹´/ç­çº§å" />
     </div>
-    <button type="submit" class="btn btn-default">ËÑ Ë÷</button>
+    <button type="submit" class="btn btn-default">æœ ç´¢</button>
 </form>
 <br />
 
-<p><a class="btn btn-primary" href="AddClass.aspx">Ìí¼ÓĞÂ°à¼¶</a></p>
+<p><a class="btn btn-primary" href="AddClass.aspx">æ·»åŠ æ–°ç­çº§</a></p>
 <div class="table-responsive">
     <table class="table table-striped table-bordered">
         <thead>
             <tr>
-                <th>°à¼¶Ãû³Æ</th>
-                <th>×¨Òµ</th>
-                <th>Ñ§Äê</th>
-                <th>°àºÅ</th>
-                <th>²Ù×÷</th>
+                <th>ç­çº§åç§°</th>
+                <th>ä¸“ä¸š</th>
+                <th>å­¦å¹´</th>
+                <th>ç­å·</th>
+                <th>æ“ä½œ</th>
             </tr>
         </thead>
         <tbody>
@@ -75,14 +75,14 @@
                         <td><%= item.AcademicYear.HasValue ? item.AcademicYear.Value.ToString() : "-" %></td>
                         <td><%= item.ClassNumber.HasValue ? item.ClassNumber.Value.ToString() : "-" %></td>
                         <td>
-                            <a href='EditClass.aspx?id=<%= item.ClassID %>'>±à¼­</a> |
-                            <a href='ClassDetails.aspx?id=<%= item.ClassID %>'>ÏêÇé</a> |
-                            <a href='DeleteClass.aspx?id=<%= item.ClassID %>'>É¾³ı</a>
+                            <a href='EditClass.aspx?id=<%= item.ClassID %>'>ç¼–è¾‘</a> |
+                            <a href='ClassDetails.aspx?id=<%= item.ClassID %>'>è¯¦æƒ…</a> |
+                            <a href='DeleteClass.aspx?id=<%= item.ClassID %>'>åˆ é™¤</a>
                         </td>
                     </tr>
                 <% } %>
             <% } else { %>
-                <tr><td colspan="5" class="text-center text-muted">ÔİÎŞ°à¼¶¼ÇÂ¼¡£</td></tr>
+                <tr><td colspan="5" class="text-center text-muted">æš‚æ— ç­çº§è®°å½•ã€‚</td></tr>
             <% } %>
         </tbody>
     </table>

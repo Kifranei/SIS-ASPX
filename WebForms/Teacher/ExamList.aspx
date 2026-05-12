@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <%@ Import Namespace="System" %>
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="System.Linq" %>
@@ -60,7 +60,7 @@
             }
         })();
     </script>
-    <title>���԰����б�</title>
+    <title>考试安排列表</title>
     <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
     <link href="<%= ResolveUrl("~/Content/theme-system.css") %>" rel="stylesheet" />
     <link href="<%= ResolveUrl("~/Content/webforms-student-layout.css") %>" rel="stylesheet" />
@@ -70,28 +70,28 @@
         <div class="sidebar-overlay"></div>
         <aside class="sidebar">
             <div class="sidebar-header">
-                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="У��" class="sidebar-logo-img" />
+                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="校徽" class="sidebar-logo-img" />
             </div>
             <ul class="sidebar-menu">
-                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">��ҳ</a></li>
-                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">�ҵĿα�</a></li>
-                <li><a class="<%= Active("CourseList.aspx") %>" href="CourseList.aspx">�ɼ�¼��</a></li>
-                <li><a class="<%= Active("ExamList.aspx") %>" href="ExamList.aspx">���Թ���</a></li>
-                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">�޸�����</a></li>
+                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">首页</a></li>
+                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">我的课表</a></li>
+                <li><a class="<%= Active("CourseList.aspx") %>" href="CourseList.aspx">成绩录入</a></li>
+                <li><a class="<%= Active("ExamList.aspx") %>" href="ExamList.aspx">考试管理</a></li>
+                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">修改密码</a></li>
             </ul>
         </aside>
 
         <div class="main-content">
             <header class="header-bar">
                 <div class="header-left">
-                    <button class="hamburger-menu" type="button" aria-label="�˵�">&#9776;</button>
+                    <button class="hamburger-menu" type="button" aria-label="菜单">&#9776;</button>
                 </div>
                 <div class="header-right">
-                    <button class='dark-toggle-btn' type='button'>��ɫģʽ</button>
+                    <button class='dark-toggle-btn' type='button'>暗色模式</button>
                     <div class="user-info">
-                        <span class="username">��ӭ��, <%= (Session["DisplayName"] as string) ?? ((Session["User"] as Users)?.Username ?? "��ʦ") %></span>
+                        <span class="username">欢迎您, <%= (Session["DisplayName"] as string) ?? ((Session["User"] as Users)?.Username ?? "教师") %></span>
                         <span class="sep">|</span>
-                        <a class="logout-link" href="../Logout.aspx">��ȫ�˳�</a>
+                        <a class="logout-link" href="../Logout.aspx">安全退出</a>
                     </div>
                 </div>
             </header>
@@ -102,17 +102,17 @@
                         <div class="alert alert-success"><%= Server.HtmlEncode(FlashMessage) %></div>
                     <% } %>
 
-                    <h2>���԰����б�</h2>
-                    <p><a class="btn btn-primary" href="AddExam.aspx">�����¿���</a></p>
+                    <h2>考试安排列表</h2>
+                    <p><a class="btn btn-primary" href="AddExam.aspx">添加新考试</a></p>
 
                     <div class="table-responsive">
                         <table class="table table-striped table-bordered">
                             <thead>
                                 <tr>
-                                    <th>�γ�����</th>
-                                    <th>����ʱ��</th>
-                                    <th>���Եص�</th>
-                                    <th>����</th>
+                                    <th>课程名称</th>
+                                    <th>考试时间</th>
+                                    <th>考试地点</th>
+                                    <th>操作</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -123,14 +123,14 @@
                                             <td><%= item.StartTime.ToString("yyyy-MM-dd HH:mm") + " - " + item.EndTime.ToString("HH:mm") %></td>
                                             <td><%= item.Location %></td>
                                             <td>
-                                                <a href="EditExam.aspx?id=<%= item.ExamID %>">�༭</a> |
-                                                <a href="DetailsExam.aspx?id=<%= item.ExamID %>">����</a> |
-                                                <a href="DeleteExam.aspx?id=<%= item.ExamID %>">ɾ��</a>
+                                                <a href="EditExam.aspx?id=<%= item.ExamID %>">编辑</a> |
+                                                <a href="DetailsExam.aspx?id=<%= item.ExamID %>">详情</a> |
+                                                <a href="DeleteExam.aspx?id=<%= item.ExamID %>">删除</a>
                                             </td>
                                         </tr>
                                     <% } %>
                                 <% } else { %>
-                                    <tr><td colspan="4" class="text-center text-muted">���޿��԰��š�</td></tr>
+                                    <tr><td colspan="4" class="text-center text-muted">暂无考试安排。</td></tr>
                                 <% } %>
                             </tbody>
                         </table>

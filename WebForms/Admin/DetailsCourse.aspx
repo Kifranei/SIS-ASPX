@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
@@ -7,7 +7,7 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "¿Î³ÌÏêÇé";
+        PageTitle = "è¯¾ç¨‹è¯¦æƒ…";
         if (!EnsureAdminRole())
         {
             return;
@@ -16,7 +16,7 @@
         int id;
         if (!int.TryParse(Request.QueryString["id"], out id) || id <= 0)
         {
-            MessageText = "¿Î³Ì²ÎÊıÎŞĞ§¡£";
+            MessageText = "è¯¾ç¨‹å‚æ•°æ— æ•ˆã€‚";
             return;
         }
 
@@ -27,14 +27,14 @@
 
         if (CurrentCourse == null)
         {
-            MessageText = "¿Î³Ì²»´æÔÚ¡£";
+            MessageText = "è¯¾ç¨‹ä¸å­˜åœ¨ã€‚";
         }
     }
 </script>
 
 <!--#include file="_AdminLayoutTop.inc" -->
 
-<h2>¿Î³ÌÏêÇé</h2>
+<h2>è¯¾ç¨‹è¯¦æƒ…</h2>
 
 <% if (!string.IsNullOrEmpty(MessageText)) { %>
     <div class="alert alert-danger"><%= H(MessageText) %></div>
@@ -43,22 +43,22 @@
         <h4><%= H(CurrentCourse.CourseName) %></h4>
         <hr />
         <dl class="dl-horizontal">
-            <dt>¿Î³ÌÃû³Æ</dt>
+            <dt>è¯¾ç¨‹åç§°</dt>
             <dd><%= H(CurrentCourse.CourseName) %></dd>
 
-            <dt>Ñ§·Ö</dt>
+            <dt>å­¦åˆ†</dt>
             <dd><%= CurrentCourse.Credits %></dd>
 
-            <dt>½ÌÊ¦Ãû³Æ</dt>
+            <dt>æ•™å¸ˆåç§°</dt>
             <dd><%= CurrentCourse.Teachers == null ? "-" : H(CurrentCourse.Teachers.TeacherName) %></dd>
 
-            <dt>¿Î³ÌÀà±ğ</dt>
+            <dt>è¯¾ç¨‹ç±»åˆ«</dt>
             <dd><%= H(CourseTypeText(CurrentCourse.CourseType)) %></dd>
         </dl>
     </div>
     <p>
-        <a class="btn btn-primary" href='EditCourse.aspx?id=<%= CurrentCourse.CourseID %>'>±à¼­</a>
-        <a class="btn btn-default" href="CourseList.aspx">·µ»ØÁĞ±í</a>
+        <a class="btn btn-primary" href='EditCourse.aspx?id=<%= CurrentCourse.CourseID %>'>ç¼–è¾‘</a>
+        <a class="btn btn-default" href="CourseList.aspx">è¿”å›åˆ—è¡¨</a>
     </p>
 <% } %>
 

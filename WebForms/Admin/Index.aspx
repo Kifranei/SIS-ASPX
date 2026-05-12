@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
@@ -15,7 +15,7 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "¹ÜÀíÔ±¿ØÖÆÌ¨";
+        PageTitle = "ç®¡ç†å‘˜æŽ§åˆ¶å°";
         if (!EnsureAdminRole())
         {
             return;
@@ -42,8 +42,8 @@
 <!--#include file="_AdminLayoutTop.inc" -->
 
 <div class="jumbotron">
-    <h1>¹ÜÀíÔ±¿ØÖÆÌ¨</h1>
-    <p class="lead">»¶Ó­»ØÀ´£¬¹ÜÀíÔ±£¡ÒÔÏÂÊÇµ±Ç°ÏµÍ³µÄºËÐÄÊý¾ÝÍ³¼Æ¡£</p>
+    <h1>ç®¡ç†å‘˜æŽ§åˆ¶å°</h1>
+    <p class="lead">æ¬¢è¿Žå›žæ¥ï¼Œç®¡ç†å‘˜ï¼ä»¥ä¸‹æ˜¯å½“å‰ç³»ç»Ÿçš„æ ¸å¿ƒæ•°æ®ç»Ÿè®¡ã€‚</p>
 </div>
 
 <div class="row">
@@ -54,11 +54,11 @@
                     <div class="col-xs-3"><i class="glyphicon glyphicon-user" style="font-size:50px;"></i></div>
                     <div class="col-xs-9 text-right">
                         <div style="font-size:40px;"><%= StudentsCount %></div>
-                        <div>Ñ§Éú×ÜÊý</div>
+                        <div>å­¦ç”Ÿæ€»æ•°</div>
                     </div>
                 </div>
             </div>
-            <a href="StudentList.aspx"><div class="panel-footer"><span class="pull-left">²é¿´ÏêÇé</span><span class="pull-right"><i class="glyphicon glyphicon-circle-arrow-right"></i></span><div class="clearfix"></div></div></a>
+            <a href="StudentList.aspx"><div class="panel-footer"><span class="pull-left">æŸ¥çœ‹è¯¦æƒ…</span><span class="pull-right"><i class="glyphicon glyphicon-circle-arrow-right"></i></span><div class="clearfix"></div></div></a>
         </div>
     </div>
 
@@ -69,11 +69,11 @@
                     <div class="col-xs-3"><i class="glyphicon glyphicon-education" style="font-size:50px;"></i></div>
                     <div class="col-xs-9 text-right">
                         <div style="font-size:40px;"><%= TeachersCount %></div>
-                        <div>½ÌÊ¦×ÜÊý</div>
+                        <div>æ•™å¸ˆæ€»æ•°</div>
                     </div>
                 </div>
             </div>
-            <a href="TeacherList.aspx"><div class="panel-footer"><span class="pull-left">²é¿´ÏêÇé</span><span class="pull-right"><i class="glyphicon glyphicon-circle-arrow-right"></i></span><div class="clearfix"></div></div></a>
+            <a href="TeacherList.aspx"><div class="panel-footer"><span class="pull-left">æŸ¥çœ‹è¯¦æƒ…</span><span class="pull-right"><i class="glyphicon glyphicon-circle-arrow-right"></i></span><div class="clearfix"></div></div></a>
         </div>
     </div>
 
@@ -84,11 +84,11 @@
                     <div class="col-xs-3"><i class="glyphicon glyphicon-list-alt" style="font-size:50px;"></i></div>
                     <div class="col-xs-9 text-right">
                         <div style="font-size:40px;"><%= CoursesCount %></div>
-                        <div>¿Î³Ì×ÜÊý</div>
+                        <div>è¯¾ç¨‹æ€»æ•°</div>
                     </div>
                 </div>
             </div>
-            <a href="CourseList.aspx"><div class="panel-footer"><span class="pull-left">²é¿´ÏêÇé</span><span class="pull-right"><i class="glyphicon glyphicon-circle-arrow-right"></i></span><div class="clearfix"></div></div></a>
+            <a href="CourseList.aspx"><div class="panel-footer"><span class="pull-left">æŸ¥çœ‹è¯¦æƒ…</span><span class="pull-right"><i class="glyphicon glyphicon-circle-arrow-right"></i></span><div class="clearfix"></div></div></a>
         </div>
     </div>
 
@@ -99,11 +99,11 @@
                     <div class="col-xs-3"><i class="glyphicon glyphicon-check" style="font-size:50px;"></i></div>
                     <div class="col-xs-9 text-right">
                         <div style="font-size:40px;"><%= EnrollmentsCount %></div>
-                        <div>×ÜÑ¡¿ÎÈË´Î</div>
+                        <div>æ€»é€‰è¯¾äººæ¬¡</div>
                     </div>
                 </div>
             </div>
-            <a href="EnrollmentList.aspx"><div class="panel-footer"><span class="pull-left">²é¿´ÏêÇé</span><span class="pull-right"><i class="glyphicon glyphicon-circle-arrow-right"></i></span><div class="clearfix"></div></div></a>
+            <a href="EnrollmentList.aspx"><div class="panel-footer"><span class="pull-left">æŸ¥çœ‹è¯¦æƒ…</span><span class="pull-right"><i class="glyphicon glyphicon-circle-arrow-right"></i></span><div class="clearfix"></div></div></a>
         </div>
     </div>
 </div>
@@ -112,16 +112,16 @@
     <div class="col-md-12">
         <div class="panel panel-info">
             <div class="panel-heading">
-                <h3 class="panel-title"><i class="glyphicon glyphicon-hdd"></i> ·þÎñÆ÷×´Ì¬</h3>
+                <h3 class="panel-title"><i class="glyphicon glyphicon-hdd"></i> æœåŠ¡å™¨çŠ¶æ€</h3>
             </div>
             <div class="panel-body">
                 <ul class="list-group">
-                    <li class="list-group-item"><strong>·þÎñÆ÷Ãû³Æ:</strong> <%= H(ServerName) %></li>
-                    <li class="list-group-item"><strong>Web ·þÎñÆ÷:</strong> <%= H(ServerSoftware) %></li>
-                    <li class="list-group-item"><strong>.NET Framework °æ±¾:</strong> <%= H(DotNetVersion) %></li>
-                    <li class="list-group-item"><strong>Ó¦ÓÃ³ÌÐòÄÚ´æÕ¼ÓÃ:</strong> <%= MemoryUsage %> MB</li>
-                    <li class="list-group-item"><strong>Æô¶¯Ê±¼ä:</strong> <%= StartTime.ToString("yyyy-MM-dd HH:mm:ss") %></li>
-                    <li class="list-group-item"><strong>ÒÑÔËÐÐÊ±³¤:</strong> <%= RunningTime.ToString(@"d\Ìì\ hh\:mm\:ss") %></li>
+                    <li class="list-group-item"><strong>æœåŠ¡å™¨åç§°:</strong> <%= H(ServerName) %></li>
+                    <li class="list-group-item"><strong>Web æœåŠ¡å™¨:</strong> <%= H(ServerSoftware) %></li>
+                    <li class="list-group-item"><strong>.NET Framework ç‰ˆæœ¬:</strong> <%= H(DotNetVersion) %></li>
+                    <li class="list-group-item"><strong>åº”ç”¨ç¨‹åºå†…å­˜å ç”¨:</strong> <%= MemoryUsage %> MB</li>
+                    <li class="list-group-item"><strong>å¯åŠ¨æ—¶é—´:</strong> <%= StartTime.ToString("yyyy-MM-dd HH:mm:ss") %></li>
+                    <li class="list-group-item"><strong>å·²è¿è¡Œæ—¶é•¿:</strong> <%= string.Format("{0}å¤© {1:00}:{2:00}:{3:00}", RunningTime.Days, RunningTime.Hours, RunningTime.Minutes, RunningTime.Seconds) %></li>
                 </ul>
             </div>
         </div>

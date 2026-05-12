@@ -676,6 +676,18 @@ namespace StudentInformationSystem.Controllers
                         "考试时间冲突！您在该时段已有以下考试安排："));
                 }
 
+                var locationConflicts = ExamConflictHelper.GetLocationExamConflicts(
+                    db,
+                    exam.Location,
+                    exam.StartTime,
+                    exam.EndTime);
+                if (locationConflicts.Any())
+                {
+                    ModelState.AddModelError("Location", ExamConflictHelper.BuildLocationExamConflictMessage(
+                        locationConflicts,
+                        "考场占用冲突！该考场在该时段已有以下考试安排："));
+                }
+
                 var studentConflicts = ExamConflictHelper.GetStudentExamConflictsForCourse(
                     db,
                     exam.CourseID,
@@ -745,6 +757,19 @@ namespace StudentInformationSystem.Controllers
                     ModelState.AddModelError("", ExamConflictHelper.BuildTeacherExamConflictMessage(
                         teacherConflicts,
                         "考试时间冲突！您在该时段已有以下考试安排："));
+                }
+
+                var locationConflicts = ExamConflictHelper.GetLocationExamConflicts(
+                    db,
+                    exam.Location,
+                    exam.StartTime,
+                    exam.EndTime,
+                    exam.ExamID);
+                if (locationConflicts.Any())
+                {
+                    ModelState.AddModelError("Location", ExamConflictHelper.BuildLocationExamConflictMessage(
+                        locationConflicts,
+                        "考场占用冲突！该考场在该时段已有以下考试安排："));
                 }
 
                 var studentConflicts = ExamConflictHelper.GetStudentExamConflictsForCourse(

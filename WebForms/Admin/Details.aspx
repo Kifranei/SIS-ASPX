@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <!--#include file="_AdminCommon.inc" -->
 
 <script runat="server">
@@ -7,7 +7,7 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "Ñ§ÉúÏêÇé";
+        PageTitle = "å­¦ç”Ÿè¯¦æƒ…";
         if (!EnsureAdminRole())
         {
             return;
@@ -16,7 +16,7 @@
         var id = (Request.QueryString["id"] ?? string.Empty).Trim();
         if (string.IsNullOrWhiteSpace(id))
         {
-            MessageText = "È±ÉÙÑ§ÉúID²ÎÊı¡£";
+            MessageText = "ç¼ºå°‘å­¦ç”ŸIDå‚æ•°ã€‚";
             return;
         }
 
@@ -27,14 +27,14 @@
 
         if (CurrentStudent == null)
         {
-            MessageText = "Ñ§Éú²»´æÔÚ¡£";
+            MessageText = "å­¦ç”Ÿä¸å­˜åœ¨ã€‚";
         }
     }
 </script>
 
 <!--#include file="_AdminLayoutTop.inc" -->
 
-<h2>Ñ§ÉúÏêÇé</h2>
+<h2>å­¦ç”Ÿè¯¦æƒ…</h2>
 
 <% if (!string.IsNullOrEmpty(MessageText)) { %>
     <div class="alert alert-danger"><%= H(MessageText) %></div>
@@ -43,22 +43,22 @@
         <h4><%= H(CurrentStudent.StudentName) %></h4>
         <hr />
         <dl class="dl-horizontal">
-            <dt>Ñ§ºÅ</dt>
+            <dt>å­¦å·</dt>
             <dd><%= H(CurrentStudent.StudentID) %></dd>
 
-            <dt>ĞÕÃû</dt>
+            <dt>å§“å</dt>
             <dd><%= H(CurrentStudent.StudentName) %></dd>
 
-            <dt>ĞÔ±ğ</dt>
+            <dt>æ€§åˆ«</dt>
             <dd><%= H(CurrentStudent.Gender) %></dd>
 
-            <dt>°à¼¶</dt>
+            <dt>ç­çº§</dt>
             <dd><%= CurrentStudent.Classes == null ? "-" : H(CurrentStudent.Classes.ClassName) %></dd>
         </dl>
     </div>
     <p>
-        <a class="btn btn-primary" href='Edit.aspx?id=<%= Server.UrlEncode(CurrentStudent.StudentID) %>'>±à¼­</a>
-        <a class="btn btn-default" href="StudentList.aspx">·µ»ØÁĞ±í</a>
+        <a class="btn btn-primary" href='Edit.aspx?id=<%= Server.UrlEncode(CurrentStudent.StudentID) %>'>ç¼–è¾‘</a>
+        <a class="btn btn-default" href="StudentList.aspx">è¿”å›åˆ—è¡¨</a>
     </p>
 <% } %>
 

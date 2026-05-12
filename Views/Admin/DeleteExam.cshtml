@@ -1,48 +1,34 @@
-@model StudentInformationSystem.Models.Exams
+﻿@model StudentInformationSystem.Models.Exams
 
 @{
-    ViewBag.Title = "DeleteExam";
+    ViewBag.Title = "删除考试";
 }
 
-<h2>ɾ������</h2>
+<h2>删除考试</h2>
 
-<h3>��ȷ��Ҫɾ���������԰�����</h3>
+<h3>确定要删除这条考试安排吗？</h3>
+
 <div>
-    <h4>@Model.Courses.CourseName</h4>
+    <h4>@(Model.Courses == null ? "考试信息" : Model.Courses.CourseName)</h4>
     <hr />
     <dl class="dl-horizontal">
-        <dt>
-            �γ�����
-        </dt>
+        <dt>课程名称</dt>
+        <dd>@Html.DisplayFor(model => model.Courses.CourseName)</dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.Courses.CourseName)
-        </dd>
+        <dt>考试时间</dt>
+        <dd>@Model.StartTime.ToString("yyyy-MM-dd HH:mm") - @Model.EndTime.ToString("HH:mm")</dd>
 
-        <dt>
-            ����ʱ��
-        </dt>
-
-        <dd>
-            @Model.StartTime.ToString("yyyy-MM-dd HH:mm") - @Model.EndTime.ToString("HH:mm")
-        </dd>
-
-        <dt>
-            ���Եص�
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Location)
-        </dd>
-
+        <dt>考试地点</dt>
+        <dd>@Html.DisplayFor(model => model.Location)</dd>
     </dl>
 
-    @using (Html.BeginForm()) {
+    @using (Html.BeginForm())
+    {
         @Html.AntiForgeryToken()
 
         <div class="form-actions no-color">
-            <input type="submit" value="ȷ��ɾ��" class="btn btn-danger" /> |
-            @Html.ActionLink("�����б�", "ExamList", null, new { @class = "btn btn-default" })
+            <input type="submit" value="确认删除" class="btn btn-danger" /> |
+            @Html.ActionLink("返回列表", "ExamList", null, new { @class = "btn btn-default" })
         </div>
     }
 </div>

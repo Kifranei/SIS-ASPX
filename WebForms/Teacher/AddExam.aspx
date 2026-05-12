@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" %>
+<%@ Page CodePage="65001" Language="C#" AutoEventWireup="true" %>
 <%@ Import Namespace="System" %>
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="System.Linq" %>
@@ -54,7 +54,7 @@
             if (!TeacherCourses.Any(c => c.CourseID == FormCourseId))
             {
                 MessageType = "danger";
-                MessageText = "�γ̲�����Ч��";
+                MessageText = "课程参数无效。";
                 return;
             }
 
@@ -63,14 +63,14 @@
             if (!DateTime.TryParse(FormStartTime, out startTime) || !DateTime.TryParse(FormEndTime, out endTime) || endTime <= startTime)
             {
                 MessageType = "danger";
-                MessageText = "����ʱ���ʽ��Ч��";
+                MessageText = "考试时间格式无效。";
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(FormLocation))
             {
                 MessageType = "danger";
-                MessageText = "����д���Եص㡣";
+                MessageText = "请填写考试地点。";
                 return;
             }
 
@@ -85,7 +85,7 @@
                 MessageType = "danger";
                 MessageText = BuildTeacherExamConflictMessage(
                     teacherConflicts,
-                    "����ʱ���ͻ�����ڸ�ʱ���������¿��԰��ţ�");
+                    "考试时间冲突！您在该时段已有以下考试安排：");
                 return;
             }
 
@@ -99,7 +99,7 @@
                 MessageType = "danger";
                 MessageText = BuildStudentExamConflictMessage(
                     studentConflicts,
-                    "����ʱ���ͻ������ѧ���ڸ�ʱ�������������ԣ�");
+                    "考试时间冲突！以下学生在该时段已有其他考试：");
                 return;
             }
 
@@ -115,7 +115,7 @@
             db.Exams.Add(exam);
             db.SaveChanges();
 
-            Response.Redirect("ExamList.aspx?msg=" + Server.UrlEncode("���԰��Ŵ����ɹ���"), true);
+            Response.Redirect("ExamList.aspx?msg=" + Server.UrlEncode("考试安排创建成功。"), true);
         }
     }
 
@@ -170,12 +170,12 @@
 
     private string BuildTeacherExamConflictMessage(IEnumerable<Exams> conflicts, string prefix)
     {
-        return prefix + " " + string.Join("��", conflicts.Select(e => (e.Courses == null ? "δ֪�γ�" : e.Courses.CourseName) + "��" + e.StartTime.ToString("yyyy-MM-dd HH:mm") + " - " + e.EndTime.ToString("HH:mm") + "��"));
+        return prefix + " " + string.Join("；", conflicts.Select(e => (e.Courses == null ? "未知课程" : e.Courses.CourseName) + "（" + e.StartTime.ToString("yyyy-MM-dd HH:mm") + " - " + e.EndTime.ToString("HH:mm") + "）"));
     }
 
     private string BuildStudentExamConflictMessage(IEnumerable<string> conflicts, string prefix)
     {
-        return prefix + " " + string.Join("��", conflicts);
+        return prefix + " " + string.Join("；", conflicts);
     }
 </script>
 
@@ -196,7 +196,7 @@
         })();
     
 </script>
-    <title>�����¿���</title>
+    <title>添加新考试</title>
     <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
     <link href="<%= ResolveUrl("~/Content/theme-system.css") %>" rel="stylesheet" />
     <link href="<%= ResolveUrl("~/Content/webforms-student-layout.css") %>" rel="stylesheet" />
@@ -206,35 +206,35 @@
         <div class="sidebar-overlay"></div>
         <aside class="sidebar">
             <div class="sidebar-header">
-                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="У��" class="sidebar-logo-img" />
+                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="校徽" class="sidebar-logo-img" />
             </div>
             <ul class="sidebar-menu">
-                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">��ҳ</a></li>
-                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">�ҵĿα�</a></li>
-                <li><a class="<%= Active("CourseList.aspx") %>" href="CourseList.aspx">�ɼ�¼��</a></li>
-                <li><a class="<%= Active("ExamList.aspx") %>" href="ExamList.aspx">���Թ���</a></li>
-                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">�޸�����</a></li>
+                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">首页</a></li>
+                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">我的课表</a></li>
+                <li><a class="<%= Active("CourseList.aspx") %>" href="CourseList.aspx">成绩录入</a></li>
+                <li><a class="<%= Active("ExamList.aspx") %>" href="ExamList.aspx">考试管理</a></li>
+                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">修改密码</a></li>
             </ul>
         </aside>
 
         <div class="main-content">
             <header class="header-bar">
                 <div class="header-left">
-                    <button class="hamburger-menu" type="button" aria-label="�˵�">&#9776;</button>
+                    <button class="hamburger-menu" type="button" aria-label="菜单">&#9776;</button>
                 </div>
                 <div class="header-right">
-                    <button class='dark-toggle-btn' type='button'>��ɫģʽ</button>
+                    <button class='dark-toggle-btn' type='button'>暗色模式</button>
                     <div class="user-info">
-                        <span class="username">��ӭ��, <%= (Session["DisplayName"] as string) ?? ((Session["User"] as Users)?.Username ?? "��ʦ") %></span>
+                        <span class="username">欢迎您, <%= (Session["DisplayName"] as string) ?? ((Session["User"] as Users)?.Username ?? "教师") %></span>
                         <span class="sep">|</span>
-                        <a class="logout-link" href="../Logout.aspx">��ȫ�˳�</a>
+                        <a class="logout-link" href="../Logout.aspx">安全退出</a>
                     </div>
                 </div>
             </header>
 
             <main class="content-body">
                 <div class="container-fluid">
-                    <h2>�����¿���</h2>
+                    <h2>添加新考试</h2>
                     <hr />
 
                     <% if (!string.IsNullOrEmpty(MessageText)) { %>
@@ -243,10 +243,10 @@
 
                     <form method="post" class="form-horizontal" style="max-width: 820px;">
                         <div class="form-group">
-                            <label class="control-label col-md-2">�γ�����</label>
+                            <label class="control-label col-md-2">课程名称</label>
                             <div class="col-md-10">
                                 <select class="form-control" name="CourseID" required>
-                                    <option value="">--��ѡ��γ�--</option>
+                                    <option value="">--请选择课程--</option>
                                     <% foreach (var c in TeacherCourses) { %>
                                         <option value="<%= c.CourseID %>" <%= c.CourseID == FormCourseId ? "selected" : "" %>><%= c.CourseName %></option>
                                     <% } %>
@@ -255,7 +255,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="control-label col-md-2">����ʱ��</label>
+                            <label class="control-label col-md-2">考试时间</label>
                             <div class="col-md-10">
                                 <input class="form-control" type="datetime-local" name="StartTime" value="<%= FormStartTime %>" required />
                             </div>
@@ -269,14 +269,14 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="control-label col-md-2">���Եص�</label>
+                            <label class="control-label col-md-2">考试地点</label>
                             <div class="col-md-10">
                                 <input class="form-control" name="Location" value="<%= FormLocation %>" required />
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="control-label col-md-2">��ע</label>
+                            <label class="control-label col-md-2">备注</label>
                             <div class="col-md-10">
                                 <input class="form-control" name="Details" value="<%= FormDetails %>" />
                             </div>
@@ -284,8 +284,8 @@
 
                         <div class="form-group">
                             <div class="col-md-offset-2 col-md-10">
-                                <button type="submit" class="btn btn-success">����</button>
-                                <a class="btn btn-default" href="ExamList.aspx">�����б�</a>
+                                <button type="submit" class="btn btn-success">创建</button>
+                                <a class="btn btn-default" href="ExamList.aspx">返回列表</a>
                             </div>
                         </div>
                     </form>
