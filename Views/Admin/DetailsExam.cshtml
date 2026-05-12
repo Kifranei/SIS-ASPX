@@ -4,14 +4,14 @@
     ViewBag.Title = "DetailsExam";
 }
 
-<h2>¿¼ÊÔÏêÇé</h2>
+<h2>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</h2>
 
 <div>
     <h4>@Model.Courses.CourseName</h4>
     <hr />
     <dl class="dl-horizontal">
         <dt>
-            ¿Î³ÌÃû³Æ
+            ï¿½Î³ï¿½ï¿½ï¿½ï¿½ï¿½
         </dt>
 
         <dd>
@@ -19,15 +19,15 @@
         </dd>
 
         <dt>
-            ¿¼ÊÔÊ±¼ä
+            ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.ExamTime)
+            @Model.StartTime.ToString("yyyy-MM-dd HH:mm") - @Model.EndTime.ToString("HH:mm")
         </dd>
 
         <dt>
-            ¿¼ÊÔµØµã
+            ï¿½ï¿½ï¿½ÔµØµï¿½
         </dt>
 
         <dd>
@@ -35,7 +35,7 @@
         </dd>
 
         <dt>
-            ±¸×¢
+            ï¿½ï¿½×¢
         </dt>
 
         <dd>
@@ -45,6 +45,6 @@
     </dl>
 </div>
 <p>
-    @Html.ActionLink("±à¼­", "EditExam", new { id = Model.ExamID }, new { @class = "btn btn-primary" }) |
-    @Html.ActionLink("·µ»ØÁÐ±í", "ExamList", null, new { @class = "btn btn-default" })
+    @Html.ActionLink("ï¿½à¼­", "EditExam", new { id = Model.ExamID }, new { @class = "btn btn-primary" }) |
+    @Html.ActionLink("ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "ExamList", null, new { @class = "btn btn-default" })
 </p>

@@ -11,7 +11,8 @@ namespace StudentInformationSystem.Helpers
         public string StudentID { get; set; }
         public string StudentName { get; set; }
         public string CourseName { get; set; }
-        public DateTime ExamTime { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
     }
 
     public static class ExamConflictHelper
@@ -19,7 +20,8 @@ namespace StudentInformationSystem.Helpers
         public static List<Exams> GetTeacherExamConflicts(
             StudentManagementDBEntities db,
             string teacherId,
-            DateTime examTime,
+            DateTime startTime,
+            DateTime endTime,
             int? excludeExamId = null)
         {
             if (db == null || string.IsNullOrWhiteSpace(teacherId))
@@ -29,7 +31,7 @@ namespace StudentInformationSystem.Helpers
 
             var query = db.Exams
                 .Include("Courses")
-                .Where(e => e.Courses.TeacherID == teacherId && e.ExamTime == examTime);
+                .Where(e => e.Courses.TeacherID == teacherId && e.StartTime < endTime && e.EndTime > startTime);
 
             if (excludeExamId.HasValue)
             {
@@ -43,7 +45,8 @@ namespace StudentInformationSystem.Helpers
         public static List<StudentExamConflictInfo> GetStudentExamConflictsForCourse(
             StudentManagementDBEntities db,
             int courseId,
-            DateTime examTime,
+            DateTime startTime,
+            DateTime endTime,
             int? excludeExamId = null)
         {
             if (db == null || courseId <= 0)
@@ -64,7 +67,7 @@ namespace StudentInformationSystem.Helpers
 
             var query = db.Exams
                 .Include("Courses")
-                .Where(e => e.ExamTime == examTime && e.CourseID != courseId);
+                .Where(e => e.StartTime < endTime && e.EndTime > startTime && e.CourseID != courseId);
 
             if (excludeExamId.HasValue)
             {
@@ -100,12 +103,13 @@ namespace StudentInformationSystem.Helpers
                     StudentID = enrollment.StudentID,
                     StudentName = enrollment.Students == null ? enrollment.StudentID : enrollment.Students.StudentName,
                     CourseName = conflictExam.Courses == null ? "未知课程" : conflictExam.Courses.CourseName,
-                    ExamTime = conflictExam.ExamTime
+                    StartTime = conflictExam.StartTime,
+                    EndTime = conflictExam.EndTime
                 });
             }
 
             return conflicts
-                .GroupBy(c => new { c.StudentID, c.CourseName, c.ExamTime })
+                .GroupBy(c => new { c.StudentID, c.CourseName, c.StartTime, c.EndTime })
                 .Select(g => g.First())
                 .OrderBy(c => c.StudentID)
                 .ThenBy(c => c.CourseName)
@@ -121,7 +125,7 @@ namespace StudentInformationSystem.Helpers
             }
 
             string description = string.Join("；", conflictList.Select(e =>
-                $"{(e.Courses == null ? "课程" : e.Courses.CourseName)}({e.ExamTime:yyyy-MM-dd HH:mm})"));
+                $"{(e.Courses == null ? "课程" : e.Courses.CourseName)}({e.StartTime:yyyy-MM-dd HH:mm} - {e.EndTime:HH:mm})"));
             return prefix + description;
         }
 
@@ -135,7 +139,7 @@ namespace StudentInformationSystem.Helpers
 
             string description = string.Join("；", conflictList
                 .Take(5)
-                .Select(c => $"{(string.IsNullOrWhiteSpace(c.StudentName) ? c.StudentID : c.StudentName)} 与 {c.CourseName}({c.ExamTime:yyyy-MM-dd HH:mm})"));
+                .Select(c => $"{(string.IsNullOrWhiteSpace(c.StudentName) ? c.StudentID : c.StudentName)} 与 {c.CourseName}({c.StartTime:yyyy-MM-dd HH:mm} - {c.EndTime:HH:mm})"));
 
             if (conflictList.Count > 5)
             {

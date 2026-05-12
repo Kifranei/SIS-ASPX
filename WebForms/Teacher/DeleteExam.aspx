@@ -31,7 +31,7 @@
         if (ExamId <= 0)
         {
             MessageType = "danger";
-            MessageText = "ÎÞÐ§µÄ¿¼ÊÔ²ÎÊý¡£";
+            MessageText = "ï¿½ï¿½Ð§ï¿½Ä¿ï¿½ï¿½Ô²ï¿½ï¿½ï¿½ï¿½ï¿½";
             return;
         }
 
@@ -50,7 +50,7 @@
             {
                 CurrentExam = null;
                 MessageType = "danger";
-                MessageText = "¿¼ÊÔ¼ÇÂ¼²»´æÔÚ»ò²»ÊôÓÚµ±Ç°½ÌÊ¦¡£";
+                MessageText = "ï¿½ï¿½ï¿½Ô¼ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½Ú»ï¿½ï¿½ï¿½ï¿½Úµï¿½Ç°ï¿½ï¿½Ê¦ï¿½ï¿½";
                 return;
             }
 
@@ -58,7 +58,7 @@
             {
                 db.Exams.Remove(CurrentExam);
                 db.SaveChanges();
-                Response.Redirect("ExamList.aspx?msg=" + Server.UrlEncode("¿¼ÊÔ°²ÅÅÉ¾³ý³É¹¦¡£"), true);
+                Response.Redirect("ExamList.aspx?msg=" + Server.UrlEncode("ï¿½ï¿½ï¿½Ô°ï¿½ï¿½ï¿½É¾ï¿½ï¿½ï¿½É¹ï¿½ï¿½ï¿½"), true);
             }
         }
     }
@@ -86,7 +86,7 @@
             }
         })();
     </script>
-    <title>É¾³ý¿¼ÊÔ</title>
+    <title>É¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</title>
     <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
     <link href="<%= ResolveUrl("~/Content/theme-system.css") %>" rel="stylesheet" />
     <link href="<%= ResolveUrl("~/Content/webforms-student-layout.css") %>" rel="stylesheet" />
@@ -96,61 +96,61 @@
         <div class="sidebar-overlay"></div>
         <aside class="sidebar">
             <div class="sidebar-header">
-                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="Ð£»Õ" class="sidebar-logo-img" />
+                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="Ð£ï¿½ï¿½" class="sidebar-logo-img" />
             </div>
             <ul class="sidebar-menu">
-                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">Ê×Ò³</a></li>
-                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">ÎÒµÄ¿Î±í</a></li>
-                <li><a class="<%= Active("CourseList.aspx") %>" href="CourseList.aspx">³É¼¨Â¼Èë</a></li>
-                <li><a class="<%= Active("ExamList.aspx") %>" href="ExamList.aspx">¿¼ÊÔ¹ÜÀí</a></li>
-                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">ÐÞ¸ÄÃÜÂë</a></li>
+                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">ï¿½ï¿½Ò³</a></li>
+                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">ï¿½ÒµÄ¿Î±ï¿½</a></li>
+                <li><a class="<%= Active("CourseList.aspx") %>" href="CourseList.aspx">ï¿½É¼ï¿½Â¼ï¿½ï¿½</a></li>
+                <li><a class="<%= Active("ExamList.aspx") %>" href="ExamList.aspx">ï¿½ï¿½ï¿½Ô¹ï¿½ï¿½ï¿½</a></li>
+                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">ï¿½Þ¸ï¿½ï¿½ï¿½ï¿½ï¿½</a></li>
             </ul>
         </aside>
 
         <div class="main-content">
             <header class="header-bar">
                 <div class="header-left">
-                    <button class="hamburger-menu" type="button" aria-label="²Ëµ¥">&#9776;</button>
+                    <button class="hamburger-menu" type="button" aria-label="ï¿½Ëµï¿½">&#9776;</button>
                 </div>
                 <div class="header-right">
-                    <button class='dark-toggle-btn' type='button'>°µÉ«Ä£Ê½</button>
+                    <button class='dark-toggle-btn' type='button'>ï¿½ï¿½É«Ä£Ê½</button>
                     <div class="user-info">
-                        <span class="username">»¶Ó­Äú, <%= (Session["DisplayName"] as string) ?? ((Session["User"] as Users)?.Username ?? "½ÌÊ¦") %></span>
+                        <span class="username">ï¿½ï¿½Ó­ï¿½ï¿½, <%= (Session["DisplayName"] as string) ?? ((Session["User"] as Users)?.Username ?? "ï¿½ï¿½Ê¦") %></span>
                         <span class="sep">|</span>
-                        <a class="logout-link" href="../Logout.aspx">°²È«ÍË³ö</a>
+                        <a class="logout-link" href="../Logout.aspx">ï¿½ï¿½È«ï¿½Ë³ï¿½</a>
                     </div>
                 </div>
             </header>
 
             <main class="content-body">
                 <div class="container-fluid">
-                    <h2>É¾³ý¿¼ÊÔ</h2>
+                    <h2>É¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</h2>
 
                     <% if (!string.IsNullOrEmpty(MessageText)) { %>
                         <div class="alert alert-<%= MessageType %>"><%= MessageText %></div>
                     <% } %>
 
                     <% if (CurrentExam != null) { %>
-                        <h3>ÄúÈ·¶¨ÒªÉ¾³ýÕâÌõ¿¼ÊÔ°²ÅÅÂð£¿</h3>
+                        <h3>ï¿½ï¿½È·ï¿½ï¿½ÒªÉ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô°ï¿½ï¿½ï¿½ï¿½ï¿½</h3>
                         <div>
                             <h4><%= CurrentExam.Courses == null ? "-" : CurrentExam.Courses.CourseName %></h4>
                             <hr />
                             <dl class="dl-horizontal">
-                                <dt>¿Î³ÌÃû³Æ</dt>
+                                <dt>ï¿½Î³ï¿½ï¿½ï¿½ï¿½ï¿½</dt>
                                 <dd><%= CurrentExam.Courses == null ? "-" : CurrentExam.Courses.CourseName %></dd>
-                                <dt>¿¼ÊÔÊ±¼ä</dt>
-                                <dd><%= CurrentExam.ExamTime.ToString("yyyy-MM-dd HH:mm") %></dd>
-                                <dt>¿¼ÊÔµØµã</dt>
+                                <dt>ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½</dt>
+                                <dd><%= CurrentExam.StartTime.ToString("yyyy-MM-dd HH:mm") + " - " + CurrentExam.EndTime.ToString("HH:mm") %></dd>
+                                <dt>ï¿½ï¿½ï¿½ÔµØµï¿½</dt>
                                 <dd><%= CurrentExam.Location %></dd>
                             </dl>
                             <form method="post">
                                 <input type="hidden" name="id" value="<%= ExamId %>" />
-                                <button type="submit" class="btn btn-danger">È·ÈÏÉ¾³ý</button>
-                                <a class="btn btn-default" href="ExamList.aspx">·µ»ØÁÐ±í</a>
+                                <button type="submit" class="btn btn-danger">È·ï¿½ï¿½É¾ï¿½ï¿½</button>
+                                <a class="btn btn-default" href="ExamList.aspx">ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½</a>
                             </form>
                         </div>
                     <% } else { %>
-                        <a class="btn btn-default" href="ExamList.aspx">·µ»ØÁÐ±í</a>
+                        <a class="btn btn-default" href="ExamList.aspx">ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½</a>
                     <% } %>
                 </div>
             </main>

@@ -7,7 +7,7 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "¿¼ÊÔÏêÇé";
+        PageTitle = "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½";
         if (!EnsureAdminRole())
         {
             return;
@@ -16,7 +16,7 @@
         int id;
         if (!int.TryParse(Request.QueryString["id"], out id) || id <= 0)
         {
-            MessageText = "¿¼ÊÔ²ÎÊýÎÞÐ§¡£";
+            MessageText = "ï¿½ï¿½ï¿½Ô²ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½";
             return;
         }
 
@@ -27,14 +27,14 @@
 
         if (CurrentExam == null)
         {
-            MessageText = "¿¼ÊÔ¼ÇÂ¼²»´æÔÚ¡£";
+            MessageText = "ï¿½ï¿½ï¿½Ô¼ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½Ú¡ï¿½";
         }
     }
 </script>
 
 <!--#include file="_AdminLayoutTop.inc" -->
 
-<h2>¿¼ÊÔÏêÇé</h2>
+<h2>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</h2>
 
 <% if (!string.IsNullOrEmpty(MessageText)) { %>
     <div class="alert alert-danger"><%= H(MessageText) %></div>
@@ -43,22 +43,22 @@
         <h4><%= CurrentExam.Courses == null ? "-" : H(CurrentExam.Courses.CourseName) %></h4>
         <hr />
         <dl class="dl-horizontal">
-            <dt>¿Î³ÌÃû³Æ</dt>
+            <dt>ï¿½Î³ï¿½ï¿½ï¿½ï¿½ï¿½</dt>
             <dd><%= CurrentExam.Courses == null ? "-" : H(CurrentExam.Courses.CourseName) %></dd>
 
-            <dt>¿¼ÊÔÊ±¼ä</dt>
-            <dd><%= CurrentExam.ExamTime.ToString("yyyy-MM-dd HH:mm") %></dd>
+            <dt>ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½</dt>
+            <dd><%= CurrentExam.StartTime.ToString("yyyy-MM-dd HH:mm") + " - " + CurrentExam.EndTime.ToString("HH:mm") %></dd>
 
-            <dt>¿¼ÊÔµØµã</dt>
+            <dt>ï¿½ï¿½ï¿½ÔµØµï¿½</dt>
             <dd><%= H(CurrentExam.Location) %></dd>
 
-            <dt>±¸×¢</dt>
+            <dt>ï¿½ï¿½×¢</dt>
             <dd><%= H(CurrentExam.Details) %></dd>
         </dl>
     </div>
     <p>
-        <a class="btn btn-primary" href='EditExam.aspx?id=<%= CurrentExam.ExamID %>'>±à¼­</a>
-        <a class="btn btn-default" href="ExamList.aspx">·µ»ØÁÐ±í</a>
+        <a class="btn btn-primary" href='EditExam.aspx?id=<%= CurrentExam.ExamID %>'>ï¿½à¼­</a>
+        <a class="btn btn-default" href="ExamList.aspx">ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½</a>
     </p>
 <% } %>
 

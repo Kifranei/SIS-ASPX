@@ -32,7 +32,7 @@
             var taughtCourseIds = db.Courses.Where(c => c.TeacherID == teacher.TeacherID).Select(c => c.CourseID).ToList();
             ExamsList = db.Exams.Include("Courses")
                 .Where(ei => taughtCourseIds.Contains(ei.CourseID))
-                .OrderBy(ei => ei.ExamTime)
+                .OrderBy(ei => ei.StartTime)
                 .ToList();
         }
     }
@@ -60,7 +60,7 @@
             }
         })();
     </script>
-    <title>¿¼ÊÔ°²ÅÅÁÐ±í</title>
+    <title>ï¿½ï¿½ï¿½Ô°ï¿½ï¿½ï¿½ï¿½Ð±ï¿½</title>
     <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet" />
     <link href="<%= ResolveUrl("~/Content/theme-system.css") %>" rel="stylesheet" />
     <link href="<%= ResolveUrl("~/Content/webforms-student-layout.css") %>" rel="stylesheet" />
@@ -70,28 +70,28 @@
         <div class="sidebar-overlay"></div>
         <aside class="sidebar">
             <div class="sidebar-header">
-                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="Ð£»Õ" class="sidebar-logo-img" />
+                <img src="https://jwgl.hrbzy.edu.cn:9081/style04/images/logo.png" height="35" alt="Ð£ï¿½ï¿½" class="sidebar-logo-img" />
             </div>
             <ul class="sidebar-menu">
-                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">Ê×Ò³</a></li>
-                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">ÎÒµÄ¿Î±í</a></li>
-                <li><a class="<%= Active("CourseList.aspx") %>" href="CourseList.aspx">³É¼¨Â¼Èë</a></li>
-                <li><a class="<%= Active("ExamList.aspx") %>" href="ExamList.aspx">¿¼ÊÔ¹ÜÀí</a></li>
-                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">ÐÞ¸ÄÃÜÂë</a></li>
+                <li><a class="<%= Active("Index.aspx") %>" href="Index.aspx">ï¿½ï¿½Ò³</a></li>
+                <li><a class="<%= Active("Timetable.aspx") %>" href="Timetable.aspx">ï¿½ÒµÄ¿Î±ï¿½</a></li>
+                <li><a class="<%= Active("CourseList.aspx") %>" href="CourseList.aspx">ï¿½É¼ï¿½Â¼ï¿½ï¿½</a></li>
+                <li><a class="<%= Active("ExamList.aspx") %>" href="ExamList.aspx">ï¿½ï¿½ï¿½Ô¹ï¿½ï¿½ï¿½</a></li>
+                <li><a class="<%= Active("ChangePassword.aspx") %>" href="ChangePassword.aspx">ï¿½Þ¸ï¿½ï¿½ï¿½ï¿½ï¿½</a></li>
             </ul>
         </aside>
 
         <div class="main-content">
             <header class="header-bar">
                 <div class="header-left">
-                    <button class="hamburger-menu" type="button" aria-label="²Ëµ¥">&#9776;</button>
+                    <button class="hamburger-menu" type="button" aria-label="ï¿½Ëµï¿½">&#9776;</button>
                 </div>
                 <div class="header-right">
-                    <button class='dark-toggle-btn' type='button'>°µÉ«Ä£Ê½</button>
+                    <button class='dark-toggle-btn' type='button'>ï¿½ï¿½É«Ä£Ê½</button>
                     <div class="user-info">
-                        <span class="username">»¶Ó­Äú, <%= (Session["DisplayName"] as string) ?? ((Session["User"] as Users)?.Username ?? "½ÌÊ¦") %></span>
+                        <span class="username">ï¿½ï¿½Ó­ï¿½ï¿½, <%= (Session["DisplayName"] as string) ?? ((Session["User"] as Users)?.Username ?? "ï¿½ï¿½Ê¦") %></span>
                         <span class="sep">|</span>
-                        <a class="logout-link" href="../Logout.aspx">°²È«ÍË³ö</a>
+                        <a class="logout-link" href="../Logout.aspx">ï¿½ï¿½È«ï¿½Ë³ï¿½</a>
                     </div>
                 </div>
             </header>
@@ -102,17 +102,17 @@
                         <div class="alert alert-success"><%= Server.HtmlEncode(FlashMessage) %></div>
                     <% } %>
 
-                    <h2>¿¼ÊÔ°²ÅÅÁÐ±í</h2>
-                    <p><a class="btn btn-primary" href="AddExam.aspx">Ìí¼ÓÐÂ¿¼ÊÔ</a></p>
+                    <h2>ï¿½ï¿½ï¿½Ô°ï¿½ï¿½ï¿½ï¿½Ð±ï¿½</h2>
+                    <p><a class="btn btn-primary" href="AddExam.aspx">ï¿½ï¿½ï¿½ï¿½ï¿½Â¿ï¿½ï¿½ï¿½</a></p>
 
                     <div class="table-responsive">
                         <table class="table table-striped table-bordered">
                             <thead>
                                 <tr>
-                                    <th>¿Î³ÌÃû³Æ</th>
-                                    <th>¿¼ÊÔÊ±¼ä</th>
-                                    <th>¿¼ÊÔµØµã</th>
-                                    <th>²Ù×÷</th>
+                                    <th>ï¿½Î³ï¿½ï¿½ï¿½ï¿½ï¿½</th>
+                                    <th>ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½</th>
+                                    <th>ï¿½ï¿½ï¿½ÔµØµï¿½</th>
+                                    <th>ï¿½ï¿½ï¿½ï¿½</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -120,17 +120,17 @@
                                     <% foreach (var item in ExamsList) { %>
                                         <tr>
                                             <td><%= item.Courses == null ? "-" : item.Courses.CourseName %></td>
-                                            <td><%= item.ExamTime.ToString("yyyy-MM-dd HH:mm") %></td>
+                                            <td><%= item.StartTime.ToString("yyyy-MM-dd HH:mm") + " - " + item.EndTime.ToString("HH:mm") %></td>
                                             <td><%= item.Location %></td>
                                             <td>
-                                                <a href="EditExam.aspx?id=<%= item.ExamID %>">±à¼­</a> |
-                                                <a href="DetailsExam.aspx?id=<%= item.ExamID %>">ÏêÇé</a> |
-                                                <a href="DeleteExam.aspx?id=<%= item.ExamID %>">É¾³ý</a>
+                                                <a href="EditExam.aspx?id=<%= item.ExamID %>">ï¿½à¼­</a> |
+                                                <a href="DetailsExam.aspx?id=<%= item.ExamID %>">ï¿½ï¿½ï¿½ï¿½</a> |
+                                                <a href="DeleteExam.aspx?id=<%= item.ExamID %>">É¾ï¿½ï¿½</a>
                                             </td>
                                         </tr>
                                     <% } %>
                                 <% } else { %>
-                                    <tr><td colspan="4" class="text-center text-muted">ÔÝÎÞ¿¼ÊÔ°²ÅÅ¡£</td></tr>
+                                    <tr><td colspan="4" class="text-center text-muted">ï¿½ï¿½ï¿½Þ¿ï¿½ï¿½Ô°ï¿½ï¿½Å¡ï¿½</td></tr>
                                 <% } %>
                             </tbody>
                         </table>

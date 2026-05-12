@@ -4,7 +4,7 @@
     ViewBag.Title = "AddExam";
 }
 
-<h2>Ìí¼ÓĞÂ¿¼ÊÔ</h2>
+<h2>ï¿½ï¿½ï¿½ï¿½ï¿½Â¿ï¿½ï¿½ï¿½</h2>
 
 
 @using (Html.BeginForm()) 
@@ -12,28 +12,35 @@
     @Html.AntiForgeryToken()
     
     <div class="form-horizontal">
-        <h4>¿¼ÊÔĞÅÏ¢</h4>
+        <h4>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢</h4>
         <hr />
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         <div class="form-group">
-            @Html.LabelFor(model => model.CourseID, "¿Î³ÌÃû³Æ", htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.LabelFor(model => model.CourseID, "ï¿½Î³ï¿½ï¿½ï¿½ï¿½ï¿½", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.DropDownList("CourseID", null, "--ÇëÑ¡Ôñ¿Î³Ì--", htmlAttributes: new { @class = "form-control" })
+                @Html.DropDownList("CourseID", null, "--ï¿½ï¿½Ñ¡ï¿½ï¿½Î³ï¿½--", htmlAttributes: new { @class = "form-control" })
                 @Html.ValidationMessageFor(model => model.CourseID, "", new { @class = "text-danger" })
             </div>
         </div>
 
         <div class="form-group">
-            @Html.LabelFor(model => model.ExamTime, "¿¼ÊÔÊ±¼ä", htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.LabelFor(model => model.StartTime, "è€ƒè¯•å¼€å§‹æ—¶é—´", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @* Ê¹ÓÃ datetime-local ÀàĞÍÒÔÏÔÊ¾·½±ãµÄÈÕÆÚÊ±¼äÑ¡ÔñÆ÷ *@
-                @Html.EditorFor(model => model.ExamTime, new { htmlAttributes = new { @class = "form-control", type = "datetime-local" } })
-                @Html.ValidationMessageFor(model => model.ExamTime, "", new { @class = "text-danger" })
+                @Html.EditorFor(model => model.StartTime, new { htmlAttributes = new { @class = "form-control", type = "datetime-local" } })
+                @Html.ValidationMessageFor(model => model.StartTime, "", new { @class = "text-danger" })
             </div>
         </div>
 
         <div class="form-group">
-            @Html.LabelFor(model => model.Location, "¿¼ÊÔµØµã", htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.LabelFor(model => model.EndTime, "è€ƒè¯•ç»“æŸæ—¶é—´", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.EndTime, new { htmlAttributes = new { @class = "form-control", type = "datetime-local" } })
+                @Html.ValidationMessageFor(model => model.EndTime, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Location, "ï¿½ï¿½ï¿½ÔµØµï¿½", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 @Html.EditorFor(model => model.Location, new { htmlAttributes = new { @class = "form-control" } })
                 @Html.ValidationMessageFor(model => model.Location, "", new { @class = "text-danger" })
@@ -41,7 +48,7 @@
         </div>
 
         <div class="form-group">
-            @Html.LabelFor(model => model.Details, "±¸×¢", htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.LabelFor(model => model.Details, "ï¿½ï¿½×¢", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 @Html.EditorFor(model => model.Details, new { htmlAttributes = new { @class = "form-control" } })
                 @Html.ValidationMessageFor(model => model.Details, "", new { @class = "text-danger" })
@@ -50,8 +57,8 @@
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="´´½¨" class="btn btn-success" />
-                @Html.ActionLink("·µ»ØÁĞ±í", "ExamList", null, new { @class = "btn btn-default" })
+                <input type="submit" value="ï¿½ï¿½ï¿½ï¿½" class="btn btn-success" />
+                @Html.ActionLink("ï¿½ï¿½ï¿½ï¿½ï¿½Ğ±ï¿½", "ExamList", null, new { @class = "btn btn-default" })
             </div>
         </div>
     </div>

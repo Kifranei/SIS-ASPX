@@ -7,7 +7,7 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "É¾³ý¿¼ÊÔ";
+        PageTitle = "É¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½";
         if (!EnsureAdminRole())
         {
             return;
@@ -16,7 +16,7 @@
         int id;
         if (!int.TryParse(Request.QueryString["id"] ?? Request.Form["ExamID"], out id) || id <= 0)
         {
-            MessageText = "¿¼ÊÔ²ÎÊýÎÞÐ§¡£";
+            MessageText = "ï¿½ï¿½ï¿½Ô²ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½";
             return;
         }
 
@@ -25,7 +25,7 @@
             CurrentExam = db.Exams.Include("Courses").FirstOrDefault(ei => ei.ExamID == id);
             if (CurrentExam == null)
             {
-                MessageText = "¿¼ÊÔ¼ÇÂ¼²»´æÔÚ¡£";
+                MessageText = "ï¿½ï¿½ï¿½Ô¼ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½Ú¡ï¿½";
                 return;
             }
 
@@ -41,30 +41,30 @@
 
 <!--#include file="_AdminLayoutTop.inc" -->
 
-<h2>É¾³ý¿¼ÊÔ</h2>
+<h2>É¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</h2>
 
 <% if (!string.IsNullOrEmpty(MessageText)) { %>
     <div class="alert alert-danger"><%= H(MessageText) %></div>
 <% } else { %>
-    <h3>ÄúÈ·¶¨ÒªÉ¾³ýÕâÌõ¿¼ÊÔ°²ÅÅÂð£¿</h3>
+    <h3>ï¿½ï¿½È·ï¿½ï¿½ÒªÉ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô°ï¿½ï¿½ï¿½ï¿½ï¿½</h3>
     <div>
         <h4><%= CurrentExam.Courses == null ? "-" : H(CurrentExam.Courses.CourseName) %></h4>
         <hr />
         <dl class="dl-horizontal">
-            <dt>¿Î³ÌÃû³Æ</dt>
+            <dt>ï¿½Î³ï¿½ï¿½ï¿½ï¿½ï¿½</dt>
             <dd><%= CurrentExam.Courses == null ? "-" : H(CurrentExam.Courses.CourseName) %></dd>
 
-            <dt>¿¼ÊÔÊ±¼ä</dt>
-            <dd><%= CurrentExam.ExamTime.ToString("yyyy-MM-dd HH:mm") %></dd>
+            <dt>ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½</dt>
+            <dd><%= CurrentExam.StartTime.ToString("yyyy-MM-dd HH:mm") + " - " + CurrentExam.EndTime.ToString("HH:mm") %></dd>
 
-            <dt>¿¼ÊÔµØµã</dt>
+            <dt>ï¿½ï¿½ï¿½ÔµØµï¿½</dt>
             <dd><%= H(CurrentExam.Location) %></dd>
         </dl>
 
         <form method="post" class="form-actions no-color">
             <input type="hidden" name="ExamID" value="<%= CurrentExam.ExamID %>" />
-            <button type="submit" class="btn btn-danger">È·ÈÏÉ¾³ý</button>
-            <a class="btn btn-default" href="ExamList.aspx">·µ»ØÁÐ±í</a>
+            <button type="submit" class="btn btn-danger">È·ï¿½ï¿½É¾ï¿½ï¿½</button>
+            <a class="btn btn-default" href="ExamList.aspx">ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½</a>
         </form>
     </div>
 <% } %>

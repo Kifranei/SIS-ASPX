@@ -7,13 +7,14 @@
     protected List<Courses> CourseOptions = new List<Courses>();
 
     protected string FormCourseID = string.Empty;
-    protected string FormExamTime = string.Empty;
+    protected string FormStartTime = string.Empty;
+    protected string FormEndTime = string.Empty;
     protected string FormLocation = string.Empty;
     protected string FormDetails = string.Empty;
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        PageTitle = "Ìí¼ÓĞÂ¿¼ÊÔ";
+        PageTitle = "ï¿½ï¿½ï¿½ï¿½ï¿½Â¿ï¿½ï¿½ï¿½";
         if (!EnsureAdminRole())
         {
             return;
@@ -22,7 +23,8 @@
         if (Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase))
         {
             FormCourseID = (Request.Form["CourseID"] ?? string.Empty).Trim();
-            FormExamTime = (Request.Form["ExamTime"] ?? string.Empty).Trim();
+            FormStartTime = (Request.Form["StartTime"] ?? string.Empty).Trim();
+            FormEndTime = (Request.Form["EndTime"] ?? string.Empty).Trim();
             FormLocation = (Request.Form["Location"] ?? string.Empty).Trim();
             FormDetails = (Request.Form["Details"] ?? string.Empty).Trim();
             SaveExam();
@@ -37,10 +39,11 @@
     private void SaveExam()
     {
         int courseId;
-        DateTime examTime;
-        if (!int.TryParse(FormCourseID, out courseId) || !DateTime.TryParse(FormExamTime, out examTime) || string.IsNullOrWhiteSpace(FormLocation))
+        DateTime startTime;
+        DateTime endTime;
+        if (!int.TryParse(FormCourseID, out courseId) || !DateTime.TryParse(FormStartTime, out startTime) || !DateTime.TryParse(FormEndTime, out endTime) || endTime <= startTime || string.IsNullOrWhiteSpace(FormLocation))
         {
-            MessageText = "ÇëÕıÈ·ÌîĞ´¿Î³Ì¡¢¿¼ÊÔÊ±¼äºÍ¿¼ÊÔµØµã¡£";
+            MessageText = "ï¿½ï¿½ï¿½ï¿½È·ï¿½ï¿½Ğ´ï¿½Î³Ì¡ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Í¿ï¿½ï¿½ÔµØµã¡£";
             return;
         }
 
@@ -49,38 +52,41 @@
             var course = db.Courses.Find(courseId);
             if (course == null)
             {
-                MessageText = "¿Î³Ì²»´æÔÚ¡£";
+                MessageText = "ï¿½Î³Ì²ï¿½ï¿½ï¿½ï¿½Ú¡ï¿½";
                 return;
             }
 
             var examTeacherConflicts = GetTeacherExamConflicts(
                 db,
                 course == null ? null : course.TeacherID,
-                examTime);
+                startTime,
+                endTime);
             if (examTeacherConflicts.Any())
             {
                 MessageText = BuildTeacherExamConflictMessage(
                     examTeacherConflicts,
-                    "¿¼ÊÔÊ±¼ä³åÍ»£¡¸Ã½ÌÊ¦ÔÚ¸ÃÊ±¶ÎÒÑÓĞÒÔÏÂ¿¼ÊÔ°²ÅÅ£º");
+                    "ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Í»ï¿½ï¿½ï¿½Ã½ï¿½Ê¦ï¿½Ú¸ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¿ï¿½ï¿½Ô°ï¿½ï¿½Å£ï¿½");
                 return;
             }
 
             var studentConflicts = GetStudentExamConflictsForCourse(
                 db,
                 courseId,
-                examTime);
+                startTime,
+                endTime);
             if (studentConflicts.Any())
             {
                 MessageText = BuildStudentExamConflictMessage(
                     studentConflicts,
-                    "¿¼ÊÔÊ±¼ä³åÍ»£¡ÒÔÏÂÑ§ÉúÔÚ¸ÃÊ±¶ÎÒÑÓĞÆäËû¿¼ÊÔ£º");
+                    "ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ§ï¿½ï¿½ï¿½Ú¸ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô£ï¿½");
                 return;
             }
 
             var exam = new Exams
             {
                 CourseID = courseId,
-                ExamTime = examTime,
+                StartTime = startTime,
+                EndTime = endTime,
                 Location = FormLocation,
                 Details = FormDetails
             };
@@ -90,7 +96,7 @@
         }
     }
 
-    private List<Exams> GetTeacherExamConflicts(StudentManagementDBEntities db, string teacherId, DateTime examTime, int? excludeExamId = null)
+    private List<Exams> GetTeacherExamConflicts(StudentManagementDBEntities db, string teacherId, DateTime startTime, DateTime endTime, int? excludeExamId = null)
     {
         if (string.IsNullOrWhiteSpace(teacherId))
         {
@@ -99,7 +105,7 @@
 
         var query = db.Exams
             .Include("Courses")
-            .Where(e => e.ExamTime == examTime && e.Courses != null && e.Courses.TeacherID == teacherId);
+            .Where(e => e.StartTime < endTime && e.EndTime > startTime && e.Courses != null && e.Courses.TeacherID == teacherId);
 
         if (excludeExamId.HasValue)
         {
@@ -110,7 +116,7 @@
         return query.OrderBy(e => e.Courses.CourseName).ToList();
     }
 
-    private List<string> GetStudentExamConflictsForCourse(StudentManagementDBEntities db, int courseId, DateTime examTime, int? excludeExamId = null)
+    private List<string> GetStudentExamConflictsForCourse(StudentManagementDBEntities db, int courseId, DateTime startTime, DateTime endTime, int? excludeExamId = null)
     {
         var studentIds = db.StudentCourses
             .Where(sc => sc.CourseID == courseId)
@@ -126,7 +132,7 @@
         var query = db.StudentCourses
             .Where(sc => studentIds.Contains(sc.StudentID)
                 && sc.CourseID != courseId
-                && sc.Courses.Exams.Any(e => e.ExamTime == examTime && (!excludeExamId.HasValue || e.ExamID != excludeExamId.Value)))
+                && sc.Courses.Exams.Any(e => e.StartTime < endTime && e.EndTime > startTime && (!excludeExamId.HasValue || e.ExamID != excludeExamId.Value)))
             .Select(sc => sc.StudentID + " " + sc.Students.StudentName + " -> " + sc.Courses.CourseName)
             .Distinct();
 
@@ -135,32 +141,32 @@
 
     private string BuildTeacherExamConflictMessage(IEnumerable<Exams> conflicts, string prefix)
     {
-        return prefix + " " + string.Join("£»", conflicts.Select(e => (e.Courses == null ? "Î´Öª¿Î³Ì" : e.Courses.CourseName) + "£¨" + e.ExamTime.ToString("yyyy-MM-dd HH:mm") + "£©"));
+        return prefix + " " + string.Join("ï¿½ï¿½", conflicts.Select(e => (e.Courses == null ? "Î´Öªï¿½Î³ï¿½" : e.Courses.CourseName) + "ï¿½ï¿½" + e.StartTime.ToString("yyyy-MM-dd HH:mm") + " - " + e.EndTime.ToString("HH:mm") + "ï¿½ï¿½"));
     }
 
     private string BuildStudentExamConflictMessage(IEnumerable<string> conflicts, string prefix)
     {
-        return prefix + " " + string.Join("£»", conflicts);
+        return prefix + " " + string.Join("ï¿½ï¿½", conflicts);
     }
 </script>
 
 <!--#include file="_AdminLayoutTop.inc" -->
 
-<h2>Ìí¼ÓĞÂ¿¼ÊÔ</h2>
+<h2>ï¿½ï¿½ï¿½ï¿½ï¿½Â¿ï¿½ï¿½ï¿½</h2>
 
 <% if (!string.IsNullOrEmpty(MessageText)) { %>
     <div class="alert alert-danger"><%= H(MessageText) %></div>
 <% } %>
 
 <form method="post" class="form-horizontal" style="max-width:900px;">
-    <h4>¿¼ÊÔĞÅÏ¢</h4>
+    <h4>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢</h4>
     <hr />
 
     <div class="form-group">
-        <label class="control-label col-md-2">¿Î³ÌÃû³Æ</label>
+        <label class="control-label col-md-2">ï¿½Î³ï¿½ï¿½ï¿½ï¿½ï¿½</label>
         <div class="col-md-10">
             <select class="form-control" name="CourseID" required>
-                <option value="">--ÇëÑ¡Ôñ¿Î³Ì--</option>
+                <option value="">--ï¿½ï¿½Ñ¡ï¿½ï¿½Î³ï¿½--</option>
                 <% foreach (var c in CourseOptions) { %>
                     <option value="<%= c.CourseID %>" <%= FormCourseID == c.CourseID.ToString() ? "selected" : "" %>><%= H(c.CourseName) %></option>
                 <% } %>
@@ -169,21 +175,28 @@
     </div>
 
     <div class="form-group">
-        <label class="control-label col-md-2">¿¼ÊÔÊ±¼ä</label>
+        <label class="control-label col-md-2">ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½</label>
         <div class="col-md-10">
-            <input class="form-control" type="datetime-local" name="ExamTime" value="<%= H(FormExamTime) %>" required />
+            <input class="form-control" type="datetime-local" name="StartTime" value="<%= H(FormStartTime) %>" required />
         </div>
     </div>
 
     <div class="form-group">
-        <label class="control-label col-md-2">¿¼ÊÔµØµã</label>
+        <label class="control-label col-md-2">è€ƒè¯•ç»“æŸæ—¶é—´</label>
+        <div class="col-md-10">
+            <input class="form-control" type="datetime-local" name="EndTime" value="<%= H(FormEndTime) %>" required />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">ï¿½ï¿½ï¿½ÔµØµï¿½</label>
         <div class="col-md-10">
             <input class="form-control" name="Location" value="<%= H(FormLocation) %>" required />
         </div>
     </div>
 
     <div class="form-group">
-        <label class="control-label col-md-2">±¸×¢</label>
+        <label class="control-label col-md-2">ï¿½ï¿½×¢</label>
         <div class="col-md-10">
             <input class="form-control" name="Details" value="<%= H(FormDetails) %>" />
         </div>
@@ -191,8 +204,8 @@
 
     <div class="form-group">
         <div class="col-md-offset-2 col-md-10">
-            <button type="submit" class="btn btn-success">´´½¨</button>
-            <a class="btn btn-default" href="ExamList.aspx">·µ»ØÁĞ±í</a>
+            <button type="submit" class="btn btn-success">ï¿½ï¿½ï¿½ï¿½</button>
+            <a class="btn btn-default" href="ExamList.aspx">ï¿½ï¿½ï¿½ï¿½ï¿½Ğ±ï¿½</a>
         </div>
     </div>
 </form>

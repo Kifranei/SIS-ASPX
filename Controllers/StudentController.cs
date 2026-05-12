@@ -361,7 +361,7 @@ namespace StudentInformationSystem.Controllers
                                         .Select(sc => sc.CourseID).ToList();
             var exams = db.Exams.Include("Courses")
                               .Where(e => enrolledCourseIds.Contains(e.CourseID))
-                              .OrderBy(e => e.ExamTime).ToList();
+                              .OrderBy(e => e.StartTime).ToList();
             return View(exams);
         }
 

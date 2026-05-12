@@ -4,15 +4,15 @@
     ViewBag.Title = "DeleteExam";
 }
 
-<h2>É¾³ý¿¼ÊÔ</h2>
+<h2>É¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</h2>
 
-<h3>ÄúÈ·¶¨ÒªÉ¾³ýÕâÌõ¿¼ÊÔ°²ÅÅÂð£¿</h3>
+<h3>ï¿½ï¿½È·ï¿½ï¿½ÒªÉ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô°ï¿½ï¿½ï¿½ï¿½ï¿½</h3>
 <div>
     <h4>@Model.Courses.CourseName</h4>
     <hr />
     <dl class="dl-horizontal">
         <dt>
-            ¿Î³ÌÃû³Æ
+            ï¿½Î³ï¿½ï¿½ï¿½ï¿½ï¿½
         </dt>
 
         <dd>
@@ -20,15 +20,15 @@
         </dd>
 
         <dt>
-            ¿¼ÊÔÊ±¼ä
+            ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.ExamTime)
+            @Model.StartTime.ToString("yyyy-MM-dd HH:mm") - @Model.EndTime.ToString("HH:mm")
         </dd>
 
         <dt>
-            ¿¼ÊÔµØµã
+            ï¿½ï¿½ï¿½ÔµØµï¿½
         </dt>
 
         <dd>
@@ -41,8 +41,8 @@
         @Html.AntiForgeryToken()
 
         <div class="form-actions no-color">
-            <input type="submit" value="È·ÈÏÉ¾³ý" class="btn btn-danger" /> |
-            @Html.ActionLink("·µ»ØÁÐ±í", "ExamList", null, new { @class = "btn btn-default" })
+            <input type="submit" value="È·ï¿½ï¿½É¾ï¿½ï¿½" class="btn btn-danger" /> |
+            @Html.ActionLink("ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "ExamList", null, new { @class = "btn btn-default" })
         </div>
     }
 </div>

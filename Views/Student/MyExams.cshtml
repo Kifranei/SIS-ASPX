@@ -1,7 +1,7 @@
 @model IEnumerable<StudentInformationSystem.Models.Exams>
 
 @{
-    ViewBag.Title = "ÎÒµÄ¿¼ÊÔ°²ÅÅ";
+    ViewBag.Title = "ï¿½ÒµÄ¿ï¿½ï¿½Ô°ï¿½ï¿½ï¿½";
 }
 
 <h2>@ViewBag.Title</h2>
@@ -9,16 +9,16 @@
 <table class="table">
     <tr>
         <th>
-            ¿Î³ÌÃû³Æ
+            ï¿½Î³ï¿½ï¿½ï¿½ï¿½ï¿½
         </th>
         <th>
-            ¿¼ÊÔÊ±¼ä
+            ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
         </th>
         <th>
-            ¿¼ÊÔµØµã
+            ï¿½ï¿½ï¿½ÔµØµï¿½
         </th>
         <th>
-            ±¸×¢
+            ï¿½ï¿½×¢
         </th>
     </tr>
 
@@ -29,7 +29,7 @@
                 @Html.DisplayFor(modelItem => item.Courses.CourseName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.ExamTime)
+                @item.StartTime.ToString("yyyy-MM-dd HH:mm") - @item.EndTime.ToString("HH:mm")
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Location)

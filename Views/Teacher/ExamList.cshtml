@@ -4,21 +4,21 @@
     ViewBag.Title = "ExamList";
 }
 
-<h2>¿¼ÊÔ°²ÅÅÁÐ±í</h2>
+<h2>ï¿½ï¿½ï¿½Ô°ï¿½ï¿½ï¿½ï¿½Ð±ï¿½</h2>
 
 <p>
-    @Html.ActionLink("Ìí¼ÓÐÂ¿¼ÊÔ", "AddExam", null, new { @class = "btn btn-primary" })
+    @Html.ActionLink("ï¿½ï¿½ï¿½ï¿½ï¿½Â¿ï¿½ï¿½ï¿½", "AddExam", null, new { @class = "btn btn-primary" })
 </p>
 <table class="table">
     <tr>
         <th>
-            ¿Î³ÌÃû³Æ
+            ï¿½Î³ï¿½ï¿½ï¿½ï¿½ï¿½
         </th>
         <th>
-            ¿¼ÊÔÊ±¼ä
+            ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
         </th>
         <th>
-            ¿¼ÊÔµØµã
+            ï¿½ï¿½ï¿½ÔµØµï¿½
         </th>
         <th></th>
     </tr>
@@ -29,15 +29,15 @@
             @Html.DisplayFor(modelItem => item.Courses.CourseName)
         </td>
         <td>
-            @Html.DisplayFor(modelItem => item.ExamTime)
+            @item.StartTime.ToString("yyyy-MM-dd HH:mm") - @item.EndTime.ToString("HH:mm")
         </td>
         <td>
             @Html.DisplayFor(modelItem => item.Location)
         </td>
         <td>
-            @Html.ActionLink("±à¼­", "EditExam", new { id=item.ExamID }) |
-            @Html.ActionLink("ÏêÇé", "DetailsExam", new { id=item.ExamID }) |
-            @Html.ActionLink("É¾³ý", "DeleteExam", new { id=item.ExamID })
+            @Html.ActionLink("ï¿½à¼­", "EditExam", new { id=item.ExamID }) |
+            @Html.ActionLink("ï¿½ï¿½ï¿½ï¿½", "DetailsExam", new { id=item.ExamID }) |
+            @Html.ActionLink("É¾ï¿½ï¿½", "DeleteExam", new { id=item.ExamID })
         </td>
     </tr>
 }

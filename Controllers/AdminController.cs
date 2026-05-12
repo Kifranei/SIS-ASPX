@@ -745,13 +745,16 @@ namespace StudentInformationSystem.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult AddExam(Exams exam)
         {
+            ValidateExamTimeRange(exam);
+
             if (ModelState.IsValid)
             {
                 var course = db.Courses.Find(exam.CourseID);
                 var teacherConflicts = ExamConflictHelper.GetTeacherExamConflicts(
                     db,
                     course == null ? null : course.TeacherID,
-                    exam.ExamTime);
+                    exam.StartTime,
+                    exam.EndTime);
                 if (teacherConflicts.Any())
                 {
                     ModelState.AddModelError("", ExamConflictHelper.BuildTeacherExamConflictMessage(
@@ -762,7 +765,8 @@ namespace StudentInformationSystem.Controllers
                 var studentConflicts = ExamConflictHelper.GetStudentExamConflictsForCourse(
                     db,
                     exam.CourseID,
-                    exam.ExamTime);
+                    exam.StartTime,
+                    exam.EndTime);
                 if (studentConflicts.Any())
                 {
                     ModelState.AddModelError("", ExamConflictHelper.BuildStudentExamConflictMessage(
@@ -802,13 +806,16 @@ namespace StudentInformationSystem.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult EditExam(Exams exam)
         {
+            ValidateExamTimeRange(exam);
+
             if (ModelState.IsValid)
             {
                 var course = db.Courses.Find(exam.CourseID);
                 var teacherConflicts = ExamConflictHelper.GetTeacherExamConflicts(
                     db,
                     course == null ? null : course.TeacherID,
-                    exam.ExamTime,
+                    exam.StartTime,
+                    exam.EndTime,
                     exam.ExamID);
                 if (teacherConflicts.Any())
                 {
@@ -820,7 +827,8 @@ namespace StudentInformationSystem.Controllers
                 var studentConflicts = ExamConflictHelper.GetStudentExamConflictsForCourse(
                     db,
                     exam.CourseID,
-                    exam.ExamTime,
+                    exam.StartTime,
+                    exam.EndTime,
                     exam.ExamID);
                 if (studentConflicts.Any())
                 {
@@ -838,6 +846,14 @@ namespace StudentInformationSystem.Controllers
             }
             ViewBag.CourseID = new SelectList(db.Courses, "CourseID", "CourseName", exam.CourseID);
             return View(exam);
+        }
+
+        private void ValidateExamTimeRange(Exams exam)
+        {
+            if (exam != null && exam.EndTime <= exam.StartTime)
+            {
+                ModelState.AddModelError("EndTime", "考试结束时间必须晚于开始时间。");
+            }
         }
 
         // 考试详情页面

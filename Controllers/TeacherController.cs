@@ -654,6 +654,8 @@ namespace StudentInformationSystem.Controllers
         public ActionResult AddExam(Exams exam)
         {
             var taughtCourseIds = GetTaughtCourseIds();
+            ValidateExamTimeRange(exam);
+
             if (!taughtCourseIds.Contains(exam.CourseID))
             {
                 ModelState.AddModelError("CourseID", "您只能为自己教授的课程安排考试。");
@@ -665,7 +667,8 @@ namespace StudentInformationSystem.Controllers
                 var teacherConflicts = ExamConflictHelper.GetTeacherExamConflicts(
                     db,
                     course == null ? null : course.TeacherID,
-                    exam.ExamTime);
+                    exam.StartTime,
+                    exam.EndTime);
                 if (teacherConflicts.Any())
                 {
                     ModelState.AddModelError("", ExamConflictHelper.BuildTeacherExamConflictMessage(
@@ -676,7 +679,8 @@ namespace StudentInformationSystem.Controllers
                 var studentConflicts = ExamConflictHelper.GetStudentExamConflictsForCourse(
                     db,
                     exam.CourseID,
-                    exam.ExamTime);
+                    exam.StartTime,
+                    exam.EndTime);
                 if (studentConflicts.Any())
                 {
                     ModelState.AddModelError("", ExamConflictHelper.BuildStudentExamConflictMessage(
@@ -720,6 +724,8 @@ namespace StudentInformationSystem.Controllers
         public ActionResult EditExam(Exams exam)
         {
             var taughtCourseIds = GetTaughtCourseIds();
+            ValidateExamTimeRange(exam);
+
             if (!taughtCourseIds.Contains(exam.CourseID))
             {
                 ModelState.AddModelError("CourseID", "您只能调整自己教授课程的考试。");
@@ -731,7 +737,8 @@ namespace StudentInformationSystem.Controllers
                 var teacherConflicts = ExamConflictHelper.GetTeacherExamConflicts(
                     db,
                     course == null ? null : course.TeacherID,
-                    exam.ExamTime,
+                    exam.StartTime,
+                    exam.EndTime,
                     exam.ExamID);
                 if (teacherConflicts.Any())
                 {
@@ -743,7 +750,8 @@ namespace StudentInformationSystem.Controllers
                 var studentConflicts = ExamConflictHelper.GetStudentExamConflictsForCourse(
                     db,
                     exam.CourseID,
-                    exam.ExamTime,
+                    exam.StartTime,
+                    exam.EndTime,
                     exam.ExamID);
                 if (studentConflicts.Any())
                 {
@@ -761,6 +769,14 @@ namespace StudentInformationSystem.Controllers
             }
             ViewBag.CourseID = new SelectList(db.Courses.Where(c => taughtCourseIds.Contains(c.CourseID)), "CourseID", "CourseName", exam.CourseID);
             return View(exam);
+        }
+
+        private void ValidateExamTimeRange(Exams exam)
+        {
+            if (exam != null && exam.EndTime <= exam.StartTime)
+            {
+                ModelState.AddModelError("EndTime", "考试结束时间必须晚于开始时间。");
+            }
         }
 
         // GET: Teacher/DeleteExam/5
